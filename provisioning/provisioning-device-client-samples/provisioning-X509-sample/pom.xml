@@ -1,15 +1,14 @@
-<!-- Copyright (c) Microsoft. All rights reserved. -->
-<!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
+<!-- Copyright (c) Microsoft. All rights reserved. --><!-- Licensed under the MIT license. See LICENSE file in the project root for full license information. -->
 <project>
     <parent>
         <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
-        <artifactId>provisioning-samples</artifactId>
-        <version>1.8.1</version>
+        <artifactId>provisioning-device-client-samples</artifactId>
+        <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>service-update-enrollment-sample</artifactId>
-    <version>1.8.1</version>
-    <name>Update individual enrollment using service Sample</name>
+    <artifactId>provisioning-X509-sample</artifactId>
+    <version>1.0.0</version>
+    <name>Provisioning X509 Sample for Device Client</name>
     <developers>
         <developer>
             <id>microsoft</id>
@@ -21,9 +20,27 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
+            <artifactId>${x509-provider-artifact-id}</artifactId>
+            <version>${x509-provider-version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
-            <artifactId>${provisioning-service-client-artifact-id}</artifactId>
-            <version>${provisioning-service-client-version}</version>
+            <artifactId>${provisioning-device-client-artifact-id}</artifactId>
+            <version>${provisioning-device-client-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>${iot-device-client-artifact-id}</artifactId>
+            <version>${iot-device-client-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcmail-jdk15on</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -36,7 +53,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>samples.com.microsoft.azure.sdk.iot.ServiceUpdateEnrollmentSample</mainClass>
+                            <mainClass>samples.com.microsoft.azure.sdk.iot.ProvisioningX509Sample</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
