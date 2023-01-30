@@ -9,14 +9,13 @@
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.microsoft.azure.sdk.iot.provisioning.tools</groupId>
-    <artifactId>provisioning-tools</artifactId>
-    <name>Provisioning Tools</name>
+    <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
+    <artifactId>provisioning-device-client-samples</artifactId>
+    <name>Provisioning Device Client Samples</name>
     <version>1.0.0</version>
     <packaging>pom</packaging>
-    <description>The Microsoft Azure IoT Provisioning Tools for Java</description>
+    <description>The Microsoft Azure IoT Provisioning Samples for Device and Service SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
-
     <developers>
         <developer>
             <id>microsoft</id>
@@ -30,6 +29,20 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+        </dependency>
+    </dependencies>
     <scm>
         <connection>scm:git:git@github.com:Azure/azure-iot-sdk-java.git</connection>
         <developerConnection>scm:git:git@github.com:Azure/azure-iot-sdk-java.git</developerConnection>
@@ -39,10 +52,11 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modules>
-        <module>provisioning-x509-cert-generator</module>
+        <module>provisioning-symmetrickey-group-sample</module>
+        <module>provisioning-symmetrickey-individual-sample</module>
+        <module>provisioning-tpm-sample</module>
+        <module>provisioning-X509-sample</module>
     </modules>
-    <dependencies>
-    </dependencies>
     <build>
         <plugins>
             <plugin>

@@ -6,13 +6,13 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
         <artifactId>provisioning</artifactId>
-        <version>1.8.1</version>
+        <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning.samples</groupId>
-    <artifactId>provisioning-samples</artifactId>
-    <name>Provisioning Samples</name>
-    <version>1.8.1</version>
+    <artifactId>provisioning-service-client-samples</artifactId>
+    <name>Provisioning Service Client Samples</name>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <description>The Microsoft Azure IoT Provisioning Samples for Device and Service SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
@@ -52,10 +52,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <modules>
-        <module>provisioning-symmetrickey-group-sample</module>
-        <module>provisioning-symmetrickey-individual-sample</module>
-        <module>provisioning-tpm-sample</module>
-        <module>provisioning-X509-sample</module>
         <module>service-enrollment-sample</module>
         <module>service-update-enrollment-sample</module>
         <module>service-bulkoperation-sample</module>
