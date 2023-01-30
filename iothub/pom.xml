@@ -8,8 +8,19 @@
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>iothub</artifactId>
+    <version>1.0.0</version>
+    <name>IoT Hub Java Device Client Parent</name>
+    <packaging>pom</packaging>
+    <developers>
+        <developer>
+            <id>microsoft</id>
+            <name>Microsoft</name>
+        </developer>
+    </developers>
+    <modules>
+        <module>device</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
