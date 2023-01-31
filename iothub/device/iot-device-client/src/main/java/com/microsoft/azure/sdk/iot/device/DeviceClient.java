@@ -224,11 +224,6 @@ public final class DeviceClient extends InternalClient
 
         log.info("Closing device client...");
 
-        if (this.fileUpload != null)
-        {
-            this.fileUpload.close();
-        }
-
         super.close();
 
         log.info("Device client closed successfully");

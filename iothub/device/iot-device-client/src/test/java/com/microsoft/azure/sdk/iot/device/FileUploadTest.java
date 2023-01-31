@@ -32,20 +32,6 @@ public class FileUploadTest
     FileUploadCompletionNotification mockFileUploadCompletionNotification;
 
     @Test
-    public void constructor()
-    {
-        new Expectations()
-        {
-            {
-                mockHttpsTransportManager.open();
-                times = 1;
-            }
-        };
-
-        Deencapsulation.newInstance(FileUpload.class, mockHttpsTransportManager);
-    }
-
-    @Test
     public void getFileUploadSasUri() throws IOException
     {
         final String mockJson = "";
@@ -54,9 +40,6 @@ public class FileUploadTest
         new Expectations()
         {
             {
-                mockHttpsTransportManager.open();
-                times = 1;
-
                 mockFileUploadSasUriRequest.toJson();
                 result = mockJson;
 
@@ -93,9 +76,6 @@ public class FileUploadTest
         new Expectations()
         {
             {
-                mockHttpsTransportManager.open();
-                times = 1;
-
                 mockFileUploadCompletionNotification.toJson();
                 result = mockJson;
 

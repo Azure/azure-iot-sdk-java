@@ -797,9 +797,6 @@ public class ModuleClientTest
         new Verifications()
         {
             {
-                mockedHttpsTransportManager.open();
-                times = 1;
-
                 mockedHttpsTransportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, "");
                 times = 1;
             }
@@ -859,9 +856,6 @@ public class ModuleClientTest
         new Verifications()
         {
             {
-                mockedHttpsTransportManager.open();
-                times = 1;
-
                 mockedHttpsTransportManager.invokeMethod(mockedDirectMethodRequest, expectedDeviceId, expectedModuleId);
                 times = 1;
             }

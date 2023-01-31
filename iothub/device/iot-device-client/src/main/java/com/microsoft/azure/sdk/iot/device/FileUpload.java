@@ -24,7 +24,6 @@ final class FileUpload
     FileUpload(HttpsTransportManager httpsTransportManager)
     {
         this.httpsTransportManager = httpsTransportManager;
-        httpsTransportManager.open();
     }
 
     FileUploadSasUriResponse getFileUploadSasUri(FileUploadSasUriRequest request) throws IotHubClientException
@@ -83,10 +82,5 @@ final class FileUpload
         }
 
         return responseMessagePayload;
-    }
-
-    void close()
-    {
-        httpsTransportManager.close();
     }
 }
