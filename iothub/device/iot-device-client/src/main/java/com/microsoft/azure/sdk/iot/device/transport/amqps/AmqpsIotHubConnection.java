@@ -56,7 +56,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private static final int CBS_SESSION_COUNT = 1; //even for multiplex scenarios
 
     // Message send constants
-    private static final int SEND_MESSAGES_PERIOD_MILLIS = 50; //every 50 milliseconds, the method onTimerTask will fire to send, at most, MAX_MESSAGES_TO_SEND_PER_CALLBACK queued messages
+    private final int sendInterval; //every X milliseconds, the method onTimerTask will fire to send, at most, MAX_MESSAGES_TO_SEND_PER_CALLBACK queued messages
     private static final int MAX_MESSAGES_TO_SEND_PER_CALLBACK = 1000; //Max number of queued messages to send per periodic sending task
 
     // States of outgoing messages, incoming messages, and outgoing subscriptions
@@ -141,6 +141,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.isMultiplexing = false;
 
         this.keepAliveInterval = config.getKeepAliveInterval();
+        this.sendInterval = clientConfiguration.getSendInterval();
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
@@ -171,6 +172,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
 
         this.keepAliveInterval = keepAliveInterval;
+        this.sendInterval = clientConfiguration.getSendInterval();
     }
 
     public void registerMultiplexedDevice(ClientConfiguration config)
@@ -394,7 +396,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
 
         this.reactor.connectionToHost(hostName, port, this);
-        this.reactor.schedule(SEND_MESSAGES_PERIOD_MILLIS, this);
+        this.reactor.schedule(this.sendInterval, this);
     }
 
     @Override
@@ -611,7 +613,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         checkForNewlyUnregisteredMultiplexedClientsToStop();
         checkForNewlyRegisteredMultiplexedClientsToStart();
 
-        event.getReactor().schedule(SEND_MESSAGES_PERIOD_MILLIS, this);
+        event.getReactor().schedule(this.sendInterval, this);
     }
 
     @Override
