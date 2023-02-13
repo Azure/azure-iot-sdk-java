@@ -37,6 +37,7 @@ public final class ClientConfiguration
     private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
 
     public static final int DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS = 230;
+    public static final int DEFAULT_SEND_INTERVAL_IN_SECONDS = 10;
 
     public static final int DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS = 20;
     public static final int DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS = 60;

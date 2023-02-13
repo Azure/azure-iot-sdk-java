@@ -147,7 +147,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
     }
 
-    public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings, int keepAliveInterval)
+    public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings, int keepAliveInterval, int sendInterval)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.clientConfigurations = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -172,7 +172,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
 
         this.keepAliveInterval = keepAliveInterval;
-        this.sendInterval = clientConfiguration.getSendInterval();
+        this.sendInterval = sendInterval;
     }
 
     public void registerMultiplexedDevice(ClientConfiguration config)
