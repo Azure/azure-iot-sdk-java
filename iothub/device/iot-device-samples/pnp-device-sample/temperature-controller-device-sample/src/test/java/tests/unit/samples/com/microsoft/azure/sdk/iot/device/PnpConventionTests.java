@@ -50,7 +50,6 @@ public class PnpConventionTests
         String propertyValue = "testValue";
         Gson gson = new Gson();
         Property testProperty = new Property(propertyName, propertyValue);
-        String actualString = gson.toJson(testProperty);
 
         // act
         TwinCollection propertyPatch = PnpConvention.createPropertyPatch(propertyName, propertyValue);
@@ -143,7 +142,7 @@ public class PnpConventionTests
         // act
         TwinCollection writablePropertyResponse = PnpConvention.createComponentWritablePropertyResponse(propertyName, propertyValue, componentName, ackCode, ackVersion, ackDescription);
         String writablePropertyString = gson.toJson(writablePropertyResponse);
-        String a = new WritablePropertyResponse(propertyValue, ackCode, ackVersion, ackDescription).toString();
+
         // assert
         assertEquals(1, writablePropertyResponse.size());
         assertTrue(writablePropertyString.contains(PROPERTY_COMPONENT_IDENTIFIER_KEY));
