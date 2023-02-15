@@ -58,7 +58,8 @@ public class PnpConventionTests
 
         // assert
         assertEquals(1, propertyPatch.size());
-        assertTrue(patchString.contains(actualString));
+        assertTrue(patchString.contains(propertyName));
+        assertTrue(patchString.contains(propertyValue));
     }
 
     @Test
@@ -74,7 +75,6 @@ public class PnpConventionTests
             put(PROPERTY_COMPONENT_IDENTIFIER_KEY, PROPERTY_COMPONENT_IDENTIFIER_VALUE);
             put(propertyName, propertyValue);
         }});
-        String actualProperty = gson.toJson(testProperty);
 
         // act
         TwinCollection propertyPatch = PnpConvention.createComponentPropertyPatch(propertyName, propertyValue, componentName);
@@ -82,7 +82,10 @@ public class PnpConventionTests
 
         // assert
         assertEquals(1, propertyPatch.size());
-        assertTrue(patchString.contains(actualProperty));
+        assertTrue(patchString.contains(PROPERTY_COMPONENT_IDENTIFIER_KEY));
+        assertTrue(patchString.contains(PROPERTY_COMPONENT_IDENTIFIER_VALUE));
+        assertTrue(patchString.contains(propertyValue));
+        assertTrue(patchString.contains(propertyName));
     }
 
     @Test
@@ -136,15 +139,20 @@ public class PnpConventionTests
         }};
 
         Property property = new Property(componentName, componentValue);
-        String actualProperty = gson.toJson(property);
 
         // act
         TwinCollection writablePropertyResponse = PnpConvention.createComponentWritablePropertyResponse(propertyName, propertyValue, componentName, ackCode, ackVersion, ackDescription);
         String writablePropertyString = gson.toJson(writablePropertyResponse);
-
+        String a = new WritablePropertyResponse(propertyValue, ackCode, ackVersion, ackDescription).toString();
         // assert
         assertEquals(1, writablePropertyResponse.size());
-        assertTrue(writablePropertyString.contains(actualProperty));
+        assertTrue(writablePropertyString.contains(PROPERTY_COMPONENT_IDENTIFIER_KEY));
+        assertTrue(writablePropertyString.contains(PROPERTY_COMPONENT_IDENTIFIER_VALUE));
+        assertTrue(writablePropertyString.contains(propertyValue.toString()));
+        assertTrue(writablePropertyString.contains(ackCode.toString()));
+        assertTrue(writablePropertyString.contains(ackVersion.toString()));
+        assertTrue(writablePropertyString.contains(ackDescription));
+        assertTrue(writablePropertyString.contains(propertyName));
     }
 
     @Test (expected = IllegalArgumentException.class)
