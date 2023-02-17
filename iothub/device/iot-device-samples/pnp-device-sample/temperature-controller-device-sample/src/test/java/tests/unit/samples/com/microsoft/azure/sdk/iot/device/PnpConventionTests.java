@@ -3,8 +3,8 @@
 
 package tests.unit.samples.com.microsoft.azure.sdk.iot.device;
 
-import com.azul.crs.com.fasterxml.jackson.core.JsonProcessingException;
-import com.azul.crs.com.fasterxml.jackson.databind.ObjectMapper;
+import com.azul.crs.com.fasterxml.jackson.core.*;
+import com.azul.crs.com.fasterxml.jackson.databind.*;
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
