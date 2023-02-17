@@ -3,8 +3,8 @@
 
 package tests.unit.samples.com.microsoft.azure.sdk.iot.device;
 
-import com.azul.crs.com.fasterxml.jackson.core.*;
-import com.azul.crs.com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
@@ -126,7 +126,6 @@ public class PnpConventionTests
     public void createComponentWritablePropertyResponse() throws JsonProcessingException
     {
         // arrange
-        Gson gson = new Gson();
         String propertyName = "testProperty";
         Object propertyValue = "testValue";
         String componentName = "testComponent";
@@ -144,7 +143,7 @@ public class PnpConventionTests
 
         // act
         TwinCollection writablePropertyResponse = PnpConvention.createComponentWritablePropertyResponse(propertyName, propertyValue, componentName, ackCode, ackVersion, ackDescription);
-        String writablePropertyString = gson.toJson(writablePropertyResponse);
+        String writablePropertyString = new ObjectMapper().writeValueAsString(writablePropertyResponse);
 
         // assert
         assertEquals(1, writablePropertyResponse.size());
