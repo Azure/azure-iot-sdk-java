@@ -45,13 +45,14 @@ public class PnpConventionTests
     }
 
     @Test
-    public void createRootLevelPropertyPatch()
+    public void createRootLevelPropertyPatch() throws JsonProcessingException
     {
         // arrange
         String propertyName = "testProperty";
         String propertyValue = "testValue";
         Gson gson = new Gson();
         Property testProperty = new Property(propertyName, propertyValue);
+        String actualProperty = new ObjectMapper().writeValueAsString(testProperty.getValue());
 
         // act
         TwinCollection propertyPatch = PnpConvention.createPropertyPatch(propertyName, propertyValue);
@@ -60,7 +61,7 @@ public class PnpConventionTests
         // assert
         assertEquals(1, propertyPatch.size());
         assertTrue(patchString.contains(testProperty.getKey()));
-        assertTrue(patchString.contains(testProperty.getValue().toString()));
+        assertTrue(patchString.contains(actualProperty));
     }
 
     @Test
