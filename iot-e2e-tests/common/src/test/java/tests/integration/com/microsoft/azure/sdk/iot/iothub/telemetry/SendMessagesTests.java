@@ -43,6 +43,7 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static junit.framework.TestCase.*;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to sending messages from a device/module.
@@ -55,6 +56,15 @@ public class SendMessagesTests extends SendMessagesCommon
     public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
     {
         super(protocol, authenticationType, clientType, withProxy);
+    }
+
+    @Test
+    public void sendMessagesasdf() throws Exception
+    {
+        assumeTrue(this.testInstance.protocol == MQTT || this.testInstance.protocol == MQTT_WS);
+        this.testInstance.setup();
+        this.testInstance.identity.getClient().open(false);
+        this.testInstance.identity.getClient().close();
     }
 
     @Test
