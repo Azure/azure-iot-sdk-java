@@ -3,6 +3,8 @@
 
 package tests.unit.samples.com.microsoft.azure.sdk.iot.device;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.twin.Property;
 import com.microsoft.azure.sdk.iot.device.Message;
@@ -43,14 +45,14 @@ public class PnpConventionTests
     }
 
     @Test
-    public void createRootLevelPropertyPatch()
+    public void createRootLevelPropertyPatch() throws JsonProcessingException
     {
         // arrange
         String propertyName = "testProperty";
         String propertyValue = "testValue";
         Gson gson = new Gson();
         Property testProperty = new Property(propertyName, propertyValue);
-        String actualString = gson.toJson(testProperty);
+        String actualProperty = new ObjectMapper().writeValueAsString(testProperty.getValue());
 
         // act
         TwinCollection propertyPatch = PnpConvention.createPropertyPatch(propertyName, propertyValue);
@@ -58,11 +60,12 @@ public class PnpConventionTests
 
         // assert
         assertEquals(1, propertyPatch.size());
-        assertTrue(patchString.contains(actualString));
+        assertTrue(patchString.contains(testProperty.getKey()));
+        assertTrue(patchString.contains(actualProperty));
     }
 
     @Test
-    public void createComponentPropertyPatch()
+    public void createComponentPropertyPatch() throws JsonProcessingException
     {
         // arrange
         String propertyName = "testProperty";
@@ -74,7 +77,7 @@ public class PnpConventionTests
             put(PROPERTY_COMPONENT_IDENTIFIER_KEY, PROPERTY_COMPONENT_IDENTIFIER_VALUE);
             put(propertyName, propertyValue);
         }});
-        String actualProperty = gson.toJson(testProperty);
+        String actualProperty = new ObjectMapper().writeValueAsString(testProperty.getValue());
 
         // act
         TwinCollection propertyPatch = PnpConvention.createComponentPropertyPatch(propertyName, propertyValue, componentName);
@@ -82,6 +85,7 @@ public class PnpConventionTests
 
         // assert
         assertEquals(1, propertyPatch.size());
+        assertTrue(patchString.contains(testProperty.getKey()));
         assertTrue(patchString.contains(actualProperty));
     }
 
@@ -119,10 +123,9 @@ public class PnpConventionTests
     }
 
     @Test
-    public void createComponentWritablePropertyResponse()
+    public void createComponentWritablePropertyResponse() throws JsonProcessingException
     {
         // arrange
-        Gson gson = new Gson();
         String propertyName = "testProperty";
         Object propertyValue = "testValue";
         String componentName = "testComponent";
@@ -136,14 +139,15 @@ public class PnpConventionTests
         }};
 
         Property property = new Property(componentName, componentValue);
-        String actualProperty = gson.toJson(property);
+        String actualProperty = new ObjectMapper().writeValueAsString(property.getValue());
 
         // act
         TwinCollection writablePropertyResponse = PnpConvention.createComponentWritablePropertyResponse(propertyName, propertyValue, componentName, ackCode, ackVersion, ackDescription);
-        String writablePropertyString = gson.toJson(writablePropertyResponse);
+        String writablePropertyString = new ObjectMapper().writeValueAsString(writablePropertyResponse);
 
         // assert
         assertEquals(1, writablePropertyResponse.size());
+        assertTrue(writablePropertyString.contains(property.getKey()));
         assertTrue(writablePropertyString.contains(actualProperty));
     }
 
