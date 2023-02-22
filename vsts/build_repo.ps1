@@ -21,7 +21,7 @@ if (($env:JAVA_VERSION).equals("8"))
     if ($isPullRequestBuild.equals("true"))
     {
         Write-Host "Skipping e2e tests since only Java 11 runs e2e tests during a pull request build"
-        mvn install -T 2C -DskipIntegrationTests=true
+        mvn install -DskipIntegrationTests -DskipTests -T 2C
     }
     else
     {
