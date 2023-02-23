@@ -13,21 +13,25 @@ public class InternalServerErrorException extends IotHubServiceException
     public InternalServerErrorException()
     {
         super();
+        this.isRetryable = true;
     }
 
     public InternalServerErrorException(String message)
     {
         super(message);
+        this.isRetryable = true;
     }
 
     public InternalServerErrorException(String message, Throwable cause)
     {
         super(message, cause);
+        this.isRetryable = true;
     }
 
     public InternalServerErrorException(Throwable cause)
     {
         super(cause);
+        this.isRetryable = true;
     }
 
     @Override
