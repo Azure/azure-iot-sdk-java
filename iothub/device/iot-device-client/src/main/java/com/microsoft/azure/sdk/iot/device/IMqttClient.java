@@ -16,7 +16,7 @@ public interface IMqttClient
 
     public void unsubscribe(String topic);
 
-    public void publish(String topic, byte[] payload, int qos);
+    public void publishAsync(String topic, byte[] payload, int qos);
 
     public void acknowledgeMessage(int messageId);
 

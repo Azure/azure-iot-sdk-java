@@ -287,10 +287,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
     @Override
     public IotHubStatusCode sendMessage(Message message) throws TransportException
     {
-        if (message == null || message.getBytes() == null ||
-            ((message.getMessageType() != DEVICE_TWIN
-                    && message.getMessageType() != DEVICE_METHODS)
-                    && message.getBytes().length == 0))
+        if (message == null || message.getBytes() == null)
         {
             return IotHubStatusCode.BAD_FORMAT;
         }
@@ -300,8 +297,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             throw new IllegalStateException("Cannot send event using a closed MQTT connection");
         }
 
-        IotHubStatusCode result = IotHubStatusCode.OK;
-
         if (message.getMessageType() == DEVICE_METHODS)
         {
         }
@@ -310,9 +305,13 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         }
         else
         {
+            String topic = "devices/" + this.config.getDeviceId() + "/messages/events/";
+            mqttClient.publish(topic, message.getBytes(), 1); //TODO qos
+            this.listener.onMessageSent(message, config.getDeviceId(), null); //TODO async pattern
+            return IotHubStatusCode.OK;
         }
 
-        return result;
+        return IotHubStatusCode.BAD_FORMAT;
     }
 
     /**
