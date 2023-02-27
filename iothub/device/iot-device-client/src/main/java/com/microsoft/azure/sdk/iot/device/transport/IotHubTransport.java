@@ -1786,28 +1786,6 @@ public class IotHubTransport implements IotHubListener
     }
 
     /**
-     * Returns if the provided packet has lasted longer than the device operation timeout
-     *
-     * @return true if the packet has been in the queues for longer than the device operation timeout and false otherwise
-     */
-    private boolean hasOperationTimedOut(long startTime, String deviceId)
-    {
-        if (startTime == 0)
-        {
-            return false;
-        }
-
-        ClientConfiguration config = this.getConfig(deviceId);
-        if (config == null)
-        {
-            log.debug("Operation has not timed out since the device it was associated with has been unregistered already.");
-            return false;
-        }
-
-        return (System.currentTimeMillis() - startTime) > config.getOperationTimeout();
-    }
-
-    /**
      * Adds the packet to the callback queue if the provided packet has a callback. The packet is ignored otherwise.
      *
      * @param packet the packet to add

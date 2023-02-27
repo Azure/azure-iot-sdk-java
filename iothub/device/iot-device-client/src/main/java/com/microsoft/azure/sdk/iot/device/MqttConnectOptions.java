@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import javax.net.ssl.SSLContext;
+import java.net.Proxy;
 
 @Builder
 public class MqttConnectOptions
@@ -28,4 +29,7 @@ public class MqttConnectOptions
 
     @Getter
     private SSLContext sslContext;
+
+    @Getter
+    private ProxySettings proxySettings;
 }

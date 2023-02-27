@@ -11,8 +11,10 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.Proxy;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
@@ -191,7 +193,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection
                 .serverUri(serverUri)
                 .keepAlivePeriod(config.getKeepAliveInterval())
                 .mqttVersion(MQTT_VERSION)
-                .username(iotHubUserName);
+                .username(iotHubUserName)
+                .proxySettings(config.getProxySettings());
 
         try
         {
@@ -201,34 +204,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         {
             throw new TransportException("Failed to get SSLContext", e);
         }
-
-        /*ProxySettings proxySettings = config.getProxySettings();
-        if (proxySettings != null)
-        {
-            if (proxySettings.getProxy().type() == Proxy.Type.SOCKS)
-            {
-                try
-                {
-                    connectOptions.setSocketFactory(new Socks5SocketFactory(proxySettings.getHostname(), proxySettings.getPort()));
-                }
-                catch (UnknownHostException e)
-                {
-                    throw new TransportException("Failed to build the Socks5SocketFactory", e);
-                }
-            }
-            else if (proxySettings.getProxy().type() == Proxy.Type.HTTP)
-            {
-                connectOptions.setSocketFactory(new HttpProxySocketFactory(sslContext.getSocketFactory(), proxySettings));
-            }
-            else
-            {
-                throw new IllegalArgumentException("Proxy settings must be configured to use either SOCKS or HTTP");
-            }
-        }
-        else
-        {
-            connectOptions.setSocketFactory(sslContext.getSocketFactory());
-        }*/ //TODO proxy support
     }
 
     /**
@@ -296,6 +271,80 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             {
                 throw timeoutException;
             }
+
+            //if (moduleId == null || moduleId.isEmpty())
+            //{
+            CountDownLatch cloudToDeviceMessageSubscriptionLatch = new CountDownLatch(1);
+            this.mqttClient.subscribeAsync("devices/" + config.getDeviceId() + "/messages/devicebound/#", QOS, new Consumer<Integer>()
+            {
+                @Override
+                public void accept(Integer integer)
+                {
+                    cloudToDeviceMessageSubscriptionLatch.countDown();
+                }
+            });
+
+            TransportException transportException = new TransportException("Timed out waiting for cloud to device message subscription to be acknowledged");
+            transportException.setRetryable(true);
+            try
+            {
+                boolean timedOut = !cloudToDeviceMessageSubscriptionLatch.await(MAX_SUBSCRIBE_ACK_WAIT_TIME, TimeUnit.MILLISECONDS);
+
+                if (timedOut)
+                {
+                    throw transportException;
+                }
+            }
+            catch (InterruptedException e)
+            {
+                transportException.initCause(e);
+                throw transportException;
+            }
+            //}
+            //else
+            //{
+                //this.publishTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
+                //this.eventsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
+                //this.inputsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/#";
+            //}
+
+            this.mqttClient.setMessageCallback(receivedMqttMessage ->
+            {
+                IotHubTransportMessage message = constructMessage(receivedMqttMessage);
+
+                if (message.getQualityOfService() == 0)
+                {
+                    // Direct method messages and Twin messages are always sent with QoS 0, so there is no need for this SDK
+                    // to acknowledge them.
+                    log.trace("MQTT received message with QoS 0 so it has not been added to the messages to acknowledge list ({})", message);
+                }
+                else
+                {
+                    log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", message);
+                    this.receivedMessagesToAcknowledge.put(message, receivedMqttMessage.getMessageId());
+                }
+
+                switch (message.getMessageType())
+                {
+                    case DEVICE_TWIN:
+                        message.setMessageCallback(this.config.getDeviceTwinMessageCallback());
+                        message.setMessageCallbackContext(this.config.getDeviceTwinMessageContext());
+                        break;
+                    case DEVICE_METHODS:
+                        message.setMessageCallback(this.config.getDirectMethodsMessageCallback());
+                        message.setMessageCallbackContext(this.config.getDirectMethodsMessageContext());
+                        break;
+                    case DEVICE_TELEMETRY:
+                        message.setMessageCallback(this.config.getDeviceTelemetryMessageCallback(message.getInputName()));
+                        message.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext(message.getInputName()));
+                        break;
+                    case UNKNOWN:
+                    default:
+                        //do nothing
+                }
+
+                this.listener.onMessageReceived(message, null);
+            });
 
             this.state = IotHubConnectionStatus.CONNECTED;
 
@@ -390,21 +439,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         }
         else
         {
-            String topic = "devices/" + this.config.getDeviceId() + "/messages/events/";
-            mqttClient.publishAsync(
-                topic,
-                message.getBytes(),
-                QOS,  //TODO qos
-                new Consumer<Integer>()
-            {
-                @Override
-                public void accept(Integer integer)
-                {
-                    listener.onMessageSent(message, config.getDeviceId(), null); //TODO error case?
-                }
-            });
-
-            return IotHubStatusCode.OK;
+            return sendTelemetry(message);
         }
 
         return IotHubStatusCode.BAD_FORMAT;
@@ -435,7 +470,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         log.trace("Checking if MQTT layer can acknowledge the received message ({})", message);
         if (receivedMessagesToAcknowledge.containsKey(message))
         {
-            messageId = receivedMessagesToAcknowledge.get(message);
+            messageId = receivedMessagesToAcknowledge.remove(message);
+            mqttClient.acknowledgeMessageAsync(messageId, 0);
         }
         else
         {
@@ -456,9 +492,114 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         return this.connectionId;
     }
 
-    // Converts an MQTT message into our native "IoT hub" message
-    private IotHubTransportMessage constructMessage(MqttMessage mqttMessage, String topic)
+    private IotHubStatusCode sendTelemetry(Message message) throws TransportException
     {
+        //TODO modules
+        String topic = "devices/" + this.config.getDeviceId() + "/messages/events/";
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(topic);
+
+        boolean separatorNeeded;
+
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, false, MESSAGE_ID, message.getMessageId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CORRELATION_ID, message.getCorrelationId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, USER_ID, message.getUserId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, TO, message.getTo(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, OUTPUT_NAME, message.getOutputName(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONNECTION_DEVICE_ID, message.getConnectionDeviceId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONNECTION_MODULE_ID, message.getConnectionModuleId(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_ENCODING, message.getContentEncoding(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CONTENT_TYPE, message.getContentType(), false);
+        separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, CREATION_TIME_UTC, message.getCreationTimeUTCString(), false);
+        if (message.isSecurityMessage())
+        {
+            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, MQTT_SECURITY_INTERFACE_ID, MessageProperty.IOTHUB_SECURITY_INTERFACE_ID_VALUE, false);
+        }
+
+        if (message.getComponentName() != null && !message.getComponentName().isEmpty())
+        {
+            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, COMPONENT_ID, message.getComponentName(), false);
+        }
+
+        for (MessageProperty property : message.getProperties())
+        {
+            separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, property.getName(), property.getValue(), true);
+        }
+
+        //if (this.moduleId != null && !this.moduleId.isEmpty())
+        //{
+        //    stringBuilder.append("/");
+        //}
+
+        String messagePublishTopic = stringBuilder.toString();
+
+        mqttClient.publishAsync(
+            messagePublishTopic,
+            message.getBytes(),
+            QOS,  //TODO qos
+            new Consumer<Integer>()
+            {
+                @Override
+                public void accept(Integer integer)
+                {
+                    listener.onMessageSent(message, config.getDeviceId(), null); //TODO error case?
+                }
+            });
+
+        return IotHubStatusCode.OK;
+    }
+
+    /**
+     * Appends the property to the provided stringbuilder if the property value is not null.
+     * @param stringBuilder the builder to build upon
+     * @param separatorNeeded if a separator should precede the new property
+     * @param propertyKey the mqtt topic string property key
+     * @param propertyValue the property value (message id, correlation id, etc.)
+     * @return true if a separator will be needed for any later properties appended on
+     */
+    private boolean appendPropertyIfPresent(StringBuilder stringBuilder, boolean separatorNeeded, String propertyKey, String propertyValue, boolean isApplicationProperty) throws TransportException
+    {
+        try
+        {
+            if (propertyValue != null && !propertyValue.isEmpty())
+            {
+                if (separatorNeeded)
+                {
+                    stringBuilder.append(MESSAGE_PROPERTY_SEPARATOR);
+                }
+
+                if (isApplicationProperty)
+                {
+                    // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
+                    stringBuilder.append(URLEncoder.encode(propertyKey, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
+                }
+                else
+                {
+                    stringBuilder.append(propertyKey);
+                }
+
+                stringBuilder.append(MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR);
+
+                // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
+                stringBuilder.append(URLEncoder.encode(propertyValue, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
+
+                return true;
+            }
+
+            return separatorNeeded;
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new TransportException("Could not utf-8 encode the property with name " + propertyKey + " and value " + propertyValue, e);
+        }
+    }
+
+    // Converts an MQTT message into our native "IoT hub" message
+    private IotHubTransportMessage constructMessage(ReceivedMqttMessage mqttMessage)
+    {
+        String topic = mqttMessage.getTopic();
+
         IotHubTransportMessage message = new IotHubTransportMessage(mqttMessage.getPayload(), MessageType.DEVICE_TELEMETRY);
 
         message.setQualityOfService(mqttMessage.getQos());

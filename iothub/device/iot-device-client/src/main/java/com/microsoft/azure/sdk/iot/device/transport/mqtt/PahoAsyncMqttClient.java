@@ -3,6 +3,7 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.IAsyncMqttClient;
 import com.microsoft.azure.sdk.iot.device.MqttConnectOptions;
 import com.microsoft.azure.sdk.iot.device.ReceivedMqttMessage;
+import com.microsoft.azure.sdk.iot.device.transport.HttpProxySocketFactory;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
@@ -47,26 +48,23 @@ public class PahoAsyncMqttClient implements IAsyncMqttClient, MqttCallback
         pahoOptions.setKeepAliveInterval(options.getKeepAlivePeriod());
         pahoOptions.setCleanSession(true);
         pahoOptions.setMaxInflight(MAX_IN_FLIGHT_COUNT);
-        pahoOptions.setSocketFactory(options.getSslContext().getSocketFactory());
+
+        if (options.getProxySettings() == null)
+        {
+            pahoOptions.setSocketFactory(options.getSslContext().getSocketFactory());
+        }
+        else
+        {
+            pahoOptions.setSocketFactory(new HttpProxySocketFactory(options.getSslContext().getSocketFactory(), options.getProxySettings()));
+        }
 
         try
         {
-            this.asyncPahoClient.connect(pahoOptions, new IMqttActionListener()
-            {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken)
-                {
-                    onConnectionAcknowledged.accept(0);
-                }
-
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception)
-                {
-                    //TODO error code?
-                    //onConnectionAcknowledged.accept(-1);
-                    exception.printStackTrace();
-                }
-            });
+            // Note that the connectAsync function of the Paho MQTT client does not work, so this method will
+            // run synchronously.
+            IMqttToken connectToken = this.asyncPahoClient.connect(pahoOptions);
+            connectToken.waitForCompletion(10000);
+            onConnectionAcknowledged.accept(1);
         }
         catch (MqttException e)
         {
@@ -232,6 +230,7 @@ public class PahoAsyncMqttClient implements IAsyncMqttClient, MqttCallback
                 .payload(mqttMessage.getPayload())
                 .topic(topic)
                 .qos(mqttMessage.getQos())
+                .messageId(mqttMessage.getId())
                 .build();
 
         this.messageCallback.accept(message);

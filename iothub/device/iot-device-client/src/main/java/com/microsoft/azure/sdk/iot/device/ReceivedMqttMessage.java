@@ -14,4 +14,6 @@ public class ReceivedMqttMessage
 
     @Getter
     private String topic;
+
+    @Getter int messageId;
 }
