@@ -9,6 +9,7 @@ import javax.net.ssl.SSLContext;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.ClientConfiguration.DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+import static com.microsoft.azure.sdk.iot.device.ClientConfiguration.DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
 
 /**
  * A client for creating multiplexed connections to IoT hub. A multiplexed connection allows for multiple device clients
@@ -99,6 +100,7 @@ public class MultiplexingClient
         long receivePeriod = options != null ? options.getReceiveInterval() : DEFAULT_RECEIVE_PERIOD_MILLIS;
         int sendMessagesPerThread = options != null ? options.getMaxMessagesSentPerSendInterval() : DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
         int keepAliveInterval = options != null ? options.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+        int sendInterval = (int) (options != null ? options.getSendInterval() : DEFAULT_SEND_INTERVAL_IN_MILLISECONDS);
 
         if (sendPeriod < 0)
         {
@@ -125,7 +127,7 @@ public class MultiplexingClient
 
         // Optional settings from MultiplexingClientOptions
         SSLContext sslContext = options != null ? options.getSslContext() : null;
-        this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, keepAliveInterval);
+        this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, keepAliveInterval, sendInterval);
         this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(sendMessagesPerThread);
         this.deviceIO.setSendPeriodInMilliseconds(sendPeriod);
         this.deviceIO.setReceivePeriodInMilliseconds(receivePeriod);

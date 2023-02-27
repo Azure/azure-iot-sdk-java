@@ -258,5 +258,7 @@ package-list
 !/.idea/inspectionProfiles
 !/.idea/scopes
 
-/device/iot-device-samples/android-sample/.idea/*
+/iothub/device/iot-device-samples/android-sample/.idea/*
 /iot-e2e-tests/android/.idea/*
+/iothub/device/iot-device-samples/android-sample/app/.idea/*
+/iot-e2e-tests/android/app/.idea/*

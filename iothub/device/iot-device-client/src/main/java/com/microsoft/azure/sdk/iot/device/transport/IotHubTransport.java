@@ -109,6 +109,7 @@ public class IotHubTransport implements IotHubListener
     private final String hostName;
     private final ProxySettings proxySettings;
     private final int keepAliveInterval;
+    private final int sendInterval;
     private SSLContext sslContext;
     private final boolean isMultiplexing;
 
@@ -148,6 +149,7 @@ public class IotHubTransport implements IotHubListener
 
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
         this.keepAliveInterval = defaultConfig.getKeepAliveInterval();
+        this.sendInterval = defaultConfig.getSendInterval();
     }
 
     public IotHubTransport(
@@ -156,7 +158,8 @@ public class IotHubTransport implements IotHubListener
             SSLContext sslContext,
             ProxySettings proxySettings,
             IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback,
-            int keepAliveInterval) throws IllegalArgumentException
+            int keepAliveInterval,
+            int sendInterval) throws IllegalArgumentException
     {
         this.protocol = protocol;
         this.hostName = hostName;
@@ -166,6 +169,7 @@ public class IotHubTransport implements IotHubListener
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
         this.isMultiplexing = true;
         this.keepAliveInterval = keepAliveInterval;
+        this.sendInterval = sendInterval;
     }
 
     public Semaphore getSendThreadSemaphore()
@@ -1324,7 +1328,8 @@ public class IotHubTransport implements IotHubListener
                                 this.protocol == IotHubClientProtocol.AMQPS_WS,
                                 this.sslContext,
                                 this.proxySettings,
-                                this.keepAliveInterval);
+                                this.keepAliveInterval,
+                                this.sendInterval);
 
                         for (ClientConfiguration config : this.deviceClientConfigs.values())
                         {
