@@ -64,6 +64,7 @@ public class SendMessagesTests extends SendMessagesCommon
         assumeTrue(this.testInstance.protocol == MQTT || this.testInstance.protocol == MQTT_WS);
         this.testInstance.setup();
         this.testInstance.identity.getClient().open(false);
+        this.testInstance.identity.getClient().sendEvent(new Message("asdf"));
         this.testInstance.identity.getClient().close();
     }
 

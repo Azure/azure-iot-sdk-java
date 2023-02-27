@@ -3,6 +3,8 @@ package com.microsoft.azure.sdk.iot.device;
 import lombok.Builder;
 import lombok.Getter;
 
+import javax.net.ssl.SSLContext;
+
 @Builder
 public class MqttConnectOptions
 {
@@ -23,4 +25,7 @@ public class MqttConnectOptions
 
     @Getter
     private String serverUri;
+
+    @Getter
+    private SSLContext sslContext;
 }

@@ -6,15 +6,20 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
@@ -32,6 +37,39 @@ public class MqttIotHubConnection implements IotHubTransportConnection
     private static final int MQTT_VERSION = MQTT_VERSION_3_1_1;
     private static final String MODEL_ID = "model-id";
 
+    private static final int CONNECTION_TIMEOUT = 60 * 1000;
+    private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
+    private static final int QOS = 1;
+    private static final int MAX_SUBSCRIBE_ACK_WAIT_TIME = 15 * 1000;
+
+    /* Each property is separated by & and all system properties start with an encoded $ (except for iothub-ack) */
+    final static char MESSAGE_PROPERTY_SEPARATOR = '&';
+    private final static String MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_ENCODED = "%24";
+    private final static char MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED = '$';
+    final static char MESSAGE_PROPERTY_KEY_VALUE_SEPARATOR = '=';
+    private final static int PROPERTY_KEY_INDEX = 0;
+    private final static int PROPERTY_VALUE_INDEX = 1;
+
+    /* The system property keys expected in a message */
+    private final static String ABSOLUTE_EXPIRY_TIME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".exp";
+    final static String CORRELATION_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cid";
+    final static String MESSAGE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".mid";
+    final static String TO = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".to";
+    final static String USER_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".uid";
+    final static String OUTPUT_NAME = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".on";
+    final static String CONNECTION_DEVICE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cdid";
+    final static String CONNECTION_MODULE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".cmid";
+    final static String CONTENT_TYPE = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ct";
+    final static String CONTENT_ENCODING = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ce";
+    final static String CREATION_TIME_UTC = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ctime";
+    final static String MQTT_SECURITY_INTERFACE_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".ifid";
+    final static String COMPONENT_ID = MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_DECODED + ".sub";
+
+    private final static String IOTHUB_ACK = "iothub-ack";
+
+    private final static String INPUTS_PATH_STRING = "inputs";
+    private final static String MODULES_PATH_STRING = "modules";
+
     private String connectionId;
     private String webSocketQueryString;
     private final Object mqttConnectionStateLock = new Object(); // lock for preventing simultaneous open and close calls
@@ -41,7 +79,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
     private final MqttConnectOptions.MqttConnectOptionsBuilder connectOptions;
     private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
 
-    private IMqttClient mqttClient;
+    private IAsyncMqttClient mqttClient;
     private IotHubListener listener;
 
     /**
@@ -69,16 +107,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         }
 
         this.config = config;
-
-        SSLContext sslContext;
-        try
-        {
-            sslContext = this.config.getAuthenticationProvider().getSSLContext();
-        }
-        catch (IOException e)
-        {
-            throw new TransportException("Failed to get SSLContext", e);
-        }
 
         if (this.config.getAuthenticationType() == ClientConfiguration.AuthType.SAS_TOKEN)
         {
@@ -165,6 +193,15 @@ public class MqttIotHubConnection implements IotHubTransportConnection
                 .mqttVersion(MQTT_VERSION)
                 .username(iotHubUserName);
 
+        try
+        {
+            this.connectOptions.sslContext(this.config.getAuthenticationProvider().getSSLContext());
+        }
+        catch (IOException e)
+        {
+            throw new TransportException("Failed to get SSLContext", e);
+        }
+
         /*ProxySettings proxySettings = config.getProxySettings();
         if (proxySettings != null)
         {
@@ -230,9 +267,35 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             this.connectOptions.clientId(this.clientId);
 
             MqttConnectOptions options = this.connectOptions.build();
-            this.mqttClient = new PahoMqttClient(); //TODO get from config
+            this.mqttClient = new PahoAsyncMqttClient(); //TODO get from config
 
-            this.mqttClient.connect(options);
+            log.debug("Opening MQTT connection...");
+            CountDownLatch connectLatch = new CountDownLatch(1);
+            this.mqttClient.connectAsync(options, new Consumer<Integer>()
+            {
+                @Override
+                public void accept(Integer integer)
+                {
+                    connectLatch.countDown();
+                }
+            });
+
+            TransportException timeoutException = new TransportException("Timed out waiting for MQTT connection to open");
+            timeoutException.setRetryable(true);
+            try
+            {
+                //TODO timeout value?
+                boolean timedOut = !connectLatch.await(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
+
+                if (timedOut)
+                {
+                    throw timeoutException;
+                }
+            }
+            catch (InterruptedException e)
+            {
+                throw timeoutException;
+            }
 
             this.state = IotHubConnectionStatus.CONNECTED;
 
@@ -268,8 +331,30 @@ public class MqttIotHubConnection implements IotHubTransportConnection
 
             log.debug("Closing MQTT connection");
 
-            this.mqttClient.disconnect();
+            CountDownLatch connectLatch = new CountDownLatch(1);
+            this.mqttClient.disconnectAsync(new Consumer<Integer>()
+            {
+                @Override
+                public void accept(Integer integer)
+                {
+                    connectLatch.countDown();
+                }
+            });
 
+            try
+            {
+                //TODO timeout value?
+                boolean timedOut = !connectLatch.await(DISCONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
+
+                if (timedOut)
+                {
+                    log.warn("Timed out waiting for the service to acknowledge the disconnection.");
+                }
+            }
+            catch (InterruptedException e)
+            {
+                log.warn("Timed out waiting for the service to acknowledge the disconnection.");
+            }
             this.state = IotHubConnectionStatus.DISCONNECTED;
             log.debug("Successfully closed MQTT connection");
         }
@@ -306,8 +391,19 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         else
         {
             String topic = "devices/" + this.config.getDeviceId() + "/messages/events/";
-            mqttClient.publish(topic, message.getBytes(), 1); //TODO qos
-            this.listener.onMessageSent(message, config.getDeviceId(), null); //TODO async pattern
+            mqttClient.publishAsync(
+                topic,
+                message.getBytes(),
+                QOS,  //TODO qos
+                new Consumer<Integer>()
+            {
+                @Override
+                public void accept(Integer integer)
+                {
+                    listener.onMessageSent(message, config.getDeviceId(), null); //TODO error case?
+                }
+            });
+
             return IotHubStatusCode.OK;
         }
 
@@ -358,5 +454,100 @@ public class MqttIotHubConnection implements IotHubTransportConnection
     public String getConnectionId()
     {
         return this.connectionId;
+    }
+
+    // Converts an MQTT message into our native "IoT hub" message
+    private IotHubTransportMessage constructMessage(MqttMessage mqttMessage, String topic)
+    {
+        IotHubTransportMessage message = new IotHubTransportMessage(mqttMessage.getPayload(), MessageType.DEVICE_TELEMETRY);
+
+        message.setQualityOfService(mqttMessage.getQos());
+
+        int propertiesStringStartingIndex = topic.indexOf(MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_ENCODED);
+        if (propertiesStringStartingIndex != -1)
+        {
+            String propertiesString = topic.substring(propertiesStringStartingIndex);
+
+            assignPropertiesToMessage(message, propertiesString);
+
+            String routeString = topic.substring(0, propertiesStringStartingIndex);
+            String[] routeComponents = routeString.split("/");
+
+            if (routeComponents.length > 2 && routeComponents[2].equals(MODULES_PATH_STRING))
+            {
+                message.setConnectionModuleId(routeComponents[3]);
+            }
+
+            if (routeComponents.length > 4 && routeComponents[4].equals(INPUTS_PATH_STRING))
+            {
+                message.setInputName(routeComponents[5]);
+            }
+        }
+
+        return message;
+    }
+
+    /**
+     * Takes propertiesString and parses it for all the properties it holds and then assigns them to the provided message
+     * @param propertiesString the string to parse containing all the properties
+     * @param message the message to add the parsed properties to
+     * @throws IllegalArgumentException if a property's key and value are not separated by the '=' symbol
+     * @throws IllegalStateException if the property for expiry time is present, but the value cannot be parsed as a Long
+     * */
+    private void assignPropertiesToMessage(Message message, String propertiesString) throws IllegalStateException, IllegalArgumentException
+    {
+        for (String propertyString : propertiesString.split(String.valueOf(MESSAGE_PROPERTY_SEPARATOR)))
+        {
+            if (propertyString.contains("="))
+            {
+                //Expected format is <key>=<value> where both key and value may be encoded
+                String key = propertyString.split("=")[PROPERTY_KEY_INDEX];
+                String value = propertyString.split("=")[PROPERTY_VALUE_INDEX];
+
+                try
+                {
+                    key = URLDecoder.decode(key, StandardCharsets.UTF_8.name());
+                    value = URLDecoder.decode(value, StandardCharsets.UTF_8.name());
+                }
+                catch (UnsupportedEncodingException e)
+                {
+                    // should never happen, since the encoding is hard-coded.
+                    throw new IllegalStateException(e);
+                }
+
+                //Some properties are reserved system properties and must be saved in the message differently
+                //Codes_SRS_Mqtt_34_057: [This function shall parse the messageId, correlationId, outputname, content encoding and content type from the provided property string]
+                switch (key)
+                {
+                    case TO:
+                    case IOTHUB_ACK:
+                    case USER_ID:
+                    case ABSOLUTE_EXPIRY_TIME:
+                        //do nothing
+                        break;
+                    case MESSAGE_ID:
+                        message.setMessageId(value);
+                        break;
+                    case CORRELATION_ID:
+                        message.setCorrelationId(value);
+                        break;
+                    case OUTPUT_NAME:
+                        message.setOutputName(value);
+                        break;
+                    case CONTENT_ENCODING:
+                        message.setContentEncoding(value);
+                        break;
+                    case CONTENT_TYPE:
+                        message.setContentType(value);
+                        break;
+                    default:
+                        message.setProperty(key, value);
+                }
+            }
+            else
+            {
+                throw new IllegalArgumentException("Unexpected property string provided. Expected '=' symbol between key and value of the property in string: " + propertyString);
+            }
+        }
     }
 }
