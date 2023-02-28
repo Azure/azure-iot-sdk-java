@@ -79,7 +79,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
     //Placement for $iothub/twin/PATCH/properties/desired/?$version={new version}
     private static final int PATCH_VERSION_TOKEN = 5;
 
-    private static final String TWIN_REQ_ID = "rid=";
+    private static final String TWIN_REQ_ID = "?$rid=";
 
     private static final String VERSION = "$version=";
 
@@ -706,7 +706,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
     private void sendReportedPropertyUpdateAsync(IotHubTransportMessage message)
     {
         log.debug("Sending 'patch twin' request with id {}", message.getRequestId());
-        String topic = "$iothub/twin/PATCH/properties/reported/?$rid=" + message.getRequestId() + "$version=" + message.getVersion();
+        String topic = "$iothub/twin/PATCH/properties/reported/?$rid=" + message.getRequestId() + "&$version=" + message.getVersion();
         this.twinRequestMap.put(message.getRequestId(), message.getDeviceOperationType());
         this.mqttClient.publishAsync(topic, message.getBytes(), 1, new Consumer<Integer>()
         {
@@ -881,10 +881,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection
 
         if (topicTokens.length > TWIN_REQID_TOKEN)
         {
-            String[] queryStringKeyValuePairs = topicTokens[TWIN_REQID_TOKEN].split(Pattern.quote("$"));
+            String[] queryStringKeyValuePairs = topicTokens[TWIN_REQID_TOKEN].split(Pattern.quote("&"));
 
             //TODO
-            String requestId = getRequestId(queryStringKeyValuePairs[1]);
+            String requestId = getRequestId(queryStringKeyValuePairs[0]);
             // MQTT does not have the concept of correlationId for request/response handling but it does have a requestId
             // To handle this we are setting the correlationId to the requestId to better handle correlation
             // whether we use MQTT or AMQP.
