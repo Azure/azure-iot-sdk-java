@@ -17,7 +17,7 @@ public class PahoAsyncMqttClient implements IAsyncMqttClient, MqttCallback
 
     private MqttAsyncClient asyncPahoClient;
     private Consumer<ReceivedMqttMessage> messageCallback;
-    private Consumer<Integer> connectionLossEvent;
+    private Consumer<Integer> connectionLossCallback;
 
     @Override
     public void connectAsync(MqttConnectOptions options, Consumer<Integer> onConnectionAcknowledged)
@@ -212,15 +212,15 @@ public class PahoAsyncMqttClient implements IAsyncMqttClient, MqttCallback
     }
 
     @Override
-    public void setConnectionLostCallback(Consumer<Integer> connectionLossEvent)
+    public void setConnectionLostCallback(Consumer<Integer> connectionLossCallback)
     {
-        this.connectionLossEvent = connectionLossEvent;
+        this.connectionLossCallback = connectionLossCallback;
     }
 
     @Override
     public void connectionLost(Throwable throwable)
     {
-        this.connectionLossEvent.accept(0); //todo details
+        this.connectionLossCallback.accept(0); //todo details
     }
 
     @Override

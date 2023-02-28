@@ -259,6 +259,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             MqttConnectOptions options = this.connectOptions.build();
             this.mqttClient = new PahoAsyncMqttClient(); //TODO get from config
 
+            this.mqttClient.setConnectionLostCallback(new Consumer<Integer>()
+            {
+                @Override
+                public void accept(Integer integer)
+                {
+                    state = IotHubConnectionStatus.DISCONNECTED;
+                    TransportException exception = new TransportException("TODO");
+                    exception.setRetryable(true);
+                    listener.onConnectionLost(exception, connectionId);
+                }
+            });
+
             log.debug("Opening MQTT connection...");
             CountDownLatch connectLatch = new CountDownLatch(1);
             this.mqttClient.connectAsync(options, new Consumer<Integer>()
