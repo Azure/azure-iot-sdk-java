@@ -5,6 +5,7 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.*;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttConnectException;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,7 +24,6 @@ import java.util.function.Consumer;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
 import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.*;
-import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1_1;
 
 @Slf4j
 public class MqttIotHubConnection implements IotHubTransportConnection
@@ -34,7 +34,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection
     private static final String NO_CLIENT_CERT_QUERY_STRING = "?iothub-no-client-cert=true";
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
-    private static final int MQTT_VERSION = MQTT_VERSION_3_1_1;
 
     private static final int CONNECTION_TIMEOUT = 60 * 1000;
     private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
@@ -170,7 +169,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         this.connectOptions = MqttConnectOptions.builder()
                 .serverUri(serverUri)
                 .keepAlivePeriod(config.getKeepAliveInterval())
-                .mqttVersion(MQTT_VERSION)
+                .mqttVersion(MqttVersion.MQTT_VERSION_3_1_1)
                 .username(iotHubUserName)
                 .clientId(clientId)
                 .proxySettings(config.getProxySettings());
@@ -248,30 +247,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             });
 
             log.debug("Opening MQTT connection...");
-            CountDownLatch connectLatch = new CountDownLatch(1);
-            this.mqttClient.connectAsync(this.connectOptions.build(), new Consumer<Integer>()
-            {
-                @Override
-                public void accept(Integer integer)
-                {
-                    connectLatch.countDown();
-                }
-            });
-
-            TransportException timeoutException = new TransportException("Timed out waiting for MQTT connection to open");
-            timeoutException.setRetryable(true);
             try
             {
-                boolean timedOut = !connectLatch.await(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-
-                if (timedOut)
-                {
-                    throw timeoutException;
-                }
+                this.mqttClient.connect(this.connectOptions.build());
             }
-            catch (InterruptedException e)
+            catch (MqttConnectException e)
             {
-                throw timeoutException;
+                TransportException transportException
+                e.printStackTrace();
             }
 
             if (config.getModuleId() == null || config.getModuleId().isEmpty())

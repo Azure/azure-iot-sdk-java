@@ -1,5 +1,6 @@
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttVersion;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -19,7 +20,7 @@ public class MqttConnectOptions
     private char[] password;
 
     @Getter
-    private int mqttVersion; //TODO enum
+    private MqttVersion mqttVersion;
 
     @Getter
     private int keepAlivePeriod;

@@ -1,10 +1,12 @@
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttConnectException;
+
 import java.util.function.Consumer;
 
 public interface IMqttAsyncClient
 {
-    void connectAsync(MqttConnectOptions options, Consumer<Integer> onConnectionAcknowledged);
+    void connect(MqttConnectOptions options) throws MqttConnectException;
 
     void disconnectAsync(Consumer<Integer> onDisconnectionAcknowledged);
 

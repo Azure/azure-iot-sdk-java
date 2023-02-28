@@ -4,6 +4,7 @@ import com.microsoft.azure.sdk.iot.device.IMqttAsyncClient;
 import com.microsoft.azure.sdk.iot.device.MqttConnectOptions;
 import com.microsoft.azure.sdk.iot.device.ReceivedMqttMessage;
 import com.microsoft.azure.sdk.iot.device.transport.HttpProxySocketFactory;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttConnectException;
 import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
@@ -20,7 +21,7 @@ public class PahoMqttAsyncClient implements IMqttAsyncClient, MqttCallback
     private Consumer<Integer> connectionLossCallback;
 
     @Override
-    public void connectAsync(MqttConnectOptions options, Consumer<Integer> onConnectionAcknowledged)
+    public void connect(MqttConnectOptions options) throws MqttConnectException
     {
         try
         {
@@ -44,7 +45,15 @@ public class PahoMqttAsyncClient implements IMqttAsyncClient, MqttCallback
             pahoOptions.setPassword(options.getPassword());
         }
 
-        pahoOptions.setMqttVersion(4); //TODO hardcoded for now
+        if (options.getMqttVersion() == MqttVersion.MQTT_VERSION_3_1_1)
+        {
+            pahoOptions.setMqttVersion(org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1_1);
+        }
+        else if (options.getMqttVersion() == MqttVersion.MQTT_VERSION_3_1)
+        {
+            pahoOptions.setMqttVersion(org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1);
+        }
+
         pahoOptions.setKeepAliveInterval(options.getKeepAlivePeriod());
         pahoOptions.setCleanSession(options.isCleanSession());
         pahoOptions.setMaxInflight(MAX_IN_FLIGHT_COUNT);
@@ -64,12 +73,13 @@ public class PahoMqttAsyncClient implements IMqttAsyncClient, MqttCallback
             // run synchronously.
             IMqttToken connectToken = this.asyncPahoClient.connect(pahoOptions);
             connectToken.waitForCompletion(10000);
-            onConnectionAcknowledged.accept(1);
         }
         catch (MqttException e)
         {
-            //TODO
-            e.printStackTrace();
+            MqttConnectException connectException = new MqttConnectException();
+            connectException.setReasonCode(e.getReasonCode());
+            connectException.setCause(e);
+            throw connectException;
         }
     }
 
