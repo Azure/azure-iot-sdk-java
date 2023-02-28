@@ -20,10 +20,6 @@ public class MessageParser
 {
     private final static String MESSAGE_SYSTEM_PROPERTY_IDENTIFIER_ENCODED = "%24";
 
-    //Placement for $iothub/methods/POST/{method name}/?$rid={request id}
-    private static final int METHOD_TOKEN = 3;
-    private static final int METHODS_REQID_TOKEN = 4;
-
     //Placement in $iothub/twin/res/{status}/?$rid={request id}&$version={new version}
     private static final int STATUS_TOKEN = 3;
     private static final int TWIN_REQID_TOKEN = 4;
@@ -55,10 +51,10 @@ public class MessageParser
         message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
         message.setQualityOfService(mqttMessage.getQos());
 
-        String methodName = TopicParser.getMethodName(mqttMessage.getTopic(), METHOD_TOKEN);
+        String methodName = TopicParser.getMethodName(mqttMessage.getTopic());
         message.setMethodName(methodName);
 
-        String reqId = TopicParser.getRequestId(mqttMessage.getTopic(), METHODS_REQID_TOKEN);
+        String reqId = TopicParser.getRequestId(mqttMessage.getTopic());
         if (reqId != null)
         {
             message.setRequestId(reqId);

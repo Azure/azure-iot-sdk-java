@@ -36,17 +36,18 @@ class TopicParser
     private final static String IOTHUB_ACK = "iothub-ack";
 
     @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexReqID".
-    static String getRequestId(String topic, int tokenIndexReqID)
+    static String getRequestId(String topic)
     {
+        int tokenIndexReqId = 4;
         String[] topicTokens = topic.split("/");
         String reqId = null;
 
-        if (tokenIndexReqID <= 0 || tokenIndexReqID >= topicTokens.length)
+        if (tokenIndexReqId >= topicTokens.length)
         {
             throw new IllegalArgumentException("Invalid token Index for request id");
         }
 
-        String token = topicTokens[tokenIndexReqID];
+        String token = topicTokens[tokenIndexReqId];
 
         if (token.contains(REQ_ID) && token.contains(QUESTION)) // restriction for request id
         {
@@ -66,13 +67,15 @@ class TopicParser
     }
 
     @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexMethod"
-    static String getMethodName(String topic, int tokenIndexMethod)
+    static String getMethodName(String topic)
     {
+        int tokenIndexMethod = 3;
+
         String[] topicTokens = topic.split("/");
 
         String methodName;
 
-        if (tokenIndexMethod <= 0 || tokenIndexMethod >= topicTokens.length)
+        if (tokenIndexMethod >= topicTokens.length)
         {
             throw new IllegalArgumentException("Invalid token Index for Method Name");
         }
@@ -123,51 +126,6 @@ class TopicParser
         }
 
         return stringBuilder.toString();
-    }
-
-    /**
-     * Appends the property to the provided stringbuilder if the property value is not null.
-     * @param stringBuilder the builder to build upon
-     * @param separatorNeeded if a separator should precede the new property
-     * @param propertyKey the mqtt topic string property key
-     * @param propertyValue the property value (message id, correlation id, etc.)
-     * @return true if a separator will be needed for any later properties appended on
-     */
-    private static boolean AppendPropertyIfPresent(StringBuilder stringBuilder, boolean separatorNeeded, String propertyKey, String propertyValue, boolean isApplicationProperty) throws TransportException
-    {
-        try
-        {
-            if (propertyValue != null && !propertyValue.isEmpty())
-            {
-                if (separatorNeeded)
-                {
-                    stringBuilder.append("&");
-                }
-
-                if (isApplicationProperty)
-                {
-                    // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
-                    stringBuilder.append(URLEncoder.encode(propertyKey, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
-                }
-                else
-                {
-                    stringBuilder.append(propertyKey);
-                }
-
-                stringBuilder.append("=");
-
-                // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
-                stringBuilder.append(URLEncoder.encode(propertyValue, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
-
-                return true;
-            }
-
-            return separatorNeeded;
-        }
-        catch (UnsupportedEncodingException e)
-        {
-            throw new TransportException("Could not utf-8 encode the property with name " + propertyKey + " and value " + propertyValue, e);
-        }
     }
 
     /**
@@ -231,6 +189,51 @@ class TopicParser
             {
                 throw new IllegalArgumentException("Unexpected property string provided. Expected '=' symbol between key and value of the property in string: " + propertyString);
             }
+        }
+    }
+
+    /**
+     * Appends the property to the provided stringbuilder if the property value is not null.
+     * @param stringBuilder the builder to build upon
+     * @param separatorNeeded if a separator should precede the new property
+     * @param propertyKey the mqtt topic string property key
+     * @param propertyValue the property value (message id, correlation id, etc.)
+     * @return true if a separator will be needed for any later properties appended on
+     */
+    private static boolean AppendPropertyIfPresent(StringBuilder stringBuilder, boolean separatorNeeded, String propertyKey, String propertyValue, boolean isApplicationProperty) throws TransportException
+    {
+        try
+        {
+            if (propertyValue != null && !propertyValue.isEmpty())
+            {
+                if (separatorNeeded)
+                {
+                    stringBuilder.append("&");
+                }
+
+                if (isApplicationProperty)
+                {
+                    // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
+                    stringBuilder.append(URLEncoder.encode(propertyKey, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
+                }
+                else
+                {
+                    stringBuilder.append(propertyKey);
+                }
+
+                stringBuilder.append("=");
+
+                // URLEncoder.Encode incorrectly encodes space characters as '+'. For MQTT to work, we need to replace those '+' with "%20"
+                stringBuilder.append(URLEncoder.encode(propertyValue, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20"));
+
+                return true;
+            }
+
+            return separatorNeeded;
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            throw new TransportException("Could not utf-8 encode the property with name " + propertyKey + " and value " + propertyValue, e);
         }
     }
 }
