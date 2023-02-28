@@ -1,6 +1,6 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-import com.microsoft.azure.sdk.iot.device.IAsyncMqttClient;
+import com.microsoft.azure.sdk.iot.device.IMqttAsyncClient;
 import com.microsoft.azure.sdk.iot.device.MqttConnectOptions;
 import com.microsoft.azure.sdk.iot.device.ReceivedMqttMessage;
 import com.microsoft.azure.sdk.iot.device.transport.HttpProxySocketFactory;
@@ -9,7 +9,7 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import java.util.function.Consumer;
 
-public class PahoAsyncMqttClient implements IAsyncMqttClient, MqttCallback
+public class PahoMqttAsyncClient implements IMqttAsyncClient, MqttCallback
 {
     // relatively arbitrary, but only because Paho doesn't have any particular recommendations here. Just a high enough
     // value that users who are building a gateway type solution don't find this value to be a bottleneck.
@@ -46,7 +46,7 @@ public class PahoAsyncMqttClient implements IAsyncMqttClient, MqttCallback
 
         pahoOptions.setMqttVersion(4); //TODO hardcoded for now
         pahoOptions.setKeepAliveInterval(options.getKeepAlivePeriod());
-        pahoOptions.setCleanSession(true);
+        pahoOptions.setCleanSession(options.isCleanSession());
         pahoOptions.setMaxInflight(MAX_IN_FLIGHT_COUNT);
 
         if (options.getProxySettings() == null)

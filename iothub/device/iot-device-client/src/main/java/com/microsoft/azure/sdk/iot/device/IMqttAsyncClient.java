@@ -2,7 +2,7 @@ package com.microsoft.azure.sdk.iot.device;
 
 import java.util.function.Consumer;
 
-public interface IAsyncMqttClient
+public interface IMqttAsyncClient
 {
     void connectAsync(MqttConnectOptions options, Consumer<Integer> onConnectionAcknowledged);
 

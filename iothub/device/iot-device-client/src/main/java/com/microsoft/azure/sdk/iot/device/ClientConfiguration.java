@@ -4,6 +4,7 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.PahoMqttAsyncClient;
 import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.auth.*;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
@@ -78,6 +79,9 @@ public final class ClientConfiguration
     @Getter
     @Setter(AccessLevel.PACKAGE)
     private int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+
+    @Getter
+    private IMqttAsyncClient mqttAsyncClient;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -207,6 +211,7 @@ public final class ClientConfiguration
         this.amqpOpenAuthenticationSessionTimeout = clientOptions != null && clientOptions.getAmqpAuthenticationSessionTimeout() != 0 ? clientOptions.getAmqpAuthenticationSessionTimeout() : DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
         this.amqpOpenDeviceSessionsTimeout = clientOptions != null && clientOptions.getAmqpDeviceSessionTimeout() != 0 ? clientOptions.getAmqpDeviceSessionTimeout() : DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
         this.proxySettings = clientOptions != null && clientOptions.getProxySettings() != null ? clientOptions.getProxySettings() : null;
+        this.mqttAsyncClient = clientOptions != null && clientOptions.getMqttClient() != null ? clientOptions.getMqttClient() : new PahoMqttAsyncClient();
 
         if (proxySettings != null)
         {

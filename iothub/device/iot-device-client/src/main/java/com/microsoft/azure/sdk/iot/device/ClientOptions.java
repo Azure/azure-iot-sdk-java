@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.transport.mqtt.PahoMqttAsyncClient;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -136,4 +137,7 @@ public final class ClientOptions
     @Getter
     @Builder.Default
     private final int receiveInterval = RECEIVE_PERIOD_MILLIS;
+
+    @Getter
+    private final IMqttAsyncClient mqttClient = new PahoMqttAsyncClient();
 }

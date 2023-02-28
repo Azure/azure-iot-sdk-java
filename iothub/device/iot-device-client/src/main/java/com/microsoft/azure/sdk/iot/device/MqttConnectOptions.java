@@ -32,4 +32,7 @@ public class MqttConnectOptions
 
     @Getter
     private ProxySettings proxySettings;
+
+    @Getter
+    private boolean cleanSession;
 }

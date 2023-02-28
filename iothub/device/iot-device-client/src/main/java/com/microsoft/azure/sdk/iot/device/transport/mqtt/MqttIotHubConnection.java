@@ -98,8 +98,16 @@ public class MqttIotHubConnection implements IotHubTransportConnection
     private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
     private final Map<String, DeviceOperations> twinRequestMap = new HashMap<>();
 
-    private IAsyncMqttClient mqttClient;
+    private IMqttAsyncClient mqttClient;
     private IotHubListener listener;
+
+    private final String publishTelemetryTopic;
+    private final String deviceboundMessagesTopic;
+    private final String moduleboundMessagesTopic;
+    private final String moduleInputMessagesTopic;
+    private static final String DesiredPropertiesTopic = "$iothub/twin/PATCH/properties/desired";
+    private static final String DirectMethodTopic = "$iothub/methods/POST";
+    private static final String TwinResponseTopic = "$iothub/twin/res";
 
     /**
      * Constructs an instance from the given {@link ClientConfiguration}
@@ -213,6 +221,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection
                 .username(iotHubUserName)
                 .proxySettings(config.getProxySettings());
 
+        this.mqttClient = config.getMqttAsyncClient();
+
         try
         {
             this.connectOptions.sslContext(this.config.getAuthenticationProvider().getSSLContext());
@@ -220,6 +230,23 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         catch (IOException e)
         {
             throw new TransportException("Failed to get SSLContext", e);
+        }
+
+        if (config.getModuleId() != null && !config.getModuleId().isEmpty())
+        {
+            this.publishTelemetryTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
+            this.moduleboundMessagesTopic = "devices/" + config.getDeviceId() + "/modules/" + config.getModuleId() + "/messages/devicebound";
+            this.moduleInputMessagesTopic = "devices/" + config.getDeviceId() + "/modules/" + config.getModuleId() + "/inputs";
+
+            this.deviceboundMessagesTopic = null;
+        }
+        else
+        {
+            this.publishTelemetryTopic = "devices/" + this.config.getDeviceId() + "/messages/events/";
+            this.deviceboundMessagesTopic = "devices/" + config.getDeviceId() + "/messages/devicebound";
+
+            this.moduleboundMessagesTopic = null;
+            this.moduleInputMessagesTopic = null;
         }
     }
 
@@ -256,9 +283,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection
 
             this.connectOptions.clientId(this.clientId);
 
-            MqttConnectOptions options = this.connectOptions.build();
-            this.mqttClient = new PahoAsyncMqttClient(); //TODO get from config
-
             this.mqttClient.setConnectionLostCallback(new Consumer<Integer>()
             {
                 @Override
@@ -273,7 +297,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
 
             log.debug("Opening MQTT connection...");
             CountDownLatch connectLatch = new CountDownLatch(1);
-            this.mqttClient.connectAsync(options, new Consumer<Integer>()
+            this.mqttClient.connectAsync(this.connectOptions.build(), new Consumer<Integer>()
             {
                 @Override
                 public void accept(Integer integer)
@@ -286,7 +310,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             timeoutException.setRetryable(true);
             try
             {
-                //TODO timeout value?
                 boolean timedOut = !connectLatch.await(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
 
                 if (timedOut)
@@ -299,78 +322,27 @@ public class MqttIotHubConnection implements IotHubTransportConnection
                 throw timeoutException;
             }
 
-            //if (moduleId == null || moduleId.isEmpty())
-            //{
-            subscribeSynchronously(
-                "devices/" + config.getDeviceId() + "/messages/devicebound/#",
-                "Timed out waiting for cloud to device message subscription to be acknowledged");
-
-            //}
-            //else
-            //{
-                //this.publishTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
-                //this.eventsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
-                //this.inputsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/#";
-            //}
-
-            this.mqttClient.setMessageCallback(receivedMqttMessage ->
+            if (config.getModuleId() == null || config.getModuleId().isEmpty())
             {
+                subscribeSynchronously(
+                    this.deviceboundMessagesTopic + "/#",
+                    "Timed out waiting for cloud to device message subscription to be acknowledged");
+            }
+            else
+            {
+                subscribeSynchronously(
+                    this.moduleboundMessagesTopic + "/#",
+                    "Timed out waiting for cloud to module messaging subscription to be acknowledged");
 
-                String topic = receivedMqttMessage.getTopic();
-                IotHubTransportMessage message;
-                if (topic.startsWith("$iothub/methods/"))
-                {
-                    message = constructDirectMethodMessage(receivedMqttMessage);
-                }
-                else if (topic.startsWith("$iothub/twin/PATCH/properties/desired"))
-                {
-                    message = constructDesiredPropertiesUpdateMessage(receivedMqttMessage);
-                }
-                else if (topic.startsWith("$iothub/twin/res"))
-                {
-                    message = constructTwinResponseMessage(receivedMqttMessage);
-                }
-                else
-                {
-                    message = constructTelemetryMessage(receivedMqttMessage);
-                }
+                subscribeSynchronously(
+                    this.moduleInputMessagesTopic + "/#",
+                    "Timed out waiting for module input messaging subscription to be acknowledged");
+            }
 
-                if (message.getQualityOfService() == 0)
-                {
-                    // Direct method messages and Twin messages are always sent with QoS 0, so there is no need for this SDK
-                    // to acknowledge them.
-                    log.trace("MQTT received message with QoS 0 so it has not been added to the messages to acknowledge list ({})", message);
-                }
-                else
-                {
-                    log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", message);
-                    this.receivedMessagesToAcknowledge.put(message, receivedMqttMessage.getMessageId());
-                }
-
-                switch (message.getMessageType())
-                {
-                    case DEVICE_TWIN:
-                        message.setMessageCallback(this.config.getDeviceTwinMessageCallback());
-                        message.setMessageCallbackContext(this.config.getDeviceTwinMessageContext());
-                        break;
-                    case DEVICE_METHODS:
-                        message.setMessageCallback(this.config.getDirectMethodsMessageCallback());
-                        message.setMessageCallbackContext(this.config.getDirectMethodsMessageContext());
-                        break;
-                    case DEVICE_TELEMETRY:
-                        message.setMessageCallback(this.config.getDeviceTelemetryMessageCallback(message.getInputName()));
-                        message.setMessageCallbackContext(this.config.getDeviceTelemetryMessageContext(message.getInputName()));
-                        break;
-                    case UNKNOWN:
-                    default:
-                        //do nothing
-                }
-
-                this.listener.onMessageReceived(message, null);
-            });
+            this.mqttClient.setMessageCallback(messageReceiveHandler);
 
             subscribeSynchronously(
-                "$iothub/twin/res/#",
+                TwinResponseTopic + "/#",
                 "Timed out waiting for twin response subscription to be acknowledged");
 
             this.state = IotHubConnectionStatus.CONNECTED;
@@ -463,11 +435,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
             if (transportMessage.getDeviceOperationType() == DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
             {
-                subscribeToDirectMethods();
+                return subscribeToDirectMethods();
             }
             else if (transportMessage.getDeviceOperationType() == DEVICE_OPERATION_METHOD_SEND_RESPONSE)
             {
-                sendDirectMethodResponseAsync(transportMessage);
+                return sendDirectMethodResponseAsync(transportMessage);
             }
         }
         else if (message.getMessageType() == DEVICE_TWIN)
@@ -475,15 +447,15 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
             if (transportMessage.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
             {
-                subscribeToDesiredPropertyUpdates();
+                return subscribeToDesiredPropertyUpdates();
             }
             else if (transportMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_GET_REQUEST)
             {
-                getTwinAsync(transportMessage);
+                return getTwinAsync(transportMessage);
             }
             else
             {
-                sendReportedPropertyUpdateAsync(transportMessage);
+                return sendReportedPropertyUpdateAsync(transportMessage);
             }
         }
         else
@@ -491,7 +463,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             return sendTelemetryAsync(message);
         }
 
-        return IotHubStatusCode.OK;
+        return IotHubStatusCode.BAD_FORMAT;
     }
 
     /**
@@ -543,11 +515,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection
 
     private IotHubStatusCode sendTelemetryAsync(Message message) throws TransportException
     {
-        //TODO modules
-        String topic = "devices/" + this.config.getDeviceId() + "/messages/events/";
-
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(topic);
+        stringBuilder.append(this.publishTelemetryTopic);
 
         boolean separatorNeeded;
 
@@ -576,11 +545,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             separatorNeeded = appendPropertyIfPresent(stringBuilder, separatorNeeded, property.getName(), property.getValue(), true);
         }
 
-        //if (this.moduleId != null && !this.moduleId.isEmpty())
-        //{
-        //    stringBuilder.append("/");
-        //}
-
         String messagePublishTopic = stringBuilder.toString();
 
         mqttClient.publishAsync(
@@ -599,7 +563,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         return IotHubStatusCode.OK;
     }
 
-    private void sendDirectMethodResponseAsync(IotHubTransportMessage transportMessage)
+    private IotHubStatusCode sendDirectMethodResponseAsync(IotHubTransportMessage transportMessage)
     {
         if (transportMessage.getRequestId() == null || transportMessage.getRequestId().isEmpty())
         {
@@ -616,16 +580,15 @@ public class MqttIotHubConnection implements IotHubTransportConnection
                 listener.onMessageSent(transportMessage, transportMessage.getConnectionDeviceId(), null);
             }
         });
+
+        return IotHubStatusCode.OK;
     }
 
-    private void subscribeToDesiredPropertyUpdates() throws TransportException
+    private IotHubStatusCode subscribeToDesiredPropertyUpdates() throws TransportException
     {
-        // Subscribe to "$iothub/twin/PATCH/properties/desired/#"
-        String subscribeTopic = "$iothub/twin/PATCH/properties/desired/#";
-
         log.debug("Subscribing to desired property updates...");
         CountDownLatch desiredPropertyUpdateSubscriptionLatch = new CountDownLatch(1);
-        this.mqttClient.subscribeAsync(subscribeTopic, QOS, new Consumer<Integer>()
+        this.mqttClient.subscribeAsync(DesiredPropertiesTopic + "/#", QOS, new Consumer<Integer>()
         {
             @Override
             public void accept(Integer integer)
@@ -652,13 +615,15 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             transportException.initCause(e);
             throw transportException;
         }
+
+        return IotHubStatusCode.OK;
     }
 
-    private void subscribeToDirectMethods() throws TransportException
+    private IotHubStatusCode subscribeToDirectMethods() throws TransportException
     {
         log.debug("Subscribing to direct methods...");
         CountDownLatch directMethodsSubscriptionLatch = new CountDownLatch(1);
-        this.mqttClient.subscribeAsync("$iothub/methods/POST/#", QOS, new Consumer<Integer>()
+        this.mqttClient.subscribeAsync(DirectMethodTopic + "/#", QOS, new Consumer<Integer>()
         {
             @Override
             public void accept(Integer integer)
@@ -685,9 +650,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             transportException.initCause(e);
             throw transportException;
         }
+
+        return IotHubStatusCode.OK;
     }
 
-    private void getTwinAsync(IotHubTransportMessage message)
+    private IotHubStatusCode getTwinAsync(IotHubTransportMessage message)
     {
         log.debug("Sending 'get twin' request with id {}", message.getRequestId());
         String topic = "$iothub/twin/GET/?$rid=" + message.getRequestId();
@@ -701,9 +668,11 @@ public class MqttIotHubConnection implements IotHubTransportConnection
                 listener.onMessageSent(message, message.getConnectionDeviceId(), null);
             }
         });
+
+        return IotHubStatusCode.OK;
     }
 
-    private void sendReportedPropertyUpdateAsync(IotHubTransportMessage message)
+    private IotHubStatusCode sendReportedPropertyUpdateAsync(IotHubTransportMessage message)
     {
         log.debug("Sending 'patch twin' request with id {}", message.getRequestId());
         String topic = "$iothub/twin/PATCH/properties/reported/?$rid=" + message.getRequestId() + "&$version=" + message.getVersion();
@@ -717,6 +686,9 @@ public class MqttIotHubConnection implements IotHubTransportConnection
                 listener.onMessageSent(message, message.getConnectionDeviceId(), null);
             }
         });
+
+
+        return IotHubStatusCode.OK;
     }
 
     /**
@@ -763,6 +735,65 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             throw new TransportException("Could not utf-8 encode the property with name " + propertyKey + " and value " + propertyValue, e);
         }
     }
+
+    private Consumer<ReceivedMqttMessage> messageReceiveHandler = new Consumer<ReceivedMqttMessage>()
+    {
+        @Override
+        public void accept(ReceivedMqttMessage receivedMqttMessage)
+        {
+            String topic = receivedMqttMessage.getTopic();
+            IotHubTransportMessage message;
+            if (topic.startsWith(DirectMethodTopic))
+            {
+                message = constructDirectMethodMessage(receivedMqttMessage);
+            }
+            else if (topic.startsWith(DesiredPropertiesTopic))
+            {
+                message = constructDesiredPropertiesUpdateMessage(receivedMqttMessage);
+            }
+            else if (topic.startsWith(TwinResponseTopic))
+            {
+                message = constructTwinResponseMessage(receivedMqttMessage);
+            }
+            else
+            {
+                message = constructTelemetryMessage(receivedMqttMessage);
+            }
+
+            if (message.getQualityOfService() == 0)
+            {
+                // Direct method messages and Twin messages are always sent with QoS 0, so there is no need for this SDK
+                // to acknowledge them.
+                log.trace("MQTT received message with QoS 0 so it has not been added to the messages to acknowledge list ({})", message);
+            }
+            else
+            {
+                log.trace("MQTT received message so it has been added to the messages to acknowledge list ({})", message);
+                receivedMessagesToAcknowledge.put(message, receivedMqttMessage.getMessageId());
+            }
+
+            switch (message.getMessageType())
+            {
+                case DEVICE_TWIN:
+                    message.setMessageCallback(config.getDeviceTwinMessageCallback());
+                    message.setMessageCallbackContext(config.getDeviceTwinMessageContext());
+                    break;
+                case DEVICE_METHODS:
+                    message.setMessageCallback(config.getDirectMethodsMessageCallback());
+                    message.setMessageCallbackContext(config.getDirectMethodsMessageContext());
+                    break;
+                case DEVICE_TELEMETRY:
+                    message.setMessageCallback(config.getDeviceTelemetryMessageCallback(message.getInputName()));
+                    message.setMessageCallbackContext(config.getDeviceTelemetryMessageContext(message.getInputName()));
+                    break;
+                case UNKNOWN:
+                default:
+                    //do nothing
+            }
+
+            listener.onMessageReceived(message, null);
+        }
+    };
 
     // Converts an MQTT message into our native "IoT hub" message
     private IotHubTransportMessage constructTelemetryMessage(ReceivedMqttMessage mqttMessage)
@@ -882,9 +913,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         if (topicTokens.length > TWIN_REQID_TOKEN)
         {
             String[] queryStringKeyValuePairs = topicTokens[TWIN_REQID_TOKEN].split(Pattern.quote("&"));
-
-            //TODO
             String requestId = getRequestId(queryStringKeyValuePairs[0]);
+
             // MQTT does not have the concept of correlationId for request/response handling but it does have a requestId
             // To handle this we are setting the correlationId to the requestId to better handle correlation
             // whether we use MQTT or AMQP.
@@ -939,8 +969,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection
 
     private String getRequestId(String token)
     {
-        //TODO version showed up twice?
-        //token = "?$rid=8c35d119-711d-4aea-94ca-595270f9c606$version=1&$version=2";
         String reqId = null;
 
         if (token.contains(TWIN_REQ_ID)) // restriction for request id
