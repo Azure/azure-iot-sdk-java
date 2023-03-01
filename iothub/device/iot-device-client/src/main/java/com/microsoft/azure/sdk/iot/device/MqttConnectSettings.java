@@ -5,10 +5,9 @@ import lombok.Builder;
 import lombok.Getter;
 
 import javax.net.ssl.SSLContext;
-import java.net.Proxy;
 
 @Builder
-public class MqttConnectOptions
+public class MqttConnectSettings
 {
     @Getter
     private String clientId;

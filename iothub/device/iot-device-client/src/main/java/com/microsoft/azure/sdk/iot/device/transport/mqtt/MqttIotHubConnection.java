@@ -5,7 +5,6 @@ package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.*;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttConnectException;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,8 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
@@ -34,22 +31,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection
     private static final String NO_CLIENT_CERT_QUERY_STRING = "?iothub-no-client-cert=true";
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
-
-    private static final int CONNECTION_TIMEOUT = 60 * 1000;
-    private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
     private static final int QOS = 1;
-    private static final int MAX_SUBSCRIBE_ACK_WAIT_TIME = 15 * 1000;
 
     private String connectionId;
     private String webSocketQueryString;
     private final Object mqttConnectionStateLock = new Object(); // lock for preventing simultaneous open and close calls
     private final ClientConfiguration config;
     private IotHubConnectionStatus state = IotHubConnectionStatus.DISCONNECTED;
-    private final MqttConnectOptions.MqttConnectOptionsBuilder connectOptions;
+    private final MqttConnectSettings.MqttConnectSettingsBuilder connectSettings;
     private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
     private final Map<String, DeviceOperations> twinRequestMap = new HashMap<>();
 
-    private final IMqttAsyncClient mqttClient;
+    private final IMqttClient mqttClient;
     private IotHubListener listener;
 
     private final String publishTelemetryTopic;
@@ -166,7 +159,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
         }
 
-        this.connectOptions = MqttConnectOptions.builder()
+        this.connectSettings = MqttConnectSettings.builder()
                 .serverUri(serverUri)
                 .keepAlivePeriod(config.getKeepAliveInterval())
                 .mqttVersion(MqttVersion.MQTT_VERSION_3_1_1)
@@ -178,7 +171,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
 
         try
         {
-            this.connectOptions.sslContext(this.config.getAuthenticationProvider().getSSLContext());
+            this.connectSettings.sslContext(this.config.getAuthenticationProvider().getSSLContext());
         }
         catch (IOException e)
         {
@@ -226,7 +219,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection
                 try
                 {
                     log.trace("Setting password for MQTT connection since it is a SAS token authenticated connection");
-                    this.connectOptions.password(this.config.getSasTokenAuthentication().getSasToken());
+                    this.connectSettings.password(this.config.getSasTokenAuthentication().getSasToken());
                 }
                 catch (IOException e)
                 {
@@ -234,51 +227,28 @@ public class MqttIotHubConnection implements IotHubTransportConnection
                 }
             }
 
-            this.mqttClient.setConnectionLostCallback(new Consumer<Integer>()
+            this.mqttClient.setConnectionLostCallback(e ->
             {
-                @Override
-                public void accept(Integer integer)
-                {
-                    state = IotHubConnectionStatus.DISCONNECTED;
-                    TransportException exception = new TransportException("TODO");
-                    exception.setRetryable(true);
-                    listener.onConnectionLost(exception, connectionId);
-                }
+                log.debug("Lost MQTT connection", e);
+                listener.onConnectionLost(e, connectionId);
             });
 
             log.debug("Opening MQTT connection...");
-            try
-            {
-                this.mqttClient.connect(this.connectOptions.build());
-            }
-            catch (MqttConnectException e)
-            {
-                TransportException transportException
-                e.printStackTrace();
-            }
-
-            if (config.getModuleId() == null || config.getModuleId().isEmpty())
-            {
-                subscribeSynchronously(
-                    this.deviceboundMessagesTopic + "/#",
-                    "Timed out waiting for cloud to device message subscription to be acknowledged");
-            }
-            else
-            {
-                subscribeSynchronously(
-                    this.moduleboundMessagesTopic + "/#",
-                    "Timed out waiting for cloud to module messaging subscription to be acknowledged");
-
-                subscribeSynchronously(
-                    this.moduleInputMessagesTopic + "/#",
-                    "Timed out waiting for module input messaging subscription to be acknowledged");
-            }
+            this.mqttClient.connect(this.connectSettings.build());
 
             this.mqttClient.setMessageCallback(messageReceiveHandler);
 
-            subscribeSynchronously(
-                TwinResponseTopic + "/#",
-                "Timed out waiting for twin response subscription to be acknowledged");
+            if (config.getModuleId() == null || config.getModuleId().isEmpty())
+            {
+                this.mqttClient.subscribe(this.deviceboundMessagesTopic + "/#", QOS);
+            }
+            else
+            {
+                this.mqttClient.subscribe(this.moduleboundMessagesTopic + "/#", QOS);
+                this.mqttClient.subscribe(this.moduleInputMessagesTopic + "/#", QOS);
+            }
+
+            this.mqttClient.subscribe(TwinResponseTopic + "/#", QOS);
 
             this.state = IotHubConnectionStatus.CONNECTED;
 
@@ -314,30 +284,15 @@ public class MqttIotHubConnection implements IotHubTransportConnection
 
             log.debug("Closing MQTT connection");
 
-            CountDownLatch connectLatch = new CountDownLatch(1);
-            this.mqttClient.disconnectAsync(new Consumer<Integer>()
-            {
-                @Override
-                public void accept(Integer integer)
-                {
-                    connectLatch.countDown();
-                }
-            });
-
             try
             {
-                //TODO timeout value?
-                boolean timedOut = !connectLatch.await(DISCONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-
-                if (timedOut)
-                {
-                    log.warn("Timed out waiting for the service to acknowledge the disconnection.");
-                }
+                this.mqttClient.disconnect();
             }
-            catch (InterruptedException e)
+            catch (TransportException e)
             {
-                log.warn("Timed out waiting for the service to acknowledge the disconnection.");
+                //TODO best effort, don't care really
             }
+
             this.state = IotHubConnectionStatus.DISCONNECTED;
             log.debug("Successfully closed MQTT connection");
         }
@@ -370,7 +325,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
             if (transportMessage.getDeviceOperationType() == DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST)
             {
-                return subscribeToDirectMethods();
+                log.debug("Subscribing to direct methods...");
+                this.mqttClient.subscribe(DirectMethodTopic + "/#", QOS);
+                log.debug("IoT hub acknowledged the direct method subscription request");
+                return IotHubStatusCode.OK;
             }
             else if (transportMessage.getDeviceOperationType() == DEVICE_OPERATION_METHOD_SEND_RESPONSE)
             {
@@ -382,7 +340,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             IotHubTransportMessage transportMessage = (IotHubTransportMessage) message;
             if (transportMessage.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
             {
-                return subscribeToDesiredPropertyUpdates();
+                log.debug("Subscribing to desired property updates...");
+                this.mqttClient.subscribe(DesiredPropertiesTopic + "/#", QOS);
+                log.debug("IoT hub acknowledged the desired properties update subscription request");
+                return IotHubStatusCode.OK;
             }
             else if (transportMessage.getDeviceOperationType() == DEVICE_OPERATION_TWIN_GET_REQUEST)
             {
@@ -455,14 +416,14 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         mqttClient.publishAsync(
             topic,
             message.getBytes(),
-            QOS,  //TODO qos
-            new Consumer<Integer>()
+            QOS,
+            () ->
             {
-                @Override
-                public void accept(Integer integer)
-                {
-                    listener.onMessageSent(message, config.getDeviceId(), null); //TODO error case?
-                }
+                listener.onMessageSent(message, config.getDeviceId(), null);
+            },
+            e ->
+            {
+                listener.onMessageSent(message, config.getDeviceId(), e);
             });
 
         return IotHubStatusCode.OK;
@@ -477,84 +438,20 @@ public class MqttIotHubConnection implements IotHubTransportConnection
 
         String topic = "$iothub/methods/res/" + transportMessage.getStatus() + "/" + "?$rid=" + transportMessage.getRequestId();
 
-        this.mqttClient.publishAsync(topic, transportMessage.getBytes(), QOS, new Consumer<Integer>()
-        {
-            @Override
-            public void accept(Integer integer)
+        this.mqttClient.publishAsync(
+            topic,
+            transportMessage.getBytes(),
+            QOS,
+            () ->
             {
-                listener.onMessageSent(transportMessage, transportMessage.getConnectionDeviceId(), null);
-            }
-        });
-
-        return IotHubStatusCode.OK;
-    }
-
-    private IotHubStatusCode subscribeToDesiredPropertyUpdates() throws TransportException
-    {
-        log.debug("Subscribing to desired property updates...");
-        CountDownLatch desiredPropertyUpdateSubscriptionLatch = new CountDownLatch(1);
-        this.mqttClient.subscribeAsync(DesiredPropertiesTopic + "/#", QOS, new Consumer<Integer>()
-        {
-            @Override
-            public void accept(Integer integer)
+                log.debug("IoT hub acknowledged the direct method response with id {}", transportMessage.getRequestId());
+                listener.onMessageSent(transportMessage, config.getDeviceId(), null);
+            },
+            e ->
             {
-                log.debug("IoT hub acknowledged the desired properties update subscription request");
-                desiredPropertyUpdateSubscriptionLatch.countDown();
-            }
-        });
-
-        TransportException transportException = new TransportException("Timed out waiting for desired properties update subscription to be acknowledged by the service");
-        transportException.setRetryable(true);
-
-        try
-        {
-            boolean timedOut = !desiredPropertyUpdateSubscriptionLatch.await(MAX_SUBSCRIBE_ACK_WAIT_TIME, TimeUnit.MILLISECONDS);
-
-            if (timedOut)
-            {
-                throw transportException;
-            }
-        }
-        catch (InterruptedException e)
-        {
-            transportException.initCause(e);
-            throw transportException;
-        }
-
-        return IotHubStatusCode.OK;
-    }
-
-    private IotHubStatusCode subscribeToDirectMethods() throws TransportException
-    {
-        log.debug("Subscribing to direct methods...");
-        CountDownLatch directMethodsSubscriptionLatch = new CountDownLatch(1);
-        this.mqttClient.subscribeAsync(DirectMethodTopic + "/#", QOS, new Consumer<Integer>()
-        {
-            @Override
-            public void accept(Integer integer)
-            {
-                log.debug("IoT hub acknowledged the direct method subscription request");
-                directMethodsSubscriptionLatch.countDown();
-            }
-        });
-
-        TransportException transportException = new TransportException("Timed out waiting for direct methods subscription to be acknowledged by the service");
-        transportException.setRetryable(true);
-
-        try
-        {
-            boolean timedOut = !directMethodsSubscriptionLatch.await(MAX_SUBSCRIBE_ACK_WAIT_TIME, TimeUnit.MILLISECONDS);
-
-            if (timedOut)
-            {
-                throw transportException;
-            }
-        }
-        catch (InterruptedException e)
-        {
-            transportException.initCause(e);
-            throw transportException;
-        }
+                log.debug("Failed to send the direct method resposne with id {}", transportMessage.getRequestId());
+                listener.onMessageSent(transportMessage, config.getDeviceId(), e);
+            });
 
         return IotHubStatusCode.OK;
     }
@@ -564,15 +461,19 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         log.debug("Sending 'get twin' request with id {}", message.getRequestId());
         String topic = "$iothub/twin/GET/?$rid=" + message.getRequestId();
         this.twinRequestMap.put(message.getRequestId(), message.getDeviceOperationType());
-        this.mqttClient.publishAsync(topic, new byte[0], 1, new Consumer<Integer>()
-        {
-            @Override
-            public void accept(Integer integer)
+        this.mqttClient.publishAsync(
+            topic,
+            new byte[0], QOS,
+            () ->
             {
                 log.debug("IoT hub acknowledged the 'get twin' request with id {}", message.getRequestId());
-                listener.onMessageSent(message, message.getConnectionDeviceId(), null);
-            }
-        });
+                listener.onMessageSent(message, config.getDeviceId(), null);
+            },
+            e ->
+            {
+                log.debug("Failed to send the 'get twin' request with id {}", message.getRequestId());
+                listener.onMessageSent(message, config.getDeviceId(), e);
+            });
 
         return IotHubStatusCode.OK;
     }
@@ -582,16 +483,21 @@ public class MqttIotHubConnection implements IotHubTransportConnection
         log.debug("Sending 'patch twin' request with id {}", message.getRequestId());
         String topic = "$iothub/twin/PATCH/properties/reported/?$rid=" + message.getRequestId() + "&$version=" + message.getVersion();
         this.twinRequestMap.put(message.getRequestId(), message.getDeviceOperationType());
-        this.mqttClient.publishAsync(topic, message.getBytes(), 1, new Consumer<Integer>()
-        {
-            @Override
-            public void accept(Integer integer)
+
+
+        this.mqttClient.publishAsync(
+            topic,
+            message.getBytes(), QOS,
+            () ->
             {
                 log.debug("IoT hub acknowledged the 'patch twin' request with id {}", message.getRequestId());
-                listener.onMessageSent(message, message.getConnectionDeviceId(), null);
-            }
-        });
-
+                listener.onMessageSent(message, config.getDeviceId(), null);
+            },
+            e ->
+            {
+                log.debug("Failed to send the 'patch twin' request with id {}", message.getRequestId());
+                listener.onMessageSent(message, config.getDeviceId(), e);
+            });
 
         return IotHubStatusCode.OK;
     }
@@ -654,34 +560,4 @@ public class MqttIotHubConnection implements IotHubTransportConnection
             listener.onMessageReceived(message, null);
         }
     };
-
-    private void subscribeSynchronously(String topic, String timeoutMessage) throws TransportException
-    {
-        CountDownLatch cloudToDeviceMessageSubscriptionLatch = new CountDownLatch(1);
-        this.mqttClient.subscribeAsync(topic, QOS, new Consumer<Integer>()
-        {
-            @Override
-            public void accept(Integer integer)
-            {
-                cloudToDeviceMessageSubscriptionLatch.countDown();
-            }
-        });
-
-        TransportException transportException = new TransportException(timeoutMessage);
-        transportException.setRetryable(true);
-        try
-        {
-            boolean timedOut = !cloudToDeviceMessageSubscriptionLatch.await(MAX_SUBSCRIBE_ACK_WAIT_TIME, TimeUnit.MILLISECONDS);
-
-            if (timedOut)
-            {
-                throw transportException;
-            }
-        }
-        catch (InterruptedException e)
-        {
-            transportException.initCause(e);
-            throw transportException;
-        }
-    }
 }
