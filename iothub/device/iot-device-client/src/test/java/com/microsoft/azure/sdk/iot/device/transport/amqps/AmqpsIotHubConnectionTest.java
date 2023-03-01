@@ -731,7 +731,6 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        final int sendPeriod = Deencapsulation.getField(AmqpsIotHubConnection.class, "SEND_MESSAGES_PERIOD_MILLIS");
         final int expectedSasTokenRenewalPeriod = 444;
 
         new NonStrictExpectations()
@@ -760,7 +759,7 @@ public class AmqpsIotHubConnectionTest {
         {
             {
                 mockEvent.getReactor();
-                mockReactor.schedule(sendPeriod, connection);
+                mockReactor.schedule(anyInt, connection);
                 mockReactor.connectionToHost(anyString, anyInt, connection);
             }
         };
@@ -814,7 +813,6 @@ public class AmqpsIotHubConnectionTest {
     {
         baseExpectations();
 
-        final int sendPeriod = Deencapsulation.getField(AmqpsIotHubConnection.class, "SEND_MESSAGES_PERIOD_MILLIS");
         final int expectedSasTokenRenewalPeriod = 444;
 
         new NonStrictExpectations()
@@ -840,7 +838,7 @@ public class AmqpsIotHubConnectionTest {
         {
             {
                 mockEvent.getReactor();
-                mockReactor.schedule(sendPeriod, connection);
+                mockReactor.schedule(anyInt, connection);
 
                 mockReactor.schedule(expectedSasTokenRenewalPeriod, mockAmqpsCbsSessionHandler);
                 times = 0;

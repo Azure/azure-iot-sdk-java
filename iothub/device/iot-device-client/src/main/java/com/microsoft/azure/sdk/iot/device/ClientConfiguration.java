@@ -37,9 +37,12 @@ public final class ClientConfiguration
     private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
 
     public static final int DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS = 230;
+    public static final int DEFAULT_SEND_INTERVAL_IN_SECONDS = 10;
 
     public static final int DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS = 20;
     public static final int DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS = 60;
+
+    public static final int DEFAULT_SEND_INTERVAL_IN_MILLISECONDS = 10;
 
     /** The default value for messageLockTimeoutSecs. */
     private static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
@@ -78,6 +81,10 @@ public final class ClientConfiguration
     @Getter
     @Setter(AccessLevel.PACKAGE)
     private int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private int sendInterval = DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -207,6 +214,7 @@ public final class ClientConfiguration
         this.amqpOpenAuthenticationSessionTimeout = clientOptions != null && clientOptions.getAmqpAuthenticationSessionTimeout() != 0 ? clientOptions.getAmqpAuthenticationSessionTimeout() : DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
         this.amqpOpenDeviceSessionsTimeout = clientOptions != null && clientOptions.getAmqpDeviceSessionTimeout() != 0 ? clientOptions.getAmqpDeviceSessionTimeout() : DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
         this.proxySettings = clientOptions != null && clientOptions.getProxySettings() != null ? clientOptions.getProxySettings() : null;
+        this.sendInterval = clientOptions != null && clientOptions.getSendInterval() != 0 ? clientOptions.getSendInterval() : DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
 
         if (proxySettings != null)
         {
