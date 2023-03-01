@@ -10,8 +10,8 @@ import com.microsoft.azure.proton.transport.proxy.ProxyHandler;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyHandlerImpl;
 import com.microsoft.azure.proton.transport.proxy.impl.ProxyImpl;
 import com.microsoft.azure.proton.transport.ws.impl.WebSocketImpl;
-import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +46,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     // Web socket constants
     private static final String WEB_SOCKET_PATH = "/$iothub/websocket";
     private static final String WEB_SOCKET_SUB_PROTOCOL = "AMQPWSB10";
-    private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=true";
+    private static final String WEB_SOCKET_QUERY = "iothub-no-client-cert=";
     private static final int MAX_MESSAGE_PAYLOAD_SIZE = 256 * 1024; //max IoT Hub message size is 256 kb, so amqp websocket layer should buffer at most that much space
     private static final int MAX_FRAME_SIZE = 4 * 1024;
     private static final int WEB_SOCKET_PORT = 443;
@@ -428,11 +428,6 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         // Convert from seconds to milliseconds since this proton-j API only accepts keep alive in milliseconds
         transport.setIdleTimeout(keepAliveInterval * 1000);
 
-        if (this.isWebsocketConnection)
-        {
-            addWebSocketLayer(transport);
-        }
-
         try
         {
             Iterator<ClientConfiguration> configsIterator = this.clientConfigurations.iterator();
@@ -461,11 +456,21 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
                 sasl.setMechanisms("ANONYMOUS");
             }
 
-            SslDomain domain = Proton.sslDomain();
-            domain.setSslContext(sslContext);
-            domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
-            domain.init(SslDomain.Mode.CLIENT);
-            transport.ssl(domain);
+            if (this.isWebsocketConnection)
+            {
+                addWebSocketLayer(transport, sslContext);
+            }
+
+            // The SSL layer is added to the websocket-specific transport when connecting over websocket. For vanilla
+            // AMQP connections, add the SSL layer to this transport
+            if (!this.isWebsocketConnection)
+            {
+                SslDomain domain = Proton.sslDomain();
+                domain.setSslContext(sslContext);
+                domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+                domain.init(SslDomain.Mode.CLIENT);
+                transport.ssl(domain);
+            }
         }
         catch (IOException e)
         {
@@ -895,12 +900,29 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         }
     }
 
-    private void addWebSocketLayer(Transport transport)
+    private void addWebSocketLayer(Transport transport, SSLContext sslContext)
     {
         log.debug("Adding websocket layer to amqp transport");
         WebSocketImpl webSocket = new WebSocketImpl(MAX_MESSAGE_PAYLOAD_SIZE);
-        webSocket.configure(this.hostName, WEB_SOCKET_PATH, WEB_SOCKET_QUERY, WEB_SOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
+        String websocketQueryString = WEB_SOCKET_QUERY;
+        if (this.authenticationType == ClientConfiguration.AuthType.SAS_TOKEN)
+        {
+            // "iothub-no-client-cert=true"
+            websocketQueryString += "true";
+        }
+        else
+        {
+            // "iothub-no-client-cert=false"
+            websocketQueryString += "false";
+        }
+        webSocket.configure(this.hostName, WEB_SOCKET_PATH, websocketQueryString, WEB_SOCKET_PORT, WEB_SOCKET_SUB_PROTOCOL, null, null);
         ((TransportInternal) transport).addTransportLayer(webSocket);
+
+        SslDomain domain = Proton.sslDomain();
+        domain.setSslContext(sslContext);
+        domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
+        domain.init(SslDomain.Mode.CLIENT);
+        ((TransportInternal) transport).ssl(domain);
     }
 
     private void addProxyLayer(Transport transport, String hostName)

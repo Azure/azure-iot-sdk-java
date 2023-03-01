@@ -76,7 +76,9 @@ public class SendMessagesCommon extends IntegrationTest
                                 //x509 device client, no proxy
                                 {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
                                 {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                                {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
                                 {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                                {AMQPS_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
 
                                 //sas token device client, with proxy
                                 {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true},
