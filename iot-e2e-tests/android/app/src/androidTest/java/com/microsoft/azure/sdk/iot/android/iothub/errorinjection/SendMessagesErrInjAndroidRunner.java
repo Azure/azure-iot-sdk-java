@@ -19,7 +19,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection.SendM
 @RunWith(Parameterized.class)
 public class SendMessagesErrInjAndroidRunner extends SendMessagesErrInjTests
 {
-    public SendMessagesErrInjAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean useHttpProxy) throws Exception
+    public SendMessagesErrInjAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
         super(protocol, authenticationType, clientType, useHttpProxy);
     }

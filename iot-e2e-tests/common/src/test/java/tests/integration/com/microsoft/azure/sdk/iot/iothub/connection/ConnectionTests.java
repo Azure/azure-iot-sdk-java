@@ -161,7 +161,7 @@ public class ConnectionTests extends IntegrationTest
         proxyServer.stop();
     }
 
-    @Test
+    @Test(timeout = 10000) // 10 seconds
     public void CanOpenConnection() throws Exception
     {
         testInstance.setup();
