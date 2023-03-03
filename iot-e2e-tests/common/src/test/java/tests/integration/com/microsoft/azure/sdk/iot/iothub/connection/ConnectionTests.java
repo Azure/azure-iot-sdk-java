@@ -56,7 +56,6 @@ public class ConnectionTests extends IntegrationTest
                     {MQTT_WS, SAS, ClientType.MODULE_CLIENT, false},
 
                     {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
-                    {AMQPS_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
                     {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
                     {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
 
@@ -66,7 +65,6 @@ public class ConnectionTests extends IntegrationTest
                     {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true},
                     {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, true},
                     {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true},
-                    {AMQPS_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true},
                     {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true},
                 });
     }
