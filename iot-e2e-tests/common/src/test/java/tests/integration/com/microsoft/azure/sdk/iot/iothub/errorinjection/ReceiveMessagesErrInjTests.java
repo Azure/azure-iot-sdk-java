@@ -30,6 +30,7 @@ import java.util.concurrent.TimeoutException;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to receiving messages.
@@ -48,11 +49,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     @StandardTierHubOnlyTest
     public void receiveMessagesWithTCPConnectionDrop() throws Exception
     {
-        if (testInstance.protocol == HTTPS)
-        {
-            //test case not applicable
-            return;
-        }
+        // This error injection test only applies for no connection can be dropped for HTTP since it is a stateless connection
+        assumeTrue(this.testInstance.protocol != HTTPS);
 
         super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
@@ -63,11 +61,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsConnectionDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
-        {
-            //test case not applicable
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
@@ -78,11 +72,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsSessionDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
-        {
-            //test case not applicable
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
@@ -93,17 +83,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsCBSReqLinkDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
-        {
-            //test case not applicable
-            return;
-        }
-
-        if (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY)
-        {
-            //cbs links aren't established in these scenarios, so it would be impossible/irrelevant if a cbs link dropped
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
+        assumeTrue(this.testInstance.authenticationType == SAS);
 
         super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
@@ -114,17 +95,8 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsCBSRespLinkDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
-        {
-            //test case not applicable
-            return;
-        }
-
-        if (testInstance.authenticationType == SELF_SIGNED || testInstance.authenticationType == CERTIFICATE_AUTHORITY)
-        {
-            //cbs links aren't established in these scenarios, so it would be impossible/irrelevant if a cbs link dropped
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
+        assumeTrue(this.testInstance.authenticationType == SAS);
 
         super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
@@ -135,11 +107,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsD2CLinkDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
-        {
-            //test case not applicable
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
@@ -150,17 +118,11 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     @ContinuousIntegrationTest
     public void receiveMessagesWithAmqpsC2DLinkDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
-        {
-            //test case not applicable
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.authenticationType != SAS)
-        {
-            //TODO X509 case never seems to get callback about the connection dying. Needs investigation because this should pass, but doesn't
-            return;
-        }
+        //TODO error injection seems to fail when using x509 auth here. C2D link is never dropped even if waiting a long time
+        // Need to talk to service folks about this strange behavior
+        assumeTrue(testInstance.authenticationType == SAS);
 
         super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
@@ -170,11 +132,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     @StandardTierHubOnlyTest
     public void receiveMessagesWithGracefulShutdownAmqp() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS)
-        {
-            //test case not applicable
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
@@ -184,11 +142,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
     @StandardTierHubOnlyTest
     public void receiveMessagesWithGracefulShutdownMqtt() throws Exception
     {
-        if (testInstance.protocol != MQTT && testInstance.protocol != MQTT_WS)
-        {
-            //test case not applicable
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == MQTT || this.testInstance.protocol == MQTT_WS);
 
         super.setupTest();
         this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));

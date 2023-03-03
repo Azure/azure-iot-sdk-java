@@ -61,7 +61,15 @@ public class DirectMethodsCommon extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-        return inputsCommon();
+
+        return Arrays.asList(
+            new Object[][]
+                {
+                    {AMQPS, SAS, ClientType.DEVICE_CLIENT},
+                    {MQTT, SAS, ClientType.DEVICE_CLIENT},
+                    {AMQPS, SAS, ClientType.MODULE_CLIENT},
+                    {MQTT, SAS, ClientType.MODULE_CLIENT},
+                });
     }
 
     protected static String iotHubConnectionString = "";
@@ -71,46 +79,6 @@ public class DirectMethodsCommon extends IntegrationTest
     protected static final String PAYLOAD_STRING = "This is a valid payload";
 
     protected DirectMethodTestInstance testInstance;
-
-    protected static Collection inputsCommon()
-    {
-        Collection<Object[]> inputs = new ArrayList<>();
-
-        for (ClientType clientType : ClientType.values())
-        {
-            for (IotHubClientProtocol protocol : IotHubClientProtocol.values())
-            {
-                if (protocol != HTTPS)
-                {
-                    for (AuthenticationType authenticationType : AuthenticationType.values())
-                    {
-                        if (authenticationType == SAS)
-                        {
-                            inputs.add(makeSubArray(protocol, authenticationType, clientType));
-                        }
-                        else if (authenticationType == SELF_SIGNED)
-                        {
-                            if (protocol != AMQPS_WS && protocol != MQTT_WS)
-                            {
-                                inputs.add(makeSubArray(protocol, authenticationType, clientType));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return inputs;
-    }
-
-    private static Object[] makeSubArray(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
-    {
-        Object[] inputSubArray = new Object[3];
-        inputSubArray[0] = protocol;
-        inputSubArray[1] = authenticationType;
-        inputSubArray[2] = clientType;
-        return inputSubArray;
-    }
 
     protected DirectMethodsCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {

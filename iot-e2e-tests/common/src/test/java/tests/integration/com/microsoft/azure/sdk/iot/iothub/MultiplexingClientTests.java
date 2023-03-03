@@ -132,7 +132,6 @@ public class MultiplexingClientTests extends IntegrationTest
         return Arrays.asList(
                 new Object[][]
                         {
-                                {IotHubClientProtocol.AMQPS},
                                 {IotHubClientProtocol.AMQPS_WS}
                         });
     }

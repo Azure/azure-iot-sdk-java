@@ -30,6 +30,7 @@ import java.security.GeneralSecurityException;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to sending messages to the cloud.
@@ -39,20 +40,16 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 @RunWith(Parameterized.class)
 public class SendMessagesErrInjTests extends SendMessagesCommon
 {
-    public SendMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
+    public SendMessagesErrInjTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, clientType, withProxy);
+        super(protocol, authenticationType, clientType);
     }
 
     @Test
     public void sendMessagesWithTcpConnectionDrop() throws Exception
     {
-        if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS) || testInstance.useHttpProxy)
-        {
-            //TCP connection is not maintained between device and service when using HTTPS, so this test case isn't applicable
-            //MQTT_WS + x509 is not supported for sending messages
-            return;
-        }
+        // This error injection test only applies for no connection can be dropped for HTTP since it is a stateless connection
+        assumeTrue(this.testInstance.protocol != HTTPS);
 
         this.testInstance.setup();
 
@@ -63,11 +60,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithConnectionDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.testInstance.setup();
 
@@ -78,11 +72,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithSessionDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.testInstance.setup();
 
@@ -93,17 +84,11 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithCbsRequestLinkDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS and AMQPS_WS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.authenticationType != SAS)
-        {
-            //CBS links are only established when using sas authentication
-            return;
-        }
+        //CBS links are only established when using sas authentication
+        assumeTrue(testInstance.authenticationType == SAS);
 
         this.testInstance.setup();
 
@@ -114,17 +99,11 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithCbsResponseLinkDrop() throws Exception
     {
-        if (testInstance.protocol != AMQPS && testInstance.protocol != AMQPS_WS || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS and AMQPS_WS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.authenticationType != SAS)
-        {
-            //CBS links are only established when using sas authentication
-            return;
-        }
+        //CBS links are only established when using sas authentication
+        assumeTrue(testInstance.authenticationType == SAS);
 
         this.testInstance.setup();
 
@@ -135,11 +114,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithD2CLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.testInstance.setup();
 
@@ -150,18 +126,12 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendMessagesOverAmqpWithC2DLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || (testInstance.protocol == AMQPS_WS && testInstance.authenticationType == SAS)) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS with SAS and X509 and for AMQPS_WS with SAS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
+        //TODO error injection seems to fail when using x509 auth here. C2D link is never dropped even if waiting a long time
+        // Need to talk to service folks about this strange behavior
+        assumeTrue(testInstance.authenticationType == SAS);
 
         this.testInstance.setup();
 
@@ -172,11 +142,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesWithThrottling() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS and AMQPS_WS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.testInstance.setup();
 
@@ -184,7 +151,6 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec),
                 IotHubStatusCode.OK,
                 false);
-
     }
 
     @Ignore
@@ -192,11 +158,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendMessagesWithThrottlingNoRetry() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS and AMQPS_WS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.testInstance.setup();
 
@@ -204,18 +167,14 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
                 ErrorInjectionHelper.throttledConnectionErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec),
                 IotHubStatusCode.THROTTLED,
                 true);
-
     }
 
     @Ignore
     @Test
     public void sendMessagesWithAuthenticationError() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS and AMQPS_WS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.testInstance.setup();
 
@@ -230,11 +189,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendMessagesWithQuotaExceeded() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS and AMQPS_WS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.testInstance.setup();
 
@@ -247,11 +203,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverAmqpWithGracefulShutdown() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for AMQPS and AMQPS_WS
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.testInstance.setup();
 
@@ -261,11 +214,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @Test
     public void sendMessagesOverMqttWithGracefulShutdown() throws Exception
     {
-        if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS) || testInstance.useHttpProxy)
-        {
-            //This error injection test only applies for MQTT and MQTT_WS
-            return;
-        }
+        // This error injection test only applies for MQTT and MQTT_WS
+        assumeTrue(this.testInstance.protocol == MQTT || this.testInstance.protocol == MQTT_WS);
 
         this.testInstance.setup();
 
@@ -276,12 +226,8 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendMessagesWithTcpConnectionDropNotifiesUserIfRetryExpires() throws Exception
     {
-        if (testInstance.protocol == HTTPS || (testInstance.protocol == MQTT_WS && testInstance.authenticationType != SAS) || testInstance.useHttpProxy)
-        {
-            //TCP connection is not maintained between device and service when using HTTPS, so this test case isn't applicable
-            //MQTT_WS + x509 is not supported for sending messages
-            return;
-        }
+        // This error injection test only applies for no connection can be dropped for HTTP since it is a stateless connection
+        assumeTrue(this.testInstance.protocol != HTTPS);
 
         this.testInstance.setup();
 

@@ -29,6 +29,7 @@ import java.util.List;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to Device methods.
@@ -58,10 +59,7 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsConnectionDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(
@@ -74,10 +72,7 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsSessionDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
@@ -90,16 +85,10 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.authenticationType != SAS)
-        {
-            //CBS links are only established when using sas authentication
-            return;
-        }
+        //CBS links are only established when using sas authentication
+        assumeTrue(testInstance.authenticationType == SAS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
@@ -112,16 +101,10 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.authenticationType != SAS)
-        {
-            //CBS links are only established when using sas authentication
-            return;
-        }
+        //CBS links are only established when using sas authentication
+        assumeTrue(testInstance.authenticationType == SAS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
@@ -134,10 +117,7 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsD2CLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
@@ -150,17 +130,12 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsC2DLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
+        //TODO error injection seems to fail when using x509 auth here. C2D link is never dropped even if waiting a long time
+        // Need to talk to service folks about this strange behavior
+        assumeTrue(testInstance.authenticationType == SAS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
@@ -173,17 +148,12 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsMethodReqLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Method Req is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
+        //TODO error injection seems to fail when using x509 auth here. C2D link is never dropped even if waiting a long time
+        // Need to talk to service folks about this strange behavior
+        assumeTrue(testInstance.authenticationType == SAS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
@@ -196,17 +166,12 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @ContinuousIntegrationTest
     public void invokeMethodRecoveredFromAmqpsMethodRespLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Method Resp is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
+        //TODO error injection seems to fail when using x509 auth here. C2D link is never dropped even if waiting a long time
+        // Need to talk to service folks about this strange behavior
+        assumeTrue(testInstance.authenticationType == SAS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsMethodRespLinkDropErrorInjectionMessage(
@@ -218,10 +183,7 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @StandardTierHubOnlyTest
     public void invokeMethodRecoveredFromGracefulShutdownAmqp() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(
@@ -233,10 +195,7 @@ public class DirectMethodsErrInjTests extends DirectMethodsCommon
     @StandardTierHubOnlyTest
     public void invokeMethodRecoveredFromGracefulShutdownMqtt() throws Exception
     {
-        if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))
-        {
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == MQTT || this.testInstance.protocol == MQTT_WS);
 
         super.openDeviceClientAndSubscribeToMethods();
         this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(

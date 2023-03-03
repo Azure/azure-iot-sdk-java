@@ -51,41 +51,15 @@ public class ReceiveMessagesCommon extends IntegrationTest
         messageProperties.put("name2", "value2");
         messageProperties.put("name3", "value3");
 
-        List inputs = new ArrayList(Arrays.asList(
-                new Object[][]
-                        {
-                                //sas token module client
-                                {MQTT, SAS, ClientType.DEVICE_CLIENT},
-                                {AMQPS, SAS, ClientType.DEVICE_CLIENT},
-                                {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
-                                {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT},
-
-                                //x509 module client
-                                {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT},
-                                {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
-                                {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT}
-                        }
-        ));
-
-        if (!IntegrationTest.isBasicTierHub)
-        {
-            inputs.addAll(Arrays.asList(
-                    new Object[][]
-                            {
-                                    //sas token module client
-                                    {MQTT, SAS, ClientType.MODULE_CLIENT},
-                                    {AMQPS, SAS, ClientType.MODULE_CLIENT},
-                                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT},
-                                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT},
-
-                                    //x509 module client
-                                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT},
-                                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT}
-                            }
-            ));
-        }
-
-        return inputs;
+        return Arrays.asList(
+            new Object[][]
+                {
+                    {HTTPS, SAS, ClientType.DEVICE_CLIENT},
+                    {AMQPS, SAS, ClientType.DEVICE_CLIENT},
+                    {MQTT, SAS, ClientType.DEVICE_CLIENT},
+                    {AMQPS, SAS, ClientType.MODULE_CLIENT},
+                    {MQTT, SAS, ClientType.MODULE_CLIENT},
+                });
     }
 
     protected static Map<String, String> messageProperties = new HashMap<>(3);

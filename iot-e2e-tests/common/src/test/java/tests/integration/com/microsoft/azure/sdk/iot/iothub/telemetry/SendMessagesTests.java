@@ -52,9 +52,9 @@ import static org.junit.Assume.assumeFalse;
 @RunWith(Parameterized.class)
 public class SendMessagesTests extends SendMessagesCommon
 {
-    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
+    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, clientType, withProxy);
+        super(protocol, authenticationType, clientType);
     }
 
     @Test
@@ -182,9 +182,6 @@ public class SendMessagesTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void expiredMessagesAreNotSent() throws Exception
     {
-        // Not worth testing for both w/ and w/o proxy
-        assumeFalse(testInstance.useHttpProxy);
-
         this.testInstance.setup();
 
         IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.identity.getClient(), testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);
