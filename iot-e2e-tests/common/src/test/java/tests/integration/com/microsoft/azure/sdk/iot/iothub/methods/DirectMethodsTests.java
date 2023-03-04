@@ -33,9 +33,9 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.CustomObject;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.CustomObject;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsCommon;
-import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.NestedCustomObject;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.NestedCustomObject;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;

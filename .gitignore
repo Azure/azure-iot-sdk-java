@@ -262,3 +262,11 @@ package-list
 /iot-e2e-tests/android/.idea/*
 /iothub/device/iot-device-samples/android-sample/app/.idea/*
 /iot-e2e-tests/android/app/.idea/*
+
+**/jquery/*
+**/package-search-index.zip
+**/member-search-index.zip
+**/type-search-index.zip
+**/element-list
+**/x.png
+**/glass.png

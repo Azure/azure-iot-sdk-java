@@ -74,8 +74,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     protected static final int FEEDBACK_TIMEOUT_MILLIS = 60 * 1000; // 1 minute
 
-    protected static final long ERROR_INJECTION_RECOVERY_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
-
     public ReceiveMessagesTestInstance testInstance;
 
     public ReceiveMessagesCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception

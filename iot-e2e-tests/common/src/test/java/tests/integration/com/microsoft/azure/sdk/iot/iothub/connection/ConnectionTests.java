@@ -3,6 +3,10 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.connection;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
+import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.registry.Device;
+import com.microsoft.azure.sdk.iot.service.registry.Module;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -15,14 +19,19 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServ
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.UUID;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 @Slf4j
 @IotHubTest
@@ -80,7 +89,6 @@ public class ConnectionTests extends IntegrationTest
         public TestIdentity identity;
         public AuthenticationType authenticationType;
         public ClientType clientType;
-        public String x509Thumbprint;
         public boolean useHttpProxy;
 
         public ConnectionTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean useHttpProxy)
@@ -88,17 +96,10 @@ public class ConnectionTests extends IntegrationTest
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
-            this.x509Thumbprint = x509CertificateGenerator.getX509Thumbprint();
             this.useHttpProxy = useHttpProxy;
         }
 
         public void setup() throws Exception
-        {
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
-            setup(sslContext);
-        }
-
-        public void setup(SSLContext customSSLContext) throws Exception
         {
             ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
             if (this.useHttpProxy)
@@ -110,17 +111,53 @@ public class ConnectionTests extends IntegrationTest
             if (clientType == ClientType.DEVICE_CLIENT)
             {
                 this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false, optionsBuilder);
-
-                if (customSSLContext != null)
-                {
-                    ClientOptions options = optionsBuilder.sslContext(customSSLContext).build();
-                    DeviceClient clientWithCustomSSLContext = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.identity.getDevice()), protocol, options);
-                    ((TestDeviceIdentity)this.identity).setDeviceClient(clientWithCustomSSLContext);
-                }
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
                 this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false, optionsBuilder);
+            }
+        }
+
+        public void setupEccDevice() throws Exception
+        {
+            ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
+            if (this.useHttpProxy)
+            {
+                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+            }
+
+            X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
+            SSLContext sslContext = SSLContextBuilder.buildSSLContext(certificateGenerator.getX509Certificate(), certificateGenerator.getPrivateKey());
+            optionsBuilder.sslContext(sslContext);
+
+            if (clientType == ClientType.DEVICE_CLIENT)
+            {
+                Device eccDevice = new Device("ecc-test-device-" + UUID.randomUUID(), SELF_SIGNED);
+                eccDevice.setThumbprint(certificateGenerator.getX509Thumbprint(), certificateGenerator.getX509Thumbprint());
+
+                Tools.addDeviceWithRetry(new RegistryClient(iotHubConnectionString), eccDevice);
+
+                String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice);
+                this.identity = new TestDeviceIdentity(
+                    new DeviceClient(deviceConnectionString, testInstance.protocol, optionsBuilder.build()),
+                    eccDevice);
+            }
+            else if (clientType == ClientType.MODULE_CLIENT)
+            {
+                Device eccDevice = new Device("ecc-test-device-" + UUID.randomUUID(), SELF_SIGNED);
+                Module eccModule = new Module(eccDevice.getDeviceId(), "ecc-test-module-" + UUID.randomUUID(), SELF_SIGNED);
+                eccDevice.setThumbprint(certificateGenerator.getX509Thumbprint(), certificateGenerator.getX509Thumbprint());
+                eccModule.setThumbprint(certificateGenerator.getX509Thumbprint(), certificateGenerator.getX509Thumbprint());
+
+                Tools.addDeviceWithRetry(new RegistryClient(iotHubConnectionString), eccDevice);
+                Tools.addModuleWithRetry(new RegistryClient(iotHubConnectionString), eccModule);
+
+                String moduleConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice) + ";ModuleId=" + eccModule.getId();
+                this.identity = new TestModuleIdentity(
+                    new ModuleClient(moduleConnectionString, testInstance.protocol, optionsBuilder.build()),
+                    eccDevice,
+                    eccModule);
             }
         }
 
@@ -165,6 +202,28 @@ public class ConnectionTests extends IntegrationTest
     public void CanOpenConnection() throws Exception
     {
         testInstance.setup();
+        testInstance.identity.getClient().open(true);
+
+        // deviceClient.open() is a no-op on HTTP, so a message needs to be sent to actually test opening the connection
+        if (testInstance.protocol == HTTPS)
+        {
+            testInstance.identity.getClient().sendEvent(new Message("some message"));
+        }
+
+        testInstance.identity.getClient().close();
+    }
+
+    @Test
+    public void CanOpenConnectionWithECCCertificates() throws Exception
+    {
+        // SAS token authenticated devices/modules don't use RSA or ECC certificates
+        assumeTrue(testInstance.authenticationType == SELF_SIGNED);
+
+        // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
+        assumeFalse(Tools.isAndroid());
+
+        testInstance.setupEccDevice();
+
         testInstance.identity.getClient().open(true);
 
         // deviceClient.open() is a no-op on HTTP, so a message needs to be sent to actually test opening the connection

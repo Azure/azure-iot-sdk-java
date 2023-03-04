@@ -21,6 +21,6 @@ public class SendMessagesErrInjAndroidRunner extends SendMessagesErrInjTests
 {
     public SendMessagesErrInjAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, clientType, useHttpProxy);
+        super(protocol, authenticationType, clientType);
     }
 }

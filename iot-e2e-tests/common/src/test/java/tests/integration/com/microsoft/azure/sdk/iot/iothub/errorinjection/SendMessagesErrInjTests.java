@@ -11,8 +11,10 @@ import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.ExponentialBackoffWithJitter;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.NoRetry;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,11 +28,17 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.SendMessagesCo
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
+import static tests.integration.com.microsoft.azure.sdk.iot.helpers.IotHubServicesCommon.actualStatusUpdatesContainsStatus;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to sending messages to the cloud.
@@ -51,9 +59,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         // This error injection test only applies for no connection can be dropped for HTTP since it is a stateless connection
         assumeTrue(this.testInstance.protocol != HTTPS);
 
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.identity.getClient(), testInstance.protocol, TCP_CONNECTION_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
+        errorInjectionTestFlow(ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
@@ -63,9 +69,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         // This error injection test only applies for AMQPS and AMQPS_WS
         assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.identity.getClient(), testInstance.protocol, AMQP_CONNECTION_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
+        errorInjectionTestFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
@@ -75,9 +79,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         // This error injection test only applies for AMQPS and AMQPS_WS
         assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.identity.getClient(), testInstance.protocol, AMQP_SESSION_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
+        errorInjectionTestFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
@@ -90,9 +92,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         //CBS links are only established when using sas authentication
         assumeTrue(testInstance.authenticationType == SAS);
 
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.identity.getClient(), testInstance.protocol, AMQP_CBS_REQUEST_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
+        errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
@@ -105,9 +105,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         //CBS links are only established when using sas authentication
         assumeTrue(testInstance.authenticationType == SAS);
 
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.identity.getClient(), testInstance.protocol, AMQP_CBS_RESPONSE_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
+        errorInjectionTestFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
@@ -117,9 +115,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         // This error injection test only applies for AMQPS and AMQPS_WS
         assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.identity.getClient(), testInstance.protocol, AMQP_D2C_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
+        errorInjectionTestFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Test
@@ -133,9 +129,7 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         // Need to talk to service folks about this strange behavior
         assumeTrue(testInstance.authenticationType == SAS);
 
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.identity.getClient(), testInstance.protocol, AMQP_C2D_LINK_DROP_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
+        errorInjectionTestFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
     @Ignore
@@ -201,28 +195,6 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
     }
 
     @Test
-    public void sendMessagesOverAmqpWithGracefulShutdown() throws Exception
-    {
-        // This error injection test only applies for AMQPS and AMQPS_WS
-        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
-
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.identity.getClient(), testInstance.protocol, AMQP_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
-    }
-
-    @Test
-    public void sendMessagesOverMqttWithGracefulShutdown() throws Exception
-    {
-        // This error injection test only applies for MQTT and MQTT_WS
-        assumeTrue(this.testInstance.protocol == MQTT || this.testInstance.protocol == MQTT_WS);
-
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessagesExpectingConnectionStatusChangeUpdate(testInstance.identity.getClient(), testInstance.protocol, MQTT_GRACEFUL_SHUTDOWN_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, IotHubConnectionStatus.DISCONNECTED_RETRYING, 100, testInstance.authenticationType);
-    }
-
-    @Test
     @ContinuousIntegrationTest
     public void sendMessagesWithTcpConnectionDropNotifiesUserIfRetryExpires() throws Exception
     {
@@ -233,11 +205,51 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
 
         testInstance.identity.getClient().setRetryPolicy(new NoRetry());
 
-        Message tcpConnectionDropErrorInjectionMessageUnrecoverable = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(1, 100000);
-        IotHubServicesCommon.sendMessagesExpectingUnrecoverableConnectionLossAndTimeout(testInstance.identity.getClient(), testInstance.protocol, tcpConnectionDropErrorInjectionMessageUnrecoverable, testInstance.authenticationType);
+        Message errorInjectionMessage = ErrorInjectionHelper.tcpConnectionDropErrorInjectionMessage(1, 100000);
+        final List<Pair<IotHubConnectionStatus, Throwable>> statusUpdates = new ArrayList<>();
+        testInstance.identity.getClient().setConnectionStatusChangeCallback((context) -> statusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause())), new Object());
 
-        //reset back to default
-        testInstance.identity.getClient().setRetryPolicy(new ExponentialBackoffWithJitter());
+        testInstance.identity.getClient().open(false);
+
+        testInstance.identity.getClient().sendEventAsync(errorInjectionMessage, new EventCallback(null), new Success());
+
+        long startTime = System.currentTimeMillis();
+        while (!(actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING) && actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED)))
+        {
+            Thread.sleep(500);
+
+            if (System.currentTimeMillis() - startTime > 30 * 1000)
+            {
+                break;
+            }
+        }
+
+        Assert.assertTrue(buildExceptionMessage("Expected notification about disconnected but retrying.", testInstance.identity.getClient()), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));
+        Assert.assertTrue(buildExceptionMessage("Expected notification about disconnected.", testInstance.identity.getClient()), actualStatusUpdatesContainsStatus(statusUpdates, IotHubConnectionStatus.DISCONNECTED));
+
+        testInstance.identity.getClient().close();
+    }
+
+    private void errorInjectionTestFlow(Message faultInjectionMessage) throws Exception
+    {
+        testInstance.setup();
+
+        List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
+        IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (context) -> actualStatusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause()));
+        testInstance.identity.getClient().setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
+
+        testInstance.identity.getClient().open(true);
+
+        testInstance.identity.getClient().sendEvent(new Message("some normal message"));
+
+        MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(faultInjectionMessage, IotHubStatusCode.OK);
+        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(testInstance.identity.getClient(), errorInjectionMsgAndRet, testInstance.protocol);
+
+        IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, testInstance.identity.getClient());
+
+        testInstance.identity.getClient().sendEvent(new Message("some normal message"));
+
+        testInstance.identity.getClient().close();
     }
 
     private void errorInjectionTestFlowNoDisconnect(Message errorInjectionMessage, IotHubStatusCode expectedStatus, boolean noRetry) throws IOException, IotHubException, URISyntaxException, InterruptedException, GeneralSecurityException, IotHubClientException
@@ -247,23 +259,29 @@ public class SendMessagesErrInjTests extends SendMessagesCommon
         {
             testInstance.identity.getClient().setRetryPolicy(new NoRetry());
         }
+
         testInstance.identity.getClient().open(false);
 
         // Act
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(errorInjectionMessage,IotHubStatusCode.OK);
-        IotHubServicesCommon.sendMessageAndWaitForResponse(
-                testInstance.identity.getClient(),
-                errorInjectionMsgAndRet,
-                this.testInstance.protocol);
+        IotHubServicesCommon.sendErrorInjectionMessageAndWaitForResponse(testInstance.identity.getClient(), errorInjectionMsgAndRet, testInstance.protocol);
 
         // time for the error injection to take effect on the service side
         Thread.sleep(2000);
 
-        MessageAndResult normalMessageAndExpectedResult = new MessageAndResult(new Message("test message"), expectedStatus);
-        IotHubServicesCommon.sendMessageAndWaitForResponse(
-                testInstance.identity.getClient(),
-                normalMessageAndExpectedResult,
-                this.testInstance.protocol);
+        try
+        {
+            testInstance.identity.getClient().sendEvent(new Message("some message sent after the fault"));
+
+            if (expectedStatus != IotHubStatusCode.OK)
+            {
+                fail("Expected " + expectedStatus + " but was OK");
+            }
+        }
+        catch (IotHubClientException e)
+        {
+            assertEquals(expectedStatus, e.getStatusCode());
+        }
 
         testInstance.identity.getClient().close();
     }

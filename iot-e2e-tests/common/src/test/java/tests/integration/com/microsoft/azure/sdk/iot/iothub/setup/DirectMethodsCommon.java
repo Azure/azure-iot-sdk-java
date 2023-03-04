@@ -22,19 +22,13 @@ import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestIdentity;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
