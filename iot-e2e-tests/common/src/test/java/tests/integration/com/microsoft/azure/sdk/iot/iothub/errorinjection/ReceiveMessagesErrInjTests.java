@@ -7,11 +7,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub.errorinjection;
 
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
-import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
+import com.microsoft.azure.sdk.iot.device.twin.Pair;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -22,13 +20,11 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.ReceiveMessagesCommon;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.*;
+import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
@@ -130,25 +126,6 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
 
     public void errorInjectionTestFlow(com.microsoft.azure.sdk.iot.device.Message faultInjectionMessage) throws Exception
     {
-        com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
-
-        if (testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS)
-        {
-            callback = new MessageCallbackMqtt();
-        }
-
-        Success messageReceived = new Success();
-        if (testInstance.identity.getClient() instanceof DeviceClient)
-        {
-            ((DeviceClient) testInstance.identity.getClient()).setMessageCallback(callback, messageReceived);
-        }
-        else if (testInstance.identity.getClient() instanceof ModuleClient)
-        {
-            ((ModuleClient) testInstance.identity.getClient()).setMessageCallback(callback, messageReceived);
-        }
-
-        testInstance.setup();
-
         List<Pair<IotHubConnectionStatus, Throwable>> actualStatusUpdates = new ArrayList<>();
         IotHubConnectionStatusChangeCallback connectionStatusUpdateCallback = (context) -> actualStatusUpdates.add(new Pair<>(context.getNewStatus(), context.getCause()));
         testInstance.identity.getClient().setConnectionStatusChangeCallback(connectionStatusUpdateCallback, null);
@@ -156,21 +133,7 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         testInstance.identity.getClient().open(true);
 
         // Test that the device/module can receive c2d messages
-        if (testInstance.identity.getClient() instanceof DeviceClient)
-        {
-            testInstance.messagingClient.send(
-                testInstance.identity.getDeviceId(),
-                createCloudToDeviceMessage(MESSAGE_SIZE_IN_BYTES));
-        }
-        else if (testInstance.identity.getClient() instanceof ModuleClient)
-        {
-            testInstance.messagingClient.send(
-                testInstance.identity.getDeviceId(),
-                ((TestModuleIdentity) testInstance.identity).getModuleId(),
-                createCloudToDeviceMessage(MESSAGE_SIZE_IN_BYTES));
-        }
-
-        waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
+        receiveMessage(MESSAGE_SIZE_IN_BYTES, false);
 
         // Inject the error
         MessageAndResult errorInjectionMsgAndRet = new MessageAndResult(faultInjectionMessage, IotHubStatusCode.OK);
@@ -179,21 +142,9 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         IotHubServicesCommon.waitForStabilizedConnection(actualStatusUpdates, testInstance.identity.getClient());
 
         // Test that the device/module can still receive c2d messages
-        if (testInstance.identity.getClient() instanceof DeviceClient)
-        {
-            testInstance.messagingClient.send(
-                testInstance.identity.getDeviceId(),
-                createCloudToDeviceMessage(MESSAGE_SIZE_IN_BYTES));
-        }
-        else if (testInstance.identity.getClient() instanceof ModuleClient)
-        {
-            testInstance.messagingClient.send(
-                testInstance.identity.getDeviceId(),
-                ((TestModuleIdentity) testInstance.identity).getModuleId(),
-                createCloudToDeviceMessage(MESSAGE_SIZE_IN_BYTES));
-        }
+        receiveMessage(MESSAGE_SIZE_IN_BYTES, false);
 
-        waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
+        testInstance.identity.getClient().close();
 
         assertTrue(CorrelationDetailsLoggingAssert.buildExceptionMessage(testInstance.protocol + ", " + testInstance.authenticationType + ": Error Injection message did not cause service to drop TCP connection", testInstance.identity.getClient()), IotHubServicesCommon.actualStatusUpdatesContainsStatus(actualStatusUpdates, IotHubConnectionStatus.DISCONNECTED_RETRYING));
     }
