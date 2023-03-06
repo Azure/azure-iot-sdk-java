@@ -6,19 +6,20 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
-import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.Message;
-import com.microsoft.azure.sdk.iot.service.messaging.*;
+import com.microsoft.azure.sdk.iot.device.DeviceClient;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.IotHubMessageResult;
+import com.microsoft.azure.sdk.iot.device.ModuleClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import com.microsoft.azure.sdk.iot.service.messaging.Message;
+import com.microsoft.azure.sdk.iot.service.messaging.*;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.runners.Parameterized;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry.ReceiveMessagesTests;
 
@@ -29,7 +30,6 @@ import java.util.function.Function;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
@@ -209,48 +209,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
         }
     }
 
-    public static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
-    {
-        private final com.microsoft.azure.sdk.iot.service.messaging.Message expectedMessage;
-
-        public MessageCallbackMqtt()
-        {
-            this.expectedMessage = null;
-        }
-
-        public MessageCallbackMqtt(com.microsoft.azure.sdk.iot.service.messaging.Message expectedMessage)
-        {
-            this.expectedMessage = expectedMessage;
-        }
-
-        public IotHubMessageResult onCloudToDeviceMessageReceived(com.microsoft.azure.sdk.iot.device.Message msg, Object context)
-        {
-            HashMap<String, String> messageProperties = (HashMap<String, String>) ReceiveMessagesTests.messageProperties;
-            Success messageReceived = (Success)context;
-            boolean resultValue = true;
-
-            if (this.expectedMessage != null)
-            {
-                if (!hasExpectedProperties(msg, messageProperties) || !hasExpectedSystemProperties(msg, expectedMessage.getCorrelationId(), expectedMessage.getMessageId()))
-                {
-                    log.warn("Unexpected properties in the received message");
-                    resultValue = false;
-                }
-
-                if (!ArrayUtils.isEquals(this.expectedMessage.getBytes(), msg.getBytes()))
-                {
-                    log.warn("Unexpected payload in the received message");
-                    resultValue = false;
-                }
-            }
-
-            messageReceived.callbackWasFired();
-            messageReceived.setResult(resultValue);
-
-            return IotHubMessageResult.COMPLETE;
-        }
-    }
-
     protected static boolean hasExpectedProperties(com.microsoft.azure.sdk.iot.device.Message msg, Map<String, String> messageProperties)
     {
         for (String key : messageProperties.keySet())
@@ -264,19 +222,17 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return true;
     }
 
-    public void receiveMessage(int messageSize) throws Exception
+    public void receiveMessage(int messageSize, boolean withOpenClose) throws Exception
     {
-        testInstance.identity.getClient().open(false);
+        if (withOpenClose)
+        {
+            testInstance.identity.getClient().open(false);
+        }
 
         com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = createCloudToDeviceMessage(messageSize);
         serviceMessage.setMessageId(UUID.randomUUID().toString());
 
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback(serviceMessage);
-
-        if (testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS)
-        {
-            callback = new MessageCallbackMqtt(serviceMessage);
-        }
 
         Success messageReceived = new Success();
 
@@ -303,8 +259,10 @@ public class ReceiveMessagesCommon extends IntegrationTest
         // flakey feature
         //waitForFeedbackMessage(serviceMessage.getMessageId());
 
-        Thread.sleep(200);
-        testInstance.identity.getClient().close();
+        if (withOpenClose)
+        {
+            testInstance.identity.getClient().close();
+        }
     }
 
     protected static boolean hasExpectedSystemProperties(com.microsoft.azure.sdk.iot.device.Message msg, String expectedCorrelationId, String expectedMessageId)
