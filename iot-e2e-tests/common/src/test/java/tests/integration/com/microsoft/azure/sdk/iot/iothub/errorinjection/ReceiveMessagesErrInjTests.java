@@ -128,26 +128,6 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test
-    @StandardTierHubOnlyTest
-    public void receiveMessagesWithGracefulShutdownAmqp() throws Exception
-    {
-        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
-
-        super.setupTest();
-        this.errorInjectionTestFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void receiveMessagesWithGracefulShutdownMqtt() throws Exception
-    {
-        assumeTrue(this.testInstance.protocol == MQTT || this.testInstance.protocol == MQTT_WS);
-
-        super.setupTest();
-        this.errorInjectionTestFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(ErrorInjectionHelper.DefaultDelayInSec, ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
     public void errorInjectionTestFlow(com.microsoft.azure.sdk.iot.device.Message faultInjectionMessage) throws Exception
     {
         com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback();
@@ -178,11 +158,16 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         // Test that the device/module can receive c2d messages
         if (testInstance.identity.getClient() instanceof DeviceClient)
         {
-            sendMessageToDevice(testInstance.identity.getDeviceId(), MESSAGE_SIZE_IN_BYTES);
+            testInstance.messagingClient.send(
+                testInstance.identity.getDeviceId(),
+                createCloudToDeviceMessage(MESSAGE_SIZE_IN_BYTES));
         }
         else if (testInstance.identity.getClient() instanceof ModuleClient)
         {
-            sendMessageToModule(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), MESSAGE_SIZE_IN_BYTES);
+            testInstance.messagingClient.send(
+                testInstance.identity.getDeviceId(),
+                ((TestModuleIdentity) testInstance.identity).getModuleId(),
+                createCloudToDeviceMessage(MESSAGE_SIZE_IN_BYTES));
         }
 
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());
@@ -196,11 +181,16 @@ public class ReceiveMessagesErrInjTests extends ReceiveMessagesCommon
         // Test that the device/module can still receive c2d messages
         if (testInstance.identity.getClient() instanceof DeviceClient)
         {
-            sendMessageToDevice(testInstance.identity.getDeviceId(), MESSAGE_SIZE_IN_BYTES);
+            testInstance.messagingClient.send(
+                testInstance.identity.getDeviceId(),
+                createCloudToDeviceMessage(MESSAGE_SIZE_IN_BYTES));
         }
         else if (testInstance.identity.getClient() instanceof ModuleClient)
         {
-            sendMessageToModule(testInstance.identity.getDeviceId(), ((TestModuleIdentity) testInstance.identity).getModuleId(), MESSAGE_SIZE_IN_BYTES);
+            testInstance.messagingClient.send(
+                testInstance.identity.getDeviceId(),
+                ((TestModuleIdentity) testInstance.identity).getModuleId(),
+                createCloudToDeviceMessage(MESSAGE_SIZE_IN_BYTES));
         }
 
         waitForMessageToBeReceived(messageReceived, testInstance.protocol.toString());

@@ -284,16 +284,6 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return serviceMessage;
     }
 
-    protected void sendMessageToDevice(String deviceId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException
-    {
-        testInstance.messagingClient.send(deviceId, createCloudToDeviceMessage(messageSize));
-    }
-
-    protected void sendMessageToModule(String deviceId, String moduleId, int messageSize) throws IotHubException, IOException, InterruptedException, TimeoutException
-    {
-        testInstance.messagingClient.send(deviceId, moduleId, createCloudToDeviceMessage(messageSize));
-    }
-
     protected void waitForMessageToBeReceived(Success messageReceived, String protocolName)
     {
         try
