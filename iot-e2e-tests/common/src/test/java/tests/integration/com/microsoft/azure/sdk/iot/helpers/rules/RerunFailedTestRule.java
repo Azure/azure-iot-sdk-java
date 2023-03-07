@@ -1,6 +1,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers.rules;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.AssumptionViolatedException;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -29,23 +30,32 @@ public class RerunFailedTestRule implements TestRule
         @Override
         public void evaluate() throws Throwable
         {
-            for (int i = 0; i < NUMBER_OF_RETRIES; i++)
+            int attempt = 0;
+            while (true)
             {
                 try
                 {
+                    attempt++;
                     base.evaluate();
                     return; // if the test passes, no need to rerun the test
                 }
+                catch (AssumptionViolatedException e)
+                {
+                    // This exception is thrown when an assumption isn't satisfied (for instance,
+                    // "assumeTrue(protocol == HTTPS)" when protocol is AMQPS). In cases like these,
+                    // there is no need to rerun as the test has completed "successfully"
+                    return;
+                }
                 catch (Throwable e)
                 {
-                    if (i == NUMBER_OF_RETRIES - 1)
+                    if (attempt == NUMBER_OF_RETRIES)
                     {
                         log.info("Test failed on final rerun. Not rerunning this test anymore");
                         throw e;
                     }
                     else
                     {
-                        log.info("Test failed on run {} with error {}. Rerunning the test.", i, e.getMessage());
+                        log.info("Test failed on run {} with error {}. Rerunning the test.", attempt, e.getMessage());
                     }
                 }
             }
