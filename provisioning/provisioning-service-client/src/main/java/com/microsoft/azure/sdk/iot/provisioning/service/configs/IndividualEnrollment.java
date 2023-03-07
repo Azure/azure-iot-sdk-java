@@ -226,6 +226,10 @@ public class IndividualEnrollment extends Serializable
     @Setter
     private Collection<String> iotHubs;
 
+    @Getter
+    @Setter
+    private ClientCertificateIssuancePolicy clientCertificateIssuancePolicy;
+
     /**
      * CONSTRUCTOR
      *
