@@ -47,6 +47,7 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
     private final Authorization authorization;
     private final SecurityProvider securityProvider;
     private final ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
+    private final String operationalClientCertificateRequest;
 
     @SuppressWarnings("unused") // Called in factory
     private static class ResponseCallbackImpl implements ResponseCallback
@@ -99,6 +100,12 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
         if (authorization == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("authorization cannot be null"));
+        }
+
+        // check if using operational CSR
+        if (provisioningDeviceClientConfig.getOperationalCertificateRequest() != null)
+        {
+            this.operationalClientCertificateRequest = provisioningDeviceClientConfig.getOperationalCertificateRequest();
         }
 
         //SRS_RegisterTask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityProvider, provisioningDeviceClientContract and authorization.]

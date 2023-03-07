@@ -8,6 +8,7 @@
 package com.microsoft.azure.sdk.iot.provisioning.device;
 
 import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -42,4 +43,11 @@ public class ProvisioningDeviceClientRegistrationResult
 
     @Getter
     protected String provisioningPayload;
+
+    /*
+     * The client certificate used by IoT Hub to authenticate a device.
+     */
+    @Getter
+    @Setter
+    protected String issuedClientCertificate;
 }
