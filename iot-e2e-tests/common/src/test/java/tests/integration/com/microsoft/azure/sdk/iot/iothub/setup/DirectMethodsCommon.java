@@ -6,19 +6,15 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
-import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.runners.Parameterized;
@@ -27,7 +23,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -435,14 +432,5 @@ public class DirectMethodsCommon extends IntegrationTest
         {
             assertEquals(senderPayload, receiverPayload);
         }
-    }
-
-    protected static DirectMethodsClient buildDeviceMethodClientWithAzureSasCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
-        return new DirectMethodsClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 }

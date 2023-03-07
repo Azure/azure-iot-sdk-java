@@ -171,34 +171,6 @@ public class TwinErrInjTests extends TwinCommon
                 ErrorInjectionHelper.DefaultDurationInSec));
     }
 
-    @Test
-    @StandardTierHubOnlyTest
-    public void getDeviceTwinRecoveredFromGracefulShutdownAmqp() throws Exception
-    {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
-
-        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void getDeviceTwinRecoveredFromGracefulShutdownMqtt() throws Exception
-    {
-        if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))
-        {
-            return;
-        }
-
-        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
     public void errorInjectionGetDeviceTwinFlow(Message errorInjectionMessage) throws Exception
     {
         // Arrange

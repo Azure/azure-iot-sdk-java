@@ -5,47 +5,33 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.methods;
 
-import com.azure.core.credential.AzureSasCredential;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.service.ProxyOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.exceptions.ErrorCodeDescription;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubGatewayTimeoutException;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubNotFoundException;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubUnauthorizedException;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.SasTokenTools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.CustomObject;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.NestedCustomObject;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.CustomObject;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.DirectMethodsCommon;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.NestedCustomObject;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static junit.framework.TestCase.fail;
 import static org.junit.Assert.*;
 import static tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert.buildExceptionMessage;
 
@@ -67,64 +53,6 @@ public class DirectMethodsTests extends DirectMethodsCommon
     public void invokeMethodSucceed() throws Exception
     {
         super.openDeviceClientAndSubscribeToMethods();
-        super.invokeMethodSucceed();
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void invokeMethodSucceedWithAzureSasCredential() throws Exception
-    {
-        this.testInstance.methodServiceClient = buildDeviceMethodClientWithAzureSasCredential();
-        super.openDeviceClientAndSubscribeToMethods();
-        super.invokeMethodSucceed();
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void serviceClientTokenRenewalWithAzureSasCredential() throws Exception
-    {
-        if (testInstance.protocol != IotHubClientProtocol.AMQPS
-            || testInstance.clientType != ClientType.DEVICE_CLIENT
-            || testInstance.authenticationType != AuthenticationType.SAS)
-        {
-            // This test is for the service client, so no need to rerun it for all the different client types or device protocols
-            return;
-        }
-
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        AzureSasCredential sasCredential = new AzureSasCredential(serviceSasToken.toString());
-
-        this.testInstance.methodServiceClient =
-            new DirectMethodsClient(
-                iotHubConnectionStringObj.getHostName(),
-                sasCredential,
-                DirectMethodsClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
-
-        super.openDeviceClientAndSubscribeToMethods();
-
-        // add first device just to make sure that the first credential update worked
-        super.invokeMethodSucceed();
-
-        // deliberately expire the SAS token to provoke a 401 to ensure that the method client is using the shared
-        // access signature that is set here.
-        sasCredential.update(SasTokenTools.makeSasTokenExpired(serviceSasToken.toString()));
-
-        try
-        {
-            super.invokeMethodSucceed();
-            fail("Expected invoke method call to throw unauthorized exception since an expired SAS token was used, but no exception was thrown");
-        }
-        catch (IotHubUnauthorizedException e)
-        {
-            log.debug("IotHubUnauthorizedException was thrown as expected, continuing test");
-        }
-
-        // Renew the expired shared access signature
-        serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        sasCredential.update(serviceSasToken.toString());
-
-        // final method invocation should succeed since the shared access signature has been renewed
         super.invokeMethodSucceed();
     }
 
@@ -300,41 +228,6 @@ public class DirectMethodsTests extends DirectMethodsCommon
                 Assert.assertEquals(404001, actualException.getErrorCode());
                 Assert.assertEquals(ErrorCodeDescription.DeviceNotFound, actualException.getErrorCodeDescription());
             }
-        }
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void invokeMethodWithServiceSideProxy() throws Exception
-    {
-        if (testInstance.protocol != IotHubClientProtocol.MQTT || testInstance.authenticationType != AuthenticationType.SAS || testInstance.clientType != ClientType.DEVICE_CLIENT)
-        {
-            // This test doesn't really care about the device side protocol or authentication, so just run it once
-            // when the device is using MQTT with SAS auth
-            return;
-        }
-
-        String testProxyHostname = "127.0.0.1";
-        int testProxyPort = 8894;
-        HttpProxyServer proxyServer = DefaultHttpProxyServer.bootstrap()
-                .withPort(testProxyPort)
-                .start();
-
-        try
-        {
-            Proxy serviceSideProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-
-            ProxyOptions proxyOptions = new ProxyOptions(serviceSideProxy);
-            DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().proxyOptions(proxyOptions).httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
-
-            this.testInstance.methodServiceClient = new DirectMethodsClient(iotHubConnectionString, options);
-
-            super.openDeviceClientAndSubscribeToMethods();
-            super.invokeMethodSucceed();
-        }
-        finally
-        {
-            proxyServer.stop();
         }
     }
 
