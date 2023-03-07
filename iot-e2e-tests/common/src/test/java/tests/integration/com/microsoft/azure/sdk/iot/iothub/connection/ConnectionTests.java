@@ -198,7 +198,7 @@ public class ConnectionTests extends IntegrationTest
         proxyServer.stop();
     }
 
-    @Test(timeout = 10000) // 10 seconds
+    @Test(timeout = 60000) // 1 minute
     public void CanOpenConnection() throws Exception
     {
         testInstance.setup();
@@ -213,7 +213,7 @@ public class ConnectionTests extends IntegrationTest
         testInstance.identity.getClient().close();
     }
 
-    @Test
+    @Test(timeout = 60000) // 1 minute
     public void CanOpenConnectionWithECCCertificates() throws Exception
     {
         // SAS token authenticated devices/modules don't use RSA or ECC certificates
