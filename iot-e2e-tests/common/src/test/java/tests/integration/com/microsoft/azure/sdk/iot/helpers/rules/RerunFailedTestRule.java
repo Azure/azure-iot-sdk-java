@@ -43,12 +43,13 @@ public class RerunFailedTestRule implements TestRule
                 {
                     // This exception is thrown when an assumption isn't satisfied (for instance,
                     // "assumeTrue(protocol == HTTPS)" when protocol is AMQPS). In cases like these,
-                    // there is no need to rerun as the test has completed "successfully"
-                    return;
+                    // there is no need to rerun as the test should be skipped. JUnit understands that
+                    // a thrown AssumptionViolatedException means that the test was successfully skipped.
+                    throw e;
                 }
                 catch (Throwable e)
                 {
-                    if (attempt == NUMBER_OF_RETRIES)
+                    if (attempt >= NUMBER_OF_RETRIES)
                     {
                         log.info("Test failed on final rerun. Not rerunning this test anymore");
                         throw e;

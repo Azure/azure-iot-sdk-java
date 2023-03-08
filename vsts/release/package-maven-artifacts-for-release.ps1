@@ -95,7 +95,7 @@ function PackageArtifacts($Sources, $Tools, $Output) {
 
         Set-Location $Sources
 
-        mvn clean install -DskipTests -T 2C # Attempt to build
+        mvn clean install -DskipTests -T 2C  --batch-mode -q # Attempt to build
         TestLastExitCode
 
         foreach ($job in $jobs) {
