@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
@@ -38,12 +36,14 @@ import static org.junit.Assume.assumeTrue;
 @RunWith(Parameterized.class)
 public class ConnectionTests extends IntegrationTest
 {
-    protected static String iotHubConnectionString;
+    private static String iotHubConnectionString;
+    private static String hostName;
 
     @Parameterized.Parameters(name = "{0}_{1}_{2}_{3}")
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
+        hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
 
         return Arrays.asList(
             new Object[][]
@@ -233,5 +233,49 @@ public class ConnectionTests extends IntegrationTest
         }
 
         testInstance.identity.getClient().close();
+    }
+
+    @Test
+    public void CanOpenMultiplexingConnection() throws Exception
+    {
+        // MQTT/HTTP don't support multiplexing
+        assumeTrue(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS);
+
+        // IoT hub does not support x509 authenticated multiplexed connections
+        assumeTrue(testInstance.authenticationType == SAS);
+
+        // IoT hub does not support module multiplexing
+        assumeTrue(testInstance.clientType == ClientType.DEVICE_CLIENT);
+
+        MultiplexingClientOptions.MultiplexingClientOptionsBuilder optionsBuilder = MultiplexingClientOptions.builder();
+        if (testInstance.useHttpProxy)
+        {
+            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+            optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+        }
+
+        MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, testInstance.protocol, optionsBuilder.build());
+
+        int multiplexCount = 3;
+        List<TestIdentity> testIdentities = new ArrayList<>(multiplexCount);
+        List<DeviceClient> testClients = new ArrayList<>(multiplexCount);
+        for (int i = 0; i < multiplexCount; i++)
+        {
+            TestIdentity testIdentity = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, false);
+            testIdentities.add(testIdentity);
+            testClients.add((DeviceClient) testIdentity.getClient());
+        }
+
+        try
+        {
+            multiplexingClient.registerDeviceClients(testClients);
+
+            multiplexingClient.open(true);
+            multiplexingClient.close();
+        }
+        finally
+        {
+            Tools.disposeTestIdentities(testIdentities, iotHubConnectionString);
+        }
     }
 }
