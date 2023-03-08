@@ -61,7 +61,7 @@ jobs:
       toolVersion: 'Latest'
       sourceCodeDirectory: '$(Build.SourcesDirectory)'
       language: 'java'
-      buildCommandsString: 'mvn clean install -DskipTests -T 2C'
+      buildCommandsString: 'mvn clean install -DskipTests -T 2C --batch-mode -q'
       querySuite: 'Recommended'
       timeout: '1800'
       ram: '16384'
