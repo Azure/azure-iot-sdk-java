@@ -94,10 +94,9 @@ public class HubTierConnectionTests extends IntegrationTest
         hostName = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString).getHostName();
         SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
 
-        ClientOptions options = ClientOptions.builder().sslContext(sslContext).build();
+        ClientOptions x509ClientOptions = ClientOptions.builder().sslContext(sslContext).build();
 
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-        ClientOptions optionsWithProxy = ClientOptions.builder().proxySettings((new ProxySettings(testProxy, testProxyUser, testProxyPass))).build();
 
         return new ArrayList(Arrays.asList(
                 new Object[][]
@@ -107,10 +106,10 @@ public class HubTierConnectionTests extends IntegrationTest
                                 {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS), AMQPS_WS, device, SAS, false},
 
                                 //x509 device client
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, options), AMQPS, deviceX509, SELF_SIGNED, false},
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, deviceX509), AMQPS, x509ClientOptions), AMQPS, deviceX509, SELF_SIGNED, false},
 
                                 //sas token device client, with proxy
-                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS, options), AMQPS_WS, device, SAS, true}
+                                {new DeviceClient(DeviceConnectionString.get(iotHubConnectionString, device), AMQPS_WS, x509ClientOptions), AMQPS_WS, device, SAS, true}
                         }
         ));
     }
