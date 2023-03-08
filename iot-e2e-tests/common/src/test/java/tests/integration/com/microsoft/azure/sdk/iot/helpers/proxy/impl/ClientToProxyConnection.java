@@ -473,7 +473,7 @@ public class ClientToProxyConnection extends ProxyConnection<HttpRequest>
         }
 
         protected Future<?> execute() {
-            log.info("Responding to proxy connect request with successful status code");
+            log.trace("Responding to proxy connect request with successful status code");
             HttpResponse response = ProxyUtils.createFullHttpResponse(HttpVersion.HTTP_1_1,
                     CONNECTION_ESTABLISHED);
             response.headers().set(HttpHeaders.Names.CONNECTION, HttpHeaders.Values.KEEP_ALIVE);

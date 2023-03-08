@@ -9,4 +9,4 @@ for %%i in ("%build-root%") do set build-root=%%~fi
 
 @REM -- E2E Test Build --
 cd %build-root%
-mvn -Dmaven.javadoc.skip=true --projects :iot-e2e-common --also-make clean install -DskipTests
+mvn -Dmaven.javadoc.skip=true --projects :iot-e2e-common --also-make clean install -DskipTests --batch-mode -q

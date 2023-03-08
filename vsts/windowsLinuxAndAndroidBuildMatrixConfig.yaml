@@ -17,7 +17,7 @@ jobs:
   - job: Windows
     timeoutInMinutes: 180
     strategy:
-      maxParallel: 1
+      maxParallel: 2
       matrix:
         JDK 11: # always run Java 11
           JAVA_VERSION: 11
@@ -118,7 +118,7 @@ jobs:
       vmImage: 'ubuntu-22.04'
     displayName: Linux
     strategy:
-      maxParallel: 1
+      maxParallel: 2
       matrix:
         JDK 11: # always run Java 11
           JAVA_VERSION: 11
