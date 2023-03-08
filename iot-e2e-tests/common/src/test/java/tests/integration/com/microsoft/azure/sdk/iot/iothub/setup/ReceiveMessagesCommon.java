@@ -170,14 +170,14 @@ public class ReceiveMessagesCommon extends IntegrationTest
 
     public static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
-        private final com.microsoft.azure.sdk.iot.service.messaging.Message expectedMessage;
+        private final Message expectedMessage;
 
         public MessageCallback()
         {
             this.expectedMessage = null;
         }
 
-        public MessageCallback(com.microsoft.azure.sdk.iot.service.messaging.Message expectedMessage)
+        public MessageCallback(Message expectedMessage)
         {
             this.expectedMessage = expectedMessage;
         }
@@ -229,10 +229,10 @@ public class ReceiveMessagesCommon extends IntegrationTest
             testInstance.identity.getClient().open(false);
         }
 
-        com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = createCloudToDeviceMessage(messageSize);
+        Message serviceMessage = createCloudToDeviceMessage(messageSize);
         serviceMessage.setMessageId(UUID.randomUUID().toString());
 
-        com.microsoft.azure.sdk.iot.device.MessageCallback callback = new MessageCallback(serviceMessage);
+        MessageCallback callback = new MessageCallback(serviceMessage);
 
         Success messageReceived = new Success();
 
@@ -275,11 +275,11 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return msg.getMessageId() != null && msg.getMessageId().equals(expectedMessageId);//all system properties are as expected
     }
 
-    protected com.microsoft.azure.sdk.iot.service.messaging.Message createCloudToDeviceMessage(int messageSize) throws IotHubException, IOException
+    protected Message createCloudToDeviceMessage(int messageSize) throws IotHubException, IOException
     {
         byte[] payload = new byte[messageSize];
         new Random().nextBytes(payload);
-        com.microsoft.azure.sdk.iot.service.messaging.Message serviceMessage = new com.microsoft.azure.sdk.iot.service.messaging.Message(payload);
+        Message serviceMessage = new Message(payload);
         serviceMessage.setCorrelationId(UUID.randomUUID().toString());
         serviceMessage.setMessageId(UUID.randomUUID().toString());
         serviceMessage.setProperties(messageProperties);
