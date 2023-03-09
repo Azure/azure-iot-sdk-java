@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 
@@ -199,6 +200,7 @@ public class ConnectionTests extends IntegrationTest
     }
 
     @Test(timeout = 60000) // 1 minute
+    @IotHubTest
     public void CanOpenConnection() throws Exception
     {
         testInstance.setup();
@@ -213,6 +215,8 @@ public class ConnectionTests extends IntegrationTest
         testInstance.identity.getClient().close();
     }
 
+    @IotHubTest
+    @StandardTierHubOnlyTest
     @Test(timeout = 60000) // 1 minute
     public void CanOpenConnectionWithECCCertificates() throws Exception
     {
@@ -236,6 +240,7 @@ public class ConnectionTests extends IntegrationTest
     }
 
     @Test
+    @IotHubTest
     public void CanOpenMultiplexingConnection() throws Exception
     {
         // MQTT/HTTP don't support multiplexing

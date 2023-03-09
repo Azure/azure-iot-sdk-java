@@ -964,7 +964,7 @@ public class Tools
 
     public static boolean isLinux()
     {
-        return System.getProperty("os.name").toLowerCase().contains("linux");
+        return !isAndroid() && System.getProperty("os.name").toLowerCase().contains("linux");
     }
 
     public static boolean isAndroid()
