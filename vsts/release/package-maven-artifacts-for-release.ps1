@@ -168,7 +168,7 @@ ValidateInputParameter $tpmProvider "tpmProvider" "tpm-provider" "provisioning/s
 ValidateInputParameter $x509Provider "x509Provider" "x509-provider" "provisioning/security/x509-provider"
 ValidateInputParameter $provisioningDeviceClient "provisioningDeviceClient" "provisioning-device-client" "provisioning/provisioning-device-client"
 ValidateInputParameter $provisioningServiceClient "provisioningServiceClient" "provisioning-service-client" "provisioning/provisioning-service-client"
-ValidateInputParameter $iotDeviceClient "iotDeviceClient" "iot-device-client" "device/iot-device-client"
+ValidateInputParameter $iotDeviceClient "iotDeviceClient" "iot-device-client" "iothub/device/iot-device-client"
 
 if (($securityProvider -eq "False") -and ($tpmProvider -eq "False") -and ($x509Provider -eq "False") -and ($provisioningDeviceClient -eq "False") -and ($provisioningServiceClient -eq "False") -and ($iotDeviceClient -eq "False"))
 {
