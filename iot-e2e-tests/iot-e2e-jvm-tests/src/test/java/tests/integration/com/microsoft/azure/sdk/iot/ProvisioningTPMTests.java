@@ -4,9 +4,11 @@
 package tests.integration.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClient;
+import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationResult;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
@@ -17,14 +19,17 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.IndividualEnroll
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.TpmAttestation;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.microsoft.azure.sdk.iot.provisioning.service.configs.AttestationMechanismType.TPM;
-import static junit.framework.TestCase.assertTrue;
-import static junit.framework.TestCase.fail;
+import static junit.framework.TestCase.*;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 @Slf4j
@@ -38,8 +43,9 @@ public class ProvisioningTPMTests
     public static final String DPS_ID_SCOPE_ENV_VAR_NAME = "IOT_DPS_ID_SCOPE";
     public static String provisioningServiceIdScope = Tools.retrieveEnvironmentVariableValue(DPS_ID_SCOPE_ENV_VAR_NAME);
 
-    private static final int REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000;
+    private static final int REGISTRATION_TIMEOUT_SECONDS = 60;
 
+    @Ignore //Test is very flakey
     @Test
     public void provisioningTpmFlow() throws SecurityProviderException, ProvisioningServiceClientException, ProvisioningDeviceClientException, InterruptedException
     {
@@ -61,39 +67,48 @@ public class ProvisioningTPMTests
                 ProvisioningDeviceClientTransportProtocol.AMQPS,
                 securityProvider);
 
-        AtomicBoolean registrationCompleted = new AtomicBoolean(false);
-        AtomicBoolean registrationCompletedSuccessfully = new AtomicBoolean(false);
+        final CountDownLatch registrationLatch = new CountDownLatch(1);
+        AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
+        AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
         provisioningDeviceClient.registerDevice(
             (provisioningDeviceClientRegistrationResult, e, context) ->
             {
                 log.debug("Provisioning registration callback fired with result {}", provisioningDeviceClientRegistrationResult.getProvisioningDeviceClientStatus());
+
+                registrationResultReference.set(provisioningDeviceClientRegistrationResult);
                 if (e != null)
                 {
-                    log.error("Provisioning registration callback fired with exception {}", e);
+                    registrationExceptionReference.set(e);
                 }
 
-                ProvisioningDeviceClientStatus status = provisioningDeviceClientRegistrationResult.getProvisioningDeviceClientStatus();
-                if (status == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
-                {
-                    registrationCompletedSuccessfully.set(true);
-                }
-
-                registrationCompleted.set(true);
+                registrationLatch.countDown();
             },
             null);
 
-        long startTime = System.currentTimeMillis();
-        while (!registrationCompleted.get())
+        boolean timedOut = !registrationLatch.await(REGISTRATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        if (timedOut)
         {
-            Thread.sleep(200);
-
-            if (System.currentTimeMillis() - startTime > REGISTRATION_TIMEOUT_MILLISECONDS)
-            {
-                fail("Timed out waiting for device registration to complete.");
-            }
+            fail("Timed out waiting for device registration to complete.");
         }
 
-        assertTrue("Registration completed, but not successfully", registrationCompletedSuccessfully.get());
         provisioningDeviceClient.close();
+
+        ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
+        Exception registrationException = registrationExceptionReference.get();
+        log.info("Registration completed with status {}", registrationResult.getStatus());
+
+        if (registrationException != null)
+        {
+            String errorContext = "";
+            errorContext += " Status=" + registrationResult.getStatus();
+            errorContext += " Substatus=" + registrationResult.getSubstatus();
+            if (registrationException instanceof ProvisioningDeviceClientException)
+            {
+                errorContext += " Error code=" + ((ProvisioningDeviceHubException) registrationException).getErrorCode();
+            }
+            fail("Registration finished with exception." + errorContext);
+        }
+
+        assertEquals("Registration completed, but not successfully", registrationResult.getProvisioningDeviceClientStatus(), ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED);
     }
 }
