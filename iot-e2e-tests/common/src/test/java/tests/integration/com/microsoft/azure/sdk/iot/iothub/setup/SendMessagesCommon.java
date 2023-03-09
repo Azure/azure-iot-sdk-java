@@ -117,7 +117,16 @@ public class SendMessagesCommon extends IntegrationTest
 
         public void setup() throws Exception
         {
-            SSLContext sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
+            // Builds an SSL context instance that trusts the certs on the device's certificate store
+            // and has no private keys
+            SSLContext sslContext = SSLContextBuilder.buildSSLContext();
+            if (testInstance.authenticationType == SELF_SIGNED)
+            {
+                // Builds an SSL context instance that trusts the certs on the device's certifiate store
+                // and also has a private key + public cert specific to this device identity
+                sslContext = SSLContextBuilder.buildSSLContext(x509CertificateGenerator.getX509Certificate(), x509CertificateGenerator.getPrivateKey());
+            }
+
             setup(sslContext);
         }
 
