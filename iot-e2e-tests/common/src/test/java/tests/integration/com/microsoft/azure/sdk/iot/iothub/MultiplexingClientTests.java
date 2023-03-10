@@ -1369,6 +1369,8 @@ public class MultiplexingClientTests extends IntegrationTest
         boolean expectedExceptionThrown = false;
         try
         {
+            // Note that we are opting to not retry on open because the first attempt should result in the caught
+            // exception below.
             testInstance.multiplexingClient.open(false);
         }
         catch (MultiplexingClientRegistrationException e)
@@ -1479,6 +1481,8 @@ public class MultiplexingClientTests extends IntegrationTest
         boolean expectedExceptionThrown = false;
         try
         {
+            // Note that we are opting to not retry on open because the first attempt should result in the caught
+            // exception below.
             testInstance.multiplexingClient.open(false);
         }
         catch (MultiplexingClientRegistrationException e)
