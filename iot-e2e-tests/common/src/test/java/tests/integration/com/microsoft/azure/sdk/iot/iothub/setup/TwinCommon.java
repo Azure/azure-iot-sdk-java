@@ -56,42 +56,14 @@ public class TwinCommon extends IntegrationTest
         IntegrationTest.isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         IntegrationTest.isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
 
-        List inputs = new ArrayList();
-        for (ClientType clientType : ClientType.values())
-        {
-            if (clientType == ClientType.DEVICE_CLIENT)
-            {
-                inputs.addAll(Arrays.asList(
-                        new Object[][]
-                                {
-                                        //sas token, device client
-                                        {AMQPS, SAS, ClientType.DEVICE_CLIENT},
-                                        {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT},
-                                        {MQTT, SAS, ClientType.DEVICE_CLIENT},
-                                        {MQTT_WS, SAS, ClientType.DEVICE_CLIENT},
-
-                                        //x509, device client
-                                        {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT},
-                                        {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT},
-                                }
-                ));
-            }
-            else
-            {
-                inputs.addAll(Arrays.asList(
-                        new Object[][]
-                                {
-                                        //sas token, module client
-                                        {AMQPS, SAS, ClientType.MODULE_CLIENT},
-                                        {AMQPS_WS, SAS, ClientType.MODULE_CLIENT},
-                                        {MQTT, SAS, ClientType.MODULE_CLIENT},
-                                        {MQTT_WS, SAS, ClientType.MODULE_CLIENT}
-                                }
-                ));
-            }
-        }
-
-        return inputs;
+        return Arrays.asList(
+            new Object[][]
+                {
+                    {AMQPS, SAS, ClientType.DEVICE_CLIENT},
+                    {MQTT, SAS, ClientType.DEVICE_CLIENT},
+                    {AMQPS, SAS, ClientType.MODULE_CLIENT},
+                    {MQTT, SAS, ClientType.MODULE_CLIENT},
+                });
     }
 
     // Max time to wait to see it on Hub

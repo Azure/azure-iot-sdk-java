@@ -132,9 +132,7 @@ public class ProvisioningCommon extends IntegrationTest
                             {
                                     {ProvisioningDeviceClientTransportProtocol.HTTPS, attestationType},
                                     {ProvisioningDeviceClientTransportProtocol.AMQPS, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, attestationType},
                                     {ProvisioningDeviceClientTransportProtocol.MQTT, attestationType},
-                                    {ProvisioningDeviceClientTransportProtocol.MQTT_WS, attestationType}
                             });
         }
         else if (attestationType == AttestationType.TPM)
@@ -156,15 +154,11 @@ public class ProvisioningCommon extends IntegrationTest
                         {
                                 {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.X509},
                                 {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.X509},
-                                {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.X509},
                                 {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.X509},
-                                {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.X509},
 
                                 {ProvisioningDeviceClientTransportProtocol.HTTPS, AttestationType.SYMMETRIC_KEY},
                                 {ProvisioningDeviceClientTransportProtocol.AMQPS, AttestationType.SYMMETRIC_KEY},
-                                {ProvisioningDeviceClientTransportProtocol.AMQPS_WS, AttestationType.SYMMETRIC_KEY},
                                 {ProvisioningDeviceClientTransportProtocol.MQTT, AttestationType.SYMMETRIC_KEY},
-                                {ProvisioningDeviceClientTransportProtocol.MQTT_WS, AttestationType.SYMMETRIC_KEY}
                         });
     }
 

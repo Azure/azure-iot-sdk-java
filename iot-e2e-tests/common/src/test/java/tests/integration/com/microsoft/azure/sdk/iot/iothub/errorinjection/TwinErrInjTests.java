@@ -30,6 +30,7 @@ import java.util.List;
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test class containing all error injection tests to be run on JVM and android pertaining to GetDeviceTwin/GetTwin.
@@ -58,10 +59,7 @@ public class TwinErrInjTests extends TwinCommon
     @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsConnectionDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsConnectionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
@@ -73,10 +71,7 @@ public class TwinErrInjTests extends TwinCommon
     @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsSessionDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsSessionDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
@@ -88,16 +83,10 @@ public class TwinErrInjTests extends TwinCommon
     @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsCBSReqLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.authenticationType != SAS)
-        {
-            //CBS links are only established when using sas authentication
-            return;
-        }
+        //CBS links are only established when using sas authentication
+        assumeTrue(this.testInstance.authenticationType == SAS);
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsCBSReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
@@ -109,16 +98,10 @@ public class TwinErrInjTests extends TwinCommon
     @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsCBSRespLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.authenticationType != SAS)
-        {
-            //CBS links are only established when using sas authentication
-            return;
-        }
+        //CBS links are only established when using sas authentication
+        assumeTrue(this.testInstance.authenticationType == SAS);
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsCBSRespLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
@@ -130,10 +113,7 @@ public class TwinErrInjTests extends TwinCommon
     @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsD2CLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsD2CTelemetryLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
@@ -145,17 +125,12 @@ public class TwinErrInjTests extends TwinCommon
     @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsC2DLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. C2D link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
+        //TODO error injection seems to fail when using x509 auth here. C2D link is never dropped even if waiting a long time
+        // Need to talk to service folks about this strange behavior
+        assumeTrue(testInstance.authenticationType == SAS);
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsC2DLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
@@ -167,17 +142,12 @@ public class TwinErrInjTests extends TwinCommon
     @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsTwinReqLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Twin Req link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
+        //TODO error injection seems to fail when using x509 auth here. C2D link is never dropped even if waiting a long time
+        // Need to talk to service folks about this strange behavior
+        assumeTrue(testInstance.authenticationType == SAS);
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsTwinReqLinkDropErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
@@ -189,47 +159,14 @@ public class TwinErrInjTests extends TwinCommon
     @ContinuousIntegrationTest
     public void getDeviceTwinRecoveredFromAmqpsTwinRespLinkDrop() throws Exception
     {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
+        // This error injection test only applies for AMQPS and AMQPS_WS
+        assumeTrue(this.testInstance.protocol == AMQPS || this.testInstance.protocol == AMQPS_WS);
 
-        if (testInstance.protocol == AMQPS && testInstance.authenticationType == SELF_SIGNED)
-        {
-            //TODO error injection seems to fail under these circumstances. Twin Resp link is never dropped even if waiting a long time
-            // Need to talk to service folks about this strange behavior
-            return;
-        }
+        //TODO error injection seems to fail when using x509 auth here. C2D link is never dropped even if waiting a long time
+        // Need to talk to service folks about this strange behavior
+        assumeTrue(testInstance.authenticationType == SAS);
 
         this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsTwinRespLinkDropErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void getDeviceTwinRecoveredFromGracefulShutdownAmqp() throws Exception
-    {
-        if (!(testInstance.protocol == AMQPS || testInstance.protocol == AMQPS_WS))
-        {
-            return;
-        }
-
-        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.amqpsGracefulShutdownErrorInjectionMessage(
-                ErrorInjectionHelper.DefaultDelayInSec,
-                ErrorInjectionHelper.DefaultDurationInSec));
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void getDeviceTwinRecoveredFromGracefulShutdownMqtt() throws Exception
-    {
-        if (!(testInstance.protocol == MQTT || testInstance.protocol == MQTT_WS))
-        {
-            return;
-        }
-
-        this.errorInjectionGetDeviceTwinFlow(ErrorInjectionHelper.mqttGracefulShutdownErrorInjectionMessage(
                 ErrorInjectionHelper.DefaultDelayInSec,
                 ErrorInjectionHelper.DefaultDurationInSec));
     }

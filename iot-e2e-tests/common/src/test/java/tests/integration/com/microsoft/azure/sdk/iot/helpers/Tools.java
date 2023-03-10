@@ -256,7 +256,7 @@ public class Tools
     {
         // Don't want multiple methods calling this simultaneously and each thinking that they need to create
         // 100 devices. Forcing them to enter this block one at a time means that the first caller creates the 100 devices,
-        // and the subsequent callers just used one of those devices
+        // and the subsequent callers just uses one of those devices.
         synchronized (testSasDeviceQueueLock)
         {
             TestDeviceIdentity testDeviceIdentity;
@@ -317,7 +317,7 @@ public class Tools
     {
         // Don't want multiple methods calling this simultaneously and each thinking that they need to create
         // 100 devices. Forcing them to enter this block one at a time means that the first caller creates the 100 devices,
-        // and the subsequent callers just used one of those devices
+        // and the subsequent callers just uses one of those devices.
         synchronized (testX509DeviceQueueLock)
         {
             TestDeviceIdentity testDeviceIdentity;
@@ -964,7 +964,7 @@ public class Tools
 
     public static boolean isLinux()
     {
-        return System.getProperty("os.name").toLowerCase().contains("linux");
+        return !isAndroid() && System.getProperty("os.name").toLowerCase().contains("linux");
     }
 
     public static boolean isAndroid()

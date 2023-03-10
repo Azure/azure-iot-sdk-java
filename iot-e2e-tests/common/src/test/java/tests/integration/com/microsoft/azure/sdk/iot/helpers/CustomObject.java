@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
+package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import lombok.Getter;
 import lombok.Setter;

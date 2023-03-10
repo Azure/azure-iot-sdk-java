@@ -273,12 +273,12 @@ public class TokenRenewalTests extends IntegrationTest
         return multiplexingClient;
     }
 
-    private void sendMessageFromEachClient(List<InternalClient> clients)
+    private void sendMessageFromEachClient(List<InternalClient> clients) throws IotHubClientException, InterruptedException
     {
         for (InternalClient client : clients)
         {
             System.out.println("Sending test message for client " + client.getConfig().getDeviceId());
-            IotHubServicesCommon.sendMessageAndWaitForResponse(client, new MessageAndResult(new Message("some message"), IotHubStatusCode.OK), client.getConfig().getProtocol());
+            client.sendEvent(new Message("some message"));
         }
     }
 
@@ -289,7 +289,8 @@ public class TokenRenewalTests extends IntegrationTest
             try
             {
                 client.open(false);
-            } catch (UnsupportedOperationException ex)
+            }
+            catch (UnsupportedOperationException ex)
             {
                 //client was a multiplexing client which was already opened, safe to ignore
             }

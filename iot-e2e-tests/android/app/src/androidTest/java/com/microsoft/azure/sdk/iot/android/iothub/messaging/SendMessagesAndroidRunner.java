@@ -19,8 +19,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry.SendMessag
 @RunWith(Parameterized.class)
 public class SendMessagesAndroidRunner extends SendMessagesTests
 {
-    public SendMessagesAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean useHttpProxy) throws Exception
+    public SendMessagesAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, clientType, useHttpProxy);
+        super(protocol, authenticationType, clientType);
     }
 }
