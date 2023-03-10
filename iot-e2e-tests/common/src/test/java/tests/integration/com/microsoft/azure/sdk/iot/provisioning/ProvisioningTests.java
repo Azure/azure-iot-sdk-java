@@ -45,7 +45,8 @@ public class ProvisioningTests extends ProvisioningCommon
     @ContinuousIntegrationTest
     public void individualEnrollmentRegistration() throws Exception
     {
-        basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
+        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint);
     }
 
     @Test
@@ -56,14 +57,15 @@ public class ProvisioningTests extends ProvisioningCommon
         assumeTrue("Skipping this test because only Symmetric Key attestion can be tested for enrollment groups",
             this.testInstance.attestationType == AttestationType.SYMMETRIC_KEY);
 
-        basicRegistrationFlow(EnrollmentType.GROUP);
+        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint);
     }
 
     @Test
     @ContinuousIntegrationTest
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
-        Assume.assumeTrue(Tools.isLinux());
+        Assume.assumeTrue("Test infrastructure is only setup to run this test on Linux", Tools.isLinux());
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
     }
 
@@ -71,7 +73,7 @@ public class ProvisioningTests extends ProvisioningCommon
     @ContinuousIntegrationTest
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
-        Assume.assumeTrue(Tools.isLinux());
+        Assume.assumeTrue("Test infrastructure is only setup to run this test on Linux", Tools.isLinux());
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.GROUP);
     }
 
@@ -107,13 +109,8 @@ public class ProvisioningTests extends ProvisioningCommon
         assumeFalse("Skipping test because it is being run on Android", Tools.isAndroid());
 
         testInstance.certificateAlgorithm = X509CertificateGenerator.CertificateAlgorithm.ECC;
-        basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
-    }
-
-    private void basicRegistrationFlow(EnrollmentType enrollmentType) throws Exception
-    {
-        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, false, null, null, null);
+        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint);
     }
 
     private void enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType enrollmentType) throws Exception
@@ -128,7 +125,7 @@ public class ProvisioningTests extends ProvisioningCommon
         // Register identity
         try
         {
-            registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpointWithInvalidCert, false, null, null, null);
+            registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpointWithInvalidCert);
         }
         catch (Exception | AssertionError e)
         {
