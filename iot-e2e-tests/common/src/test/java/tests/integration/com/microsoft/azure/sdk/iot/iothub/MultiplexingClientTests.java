@@ -1369,7 +1369,7 @@ public class MultiplexingClientTests extends IntegrationTest
         boolean expectedExceptionThrown = false;
         try
         {
-            testInstance.multiplexingClient.open(true);
+            testInstance.multiplexingClient.open(false);
         }
         catch (MultiplexingClientRegistrationException e)
         {
@@ -1469,7 +1469,7 @@ public class MultiplexingClientTests extends IntegrationTest
             else
             {
                 incorrectConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, testInstance.deviceIdentityArray.get(i+1));
-                incorrectConnectionString =incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(i+1).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
+                incorrectConnectionString = incorrectConnectionString.replace(testInstance.deviceIdentityArray.get(i+1).getDeviceId(), testInstance.deviceIdentityArray.get(i).getDeviceId());
             }
             DeviceClient clientWithIncorrectCredentials = new DeviceClient(incorrectConnectionString, testInstance.protocol);
             clientsWithIncorrectCredentials.add(clientWithIncorrectCredentials);
@@ -1479,7 +1479,7 @@ public class MultiplexingClientTests extends IntegrationTest
         boolean expectedExceptionThrown = false;
         try
         {
-            testInstance.multiplexingClient.open(true);
+            testInstance.multiplexingClient.open(false);
         }
         catch (MultiplexingClientRegistrationException e)
         {
