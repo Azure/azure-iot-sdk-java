@@ -142,20 +142,9 @@ public class SendMessagesTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void sendLargestMessages() throws Exception
     {
-        // Only HTTP supports batching messages
-        assumeTrue(this.testInstance.protocol == HTTPS);
-
-        this.testInstance.setup();
-
-        int count = 5;
-        List<Message> messages = new ArrayList<>(count);
-        for (int i = 0; i < count; i++)
-        {
-            messages.add(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE]));
-        }
-
+        testInstance.setup();
         testInstance.identity.getClient().open(true);
-        testInstance.identity.getClient().sendEvents(messages);
+        testInstance.identity.getClient().sendEvent(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE]));
         testInstance.identity.getClient().close();
     }
 
