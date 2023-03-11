@@ -20,8 +20,6 @@ import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX50
 import com.microsoft.azure.sdk.iot.provisioning.service.ProvisioningServiceClient;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.Assert;
@@ -138,8 +136,6 @@ public class ProvisioningCommon extends IntegrationTest
 
     public static final int MAX_TPM_CONNECT_RETRY_ATTEMPTS = 10;
 
-    public RegistryClient registryClient = null;
-
     public ProvisioningCommon(ProvisioningDeviceClientTransportProtocol protocol, AttestationType attestationType)
     {
         this.testInstance = new ProvisioningTestInstance(protocol, attestationType);
@@ -177,16 +173,12 @@ public class ProvisioningCommon extends IntegrationTest
     @Before
     public void setUp() throws Exception
     {
-        registryClient = new RegistryClient(iotHubConnectionString, RegistryClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build());
-
         this.testInstance = new ProvisioningTestInstance(this.testInstance.protocol, this.testInstance.attestationType);
     }
 
     @After
     public void tearDown()
     {
-        registryClient = null;
-
         if (testInstance != null && testInstance.securityProvider != null && testInstance.securityProvider instanceof SecurityProviderTPMEmulator)
         {
             try
