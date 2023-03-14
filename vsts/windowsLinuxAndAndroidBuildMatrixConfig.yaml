@@ -4,10 +4,7 @@ trigger:
   batch: true
 variables:
   # Run JDK 8 + 11 in parallel if it is a pull request, but in serial otherwise
-  ${{ if eq(parameters.os, 'win') }}:
     maxParallel: 2
-  ${{ else }}:
-    maxParallel: 1
   branches:
     include:
       - main
