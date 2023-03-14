@@ -3,11 +3,12 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 trigger:
   batch: true
 variables:
-  # Run JDK 8 + 11 in parallel if it is a pull request, but in serial otherwise
-${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
-  maxParallel: 2
-${{ else }}:
-  maxParallel: 1
+  ${{ if eq(parameters.os, 'win') }}:
+    testsFolder: windows
+  ${{ elseif eq(parameters.os, 'linux' }}:
+    testsFolder: linux
+  ${{ else }}:
+    testsFolder: mac
 
   branches:
     include:
