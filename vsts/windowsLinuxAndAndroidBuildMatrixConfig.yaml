@@ -12,12 +12,19 @@ trigger:
       - service/iot-service-samples/*
       - provisioning/provisioning-samples/*
 
+variables:
+  # Run JDK 8 + 11 in parallel if it is a pull request, but in serial otherwise
+  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+    maxParallel: 2
+  ${{ else }}:
+    maxParallel: 1
+
 jobs:
   ### Windows ###
   - job: Windows
     timeoutInMinutes: 180
     strategy:
-      maxParallel: 2
+      maxParallel: $[variables.maxParallel]
       matrix:
         JDK 11: # always run Java 11
           JAVA_VERSION: 11
@@ -118,7 +125,7 @@ jobs:
       vmImage: 'ubuntu-22.04'
     displayName: Linux
     strategy:
-      maxParallel: 2
+      maxParallel: $[variables.maxParallel]
       matrix:
         JDK 11: # always run Java 11
           JAVA_VERSION: 11
