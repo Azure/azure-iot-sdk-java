@@ -5,10 +5,12 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup;
 
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
-import com.microsoft.azure.sdk.iot.provisioning.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClient;
+import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientRegistrationResult;
+import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
@@ -30,7 +32,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.GeneralSecurityException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -254,7 +256,9 @@ public class ProvisioningCommon extends IntegrationTest
                     errorContext += " Error code=" + ((ProvisioningDeviceHubException) registrationException).getErrorCode();
                 }
 
-                fail("Registration finished with exception." + errorContext);
+                // While this would normally throw an assertion failed exception, those exceptions do not allow for nesting
+                // of exception causes. The invalid server cert tests need to be able to check that inner exception, though.
+                throw new Exception("Registration finished with exception." + errorContext, registrationException);
             }
 
             Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected status", Tools.getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), PROVISIONING_DEVICE_STATUS_ASSIGNED, registrationResult.getProvisioningDeviceClientStatus());

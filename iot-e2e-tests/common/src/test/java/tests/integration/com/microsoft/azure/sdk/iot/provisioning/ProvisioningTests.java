@@ -132,7 +132,7 @@ public class ProvisioningTests extends ProvisioningCommon
             if (testInstance.protocol == HTTPS)
             {
                 //SSLHandshakeException is buried in the message, not the cause, for HTTP
-                if (e.getMessage().contains("SSLHandshakeException"))
+                if (e.getCause().getMessage().contains("SSLHandshakeException"))
                 {
                     expectedExceptionEncountered = true;
                 }
