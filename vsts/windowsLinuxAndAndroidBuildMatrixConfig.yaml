@@ -2,6 +2,12 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 
 trigger:
   batch: true
+variables:
+  # Run JDK 8 + 11 in parallel if it is a pull request, but in serial otherwise
+  ${{ if eq(build.reason, 'PullRequest') }}:
+    maxParallel: 2
+  ${{ else }}:
+    maxParallel: 1
   branches:
     include:
       - main
@@ -17,7 +23,7 @@ jobs:
   - job: Windows
     timeoutInMinutes: 180
     strategy:
-      maxParallel: 2
+      maxParallel: $(maxParallel)
       matrix:
         JDK 11: # always run Java 11
           JAVA_VERSION: 11
@@ -118,7 +124,7 @@ jobs:
       vmImage: 'ubuntu-22.04'
     displayName: Linux
     strategy:
-      maxParallel: 2
+      maxParallel: $(maxParallel)
       matrix:
         JDK 11: # always run Java 11
           JAVA_VERSION: 11
