@@ -19,81 +19,16 @@ import java.util.Scanner;
  */
 public class HandleMessages
 {
-    /** Used as a counter in the message callback. */
-    protected static class Counter
-    {
-        protected int num;
-
-        public Counter(int num)
-        {
-            this.num = num;
-        }
-
-        public int get()
-        {
-            return this.num;
-        }
-
-        public void increment()
-        {
-            this.num++;
-        }
-
-        @Override
-        public String toString()
-        {
-            return Integer.toString(this.num);
-        }
-    }
-
     protected static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
         {
-            Counter counter = (Counter) context;
             System.out.println(
-                    "Received message " + counter.toString()
-                            + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
+                    "Received message with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
 
-            int switchVal = counter.get() % 3;
-            IotHubMessageResult res;
-            switch (switchVal)
-            {
-                case 0:
-                    res = IotHubMessageResult.COMPLETE;
-                    break;
-                case 1:
-                    res = IotHubMessageResult.ABANDON;
-                    break;
-                case 2:
-                    res = IotHubMessageResult.REJECT;
-                    break;
-                default:
-                    // should never happen.
-                    throw new IllegalStateException("Invalid message result specified.");
-            }
-
-            System.out.println("Responding to message " + counter.toString() + " with " + res.name());
-
-            counter.increment();
-
-            return res;
-        }
-    }
-
-    // Our MQTT doesn't support abandon/reject, so we will only display the messaged received
-    // from IoTHub and return COMPLETE
-    protected static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
-    {
-        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
-        {
-            Counter counter = (Counter) context;
-            System.out.println(
-                    "Received message " + counter.toString()
-                            + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
-
-            counter.increment();
-
+            // Other options here are to ABANDON the message (IoT hub will requeue it and send it again later)
+            // or to REJECT the message (IoT hub will not requeue it). Note that clients using MQTT or MQTT_WS
+            // cannot ABANDON or REJECT messages.
             return IotHubMessageResult.COMPLETE;
         }
     }
@@ -208,35 +143,21 @@ public class HandleMessages
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        if (protocol == IotHubClientProtocol.MQTT)
-        {
-            MessageCallbackMqtt callback = new MessageCallbackMqtt();
-            Counter counter = new Counter(0);
-            client.setMessageCallback(callback, counter);
-        }
-        else
-        {
-            MessageCallback callback = new MessageCallback();
-            Counter counter = new Counter(0);
-            client.setMessageCallback(callback, counter);
-        }
+        client.setMessageCallback(new MessageCallback(), null);
 
         System.out.println("Successfully set message callback.");
 
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open(false);
+        client.open(true);
 
-        System.out.println("Opened connection to IoT Hub.");
+        System.out.println("Opened connection to IoT Hub. Messages sent to this device will now be received.");
 
-        System.out.println("Beginning to receive messages(only for MQTT and AMQP). To receive in Https, send message and then start the sample...");
         System.out.println("Press any key to exit...");
 
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
-
-        client.close();
-
         System.out.println("Shutting down...");
+        client.close();
     }
 }

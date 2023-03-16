@@ -80,7 +80,7 @@ public class ModuleInvokeMethodSample
         String moduleIdToInvokeOn = args.length > 4 ? args[4] : null;
 
         ModuleClient client = ModuleClient.createFromEnvironment(new UnixDomainSocketSample.UnixDomainSocketChannelImpl(), protocol);
-        client.open(false);
+        client.open(true);
 
         // Along with String as the type of "methodPayload" here, the type can also be Null/Primitive type/Array/List/Map/custom type.
         // Please also refer to https://github.com/Azure/azure-iot-sdk-java/blob/main/device/iot-device-client/src/main/java/com/microsoft/azure/sdk/iot/device/edge/DirectMethodRequest.java

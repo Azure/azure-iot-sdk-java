@@ -26,49 +26,6 @@ public class ModuleMethodSample
 
     private static final String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
     private static final String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
-    private static final int METHOD_SUCCESS = 200;
-    private static final int METHOD_NOT_DEFINED = 404;
-
-    private static int method_command(Object command)
-    {
-        System.out.println("invoking command on this device");
-        // Insert code to invoke command here
-        return METHOD_SUCCESS;
-    }
-
-    private static int method_default(Object data)
-    {
-        System.out.println("invoking default method for this device");
-        // Insert device specific code here
-        return METHOD_NOT_DEFINED;
-    }
-
-    protected static class DirectMethodStatusCallback implements SubscriptionAcknowledgedCallback
-    {
-        public void onSubscriptionAcknowledged(IotHubClientException exception, Object context)
-        {
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-            System.out.println("IoT Hub responded to device method operation with status " + status.name());
-        }
-    }
-
-    protected static class SampleMethodCallback implements MethodCallback
-    {
-        @Override
-        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context)
-        {
-            DirectMethodResponse deviceDirectMethodResponse;
-            int status = method_default(methodData);
-            if ("command".equals(methodName))
-            {
-                status = method_command(methodData);
-            }
-
-            deviceDirectMethodResponse = new DirectMethodResponse(status, "executed " + methodName);
-
-            return deviceDirectMethodResponse;
-        }
-    }
 
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
@@ -171,28 +128,33 @@ public class ModuleMethodSample
 
         try
         {
-            client.open(false);
+            client.open(true);
 
             System.out.println("Opened connection to IoT Hub.");
 
-            client.subscribeToMethodsAsync(new SampleMethodCallback(), null, new DirectMethodStatusCallback(), null);
+            client.subscribeToMethods(
+                (methodName, methodData, context) ->
+                {
+                    System.out.println("Received a direct method invocation with name " + methodName + " and payload " + methodData.getPayloadAsJsonString());
+                    return new DirectMethodResponse(200, methodData);
+                },
+                null);
 
-            System.out.println("Subscribed to device method");
-
-            System.out.println("Waiting for method trigger");
+            System.out.println("Successfully subscribed to device method");
         }
-        catch (Exception e)
+        catch (IotHubClientException e)
         {
-            System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
+            System.out.println("Failed to subscribe to direct methods. Error code: " + e.getStatusCode());
             client.close();
             System.out.println("Shutting down...");
+            return;
         }
 
         System.out.println("Press any key to exit...");
 
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
-        client.close();
         System.out.println("Shutting down...");
+        client.close();
     }
 }

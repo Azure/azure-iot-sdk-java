@@ -223,7 +223,6 @@ public class ProvisioningCommon extends IntegrationTest
 
         try
         {
-
             final CountDownLatch registrationLatch = new CountDownLatch(1);
             AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
             AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();

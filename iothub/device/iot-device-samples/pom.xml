@@ -21,7 +21,6 @@
         <module>send-event</module>
         <module>send-batch-events</module>
         <module>send-receive-module-sample</module>
-        <module>send-serialized-event</module>
         <module>handle-messages</module>
         <module>send-receive-sample</module>
         <module>device-twin-sample</module>

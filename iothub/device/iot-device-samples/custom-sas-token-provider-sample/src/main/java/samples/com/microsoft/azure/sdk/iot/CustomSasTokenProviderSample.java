@@ -28,7 +28,6 @@ import java.util.List;
 public class CustomSasTokenProviderSample
 {
     private static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
 
     /**
      * Helper class for turning symmetric keys into SAS tokens. It also provides some helpful functions around
@@ -189,21 +188,6 @@ public class CustomSasTokenProviderSample
         }
     }
 
-    protected static class EventCallback implements MessageSentCallback
-    {
-        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
-        {
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-
-            System.out.println("IoT Hub responded to message "+ sentMessage.getMessageId()  + " with status " + status.name());
-
-            if (status == IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
-            {
-                failedMessageListOnClose.add(sentMessage.getMessageId());
-            }
-        }
-    }
-
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
@@ -252,7 +236,7 @@ public class CustomSasTokenProviderSample
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      * args[3] = path to certificate to enable one-way authentication over ssl. (Not necessary when connecting directly to Iot Hub, but required if connecting to an Edge device using a non public root CA certificate).
      */
-    public static void main(String[] args) throws IOException, IotHubClientException
+    public static void main(String[] args) throws IOException, IotHubClientException, InterruptedException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -324,7 +308,7 @@ public class CustomSasTokenProviderSample
 
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open(false);
+        client.open(true);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending telemetry...");
@@ -339,38 +323,18 @@ public class CustomSasTokenProviderSample
             msg.setContentType("application/json");
             msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
             msg.setMessageId(java.util.UUID.randomUUID().toString());
-            msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
             System.out.println(msgStr);
 
-            EventCallback callback = new EventCallback();
-            client.sendEventAsync(msg, callback, null);
+            client.sendEvent(msg, D2C_MESSAGE_TIMEOUT);
+            System.out.println("Successfully sent the message");
         }
-        catch (Exception e)
+        catch (IotHubClientException e)
         {
-            e.printStackTrace(); // Trace the exception
-        }
-
-        System.out.println("Wait for " + D2C_MESSAGE_TIMEOUT / 1000 + " second(s) for response from the IoT Hub...");
-
-        // Wait for IoT Hub to respond.
-        try
-        {
-            Thread.sleep(D2C_MESSAGE_TIMEOUT);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
+            System.out.println("Failed to send the message. Status code: " + e.getStatusCode());
         }
 
         // close the connection
-        System.out.println("Closing");
+        System.out.println("Closing the client...");
         client.close();
-
-        if (!failedMessageListOnClose.isEmpty())
-        {
-            System.out.println("List of messages that were cancelled on close:" + failedMessageListOnClose.toString());
-        }
-
-        System.out.println("Shutting down...");
     }
 }
