@@ -16,7 +16,8 @@ import java.util.List;
 /** Sends a number of event messages in batch to an IoT Hub. */
 public class SendBatchEvents
 {
-    private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
+    // The maximum amount of time to wait for a message to be sent. Typically, this operation finishes in under a second.
+    private static final int D2C_MESSAGE_TIMEOUT_MILLISECONDS = 10000;
 
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
@@ -173,7 +174,7 @@ public class SendBatchEvents
 
         try
         {
-            client.sendEvents(messageList, D2C_MESSAGE_TIMEOUT);
+            client.sendEvents(messageList, D2C_MESSAGE_TIMEOUT_MILLISECONDS);
             System.out.println("Successfully sent the batch message");
         }
         catch (IotHubClientException e)

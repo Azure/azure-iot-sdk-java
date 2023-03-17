@@ -26,7 +26,8 @@ public class SendReceiveModuleSample
     private static final String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
     private static final String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'mqtt_ws', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
 
-    private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
+    // The maximum amount of time to wait for a message to be sent. Typically, this operation finishes in under a second.
+    private static final int D2C_MESSAGE_TIMEOUT_MILLISECONDS = 10000;
 
     protected static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
@@ -179,9 +180,9 @@ public class SendReceiveModuleSample
                 msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
-                msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
+                msg.setExpiryTime(D2C_MESSAGE_TIMEOUT_MILLISECONDS);
                 System.out.println(msgStr);
-                client.sendEvent(msg, D2C_MESSAGE_TIMEOUT);
+                client.sendEvent(msg, D2C_MESSAGE_TIMEOUT_MILLISECONDS);
                 System.out.println("Successfully sent the message");
             }
             catch (IotHubClientException e)

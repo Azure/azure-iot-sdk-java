@@ -240,6 +240,7 @@ public class Thermostat {
             additionalData);
 
         System.out.println("Waiting for Provisioning Service to register");
+        // Time out after 1 minute of waiting. Typically, this operation only takes a few seconds.
         boolean timedOut = !registrationLatch.await(1, TimeUnit.MINUTES);
         if (timedOut)
         {

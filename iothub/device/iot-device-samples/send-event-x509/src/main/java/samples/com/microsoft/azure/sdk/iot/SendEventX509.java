@@ -39,7 +39,8 @@ public class SendEventX509
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "-----END PRIVATE KEY-----\n";
 
-    private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
+    // The maximum amount of time to wait for a message to be sent. Typically, this operation finishes in under a second.
+    private static final int D2C_MESSAGE_TIMEOUT_MILLISECONDS = 10000;
 
     /**
      * Sends a number of messages to an IoT Hub. Default protocol is to 
@@ -148,7 +149,7 @@ public class SendEventX509
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
                 System.out.println(msgStr);
 
-                client.sendEvent(msg, D2C_MESSAGE_TIMEOUT);
+                client.sendEvent(msg, D2C_MESSAGE_TIMEOUT_MILLISECONDS);
                 System.out.println("Successfully sent the message");
             }
             catch (IotHubClientException e)
