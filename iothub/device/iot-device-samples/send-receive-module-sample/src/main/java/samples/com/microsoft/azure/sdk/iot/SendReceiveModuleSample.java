@@ -26,113 +26,19 @@ public class SendReceiveModuleSample
     private static final String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
     private static final String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'mqtt_ws', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
 
-    private  static final int D2C_MESSAGE_TIMEOUT = 5000; // 5 seconds
-    private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
+    // The maximum amount of time to wait for a message to be sent. Typically, this operation finishes in under a second.
+    private static final int D2C_MESSAGE_TIMEOUT_MILLISECONDS = 10000;
 
-    protected static class EventCallback implements MessageSentCallback
-    {
-        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
-        {
-            Message msg = (Message) context;
-
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-            System.out.println("IoT Hub responded to message "+ msg.getMessageId()  + " with status " + status.name());
-
-            if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
-            {
-                failedMessageListOnClose.add(msg.getMessageId());
-            }
-        }
-    }
-
-    /** Used as a counter in the message callback. */
-    protected static class Counter
-    {
-        protected int num;
-
-        public Counter(int num)
-        {
-            this.num = num;
-        }
-
-        public int get()
-        {
-            return this.num;
-        }
-
-        public void increment()
-        {
-            this.num++;
-        }
-
-        @Override
-        public String toString()
-        {
-            return Integer.toString(this.num);
-        }
-    }
-
-    protected static class MessageCallback
-            implements com.microsoft.azure.sdk.iot.device.MessageCallback
-    {
-        public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg,
-                                                                  Object context)
-        {
-            Counter counter = (Counter) context;
-            System.out.println(
-                    "Received message " + counter.toString()
-                            + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
-            for (MessageProperty messageProperty : msg.getProperties())
-            {
-                System.out.println(messageProperty.getName() + " : " + messageProperty.getValue());
-            }
-
-            int switchVal = counter.get() % 3;
-            IotHubMessageResult res;
-            switch (switchVal)
-            {
-                case 0:
-                    res = IotHubMessageResult.COMPLETE;
-                    break;
-                case 1:
-                    res = IotHubMessageResult.ABANDON;
-                    break;
-                case 2:
-                    res = IotHubMessageResult.REJECT;
-                    break;
-                default:
-                    // should never happen.
-                    throw new IllegalStateException(
-                            "Invalid message result specified.");
-            }
-
-            System.out.println(
-                    "Responding to message " + counter.toString()
-                            + " with " + res.name());
-
-            counter.increment();
-
-            return res;
-        }
-    }
-
-    // Our MQTT doesn't support abandon/reject, so we will only display the messaged received
-    // from IoTHub and return COMPLETE
-    protected static class MessageCallbackMqtt implements com.microsoft.azure.sdk.iot.device.MessageCallback
+    protected static class MessageCallback implements com.microsoft.azure.sdk.iot.device.MessageCallback
     {
         public IotHubMessageResult onCloudToDeviceMessageReceived(Message msg, Object context)
         {
-            Counter counter = (Counter) context;
             System.out.println(
-                    "Received message " + counter.toString()
-                            + " with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
-            for (MessageProperty messageProperty : msg.getProperties())
-            {
-                System.out.println(messageProperty.getName() + " : " + messageProperty.getValue());
-            }
+                "Received message with content: " + new String(msg.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET));
 
-            counter.increment();
-
+            // Other options here are to ABANDON the message (IoT hub will requeue it and send it again later)
+            // or to REJECT the message (IoT hub will not requeue it). Note that clients using MQTT or MQTT_WS
+            // cannot ABANDON or REJECT messages.
             return IotHubMessageResult.COMPLETE;
         }
     }
@@ -185,7 +91,7 @@ public class SendReceiveModuleSample
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      * args[3] = path to certificate to enable one-way authentication over ssl for amqps (optional, default shall be used if unspecified).
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, IotHubClientException
+    public static void main(String[] args) throws IOException, URISyntaxException, IotHubClientException, InterruptedException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -247,24 +153,13 @@ public class SendReceiveModuleSample
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        if (protocol == IotHubClientProtocol.MQTT)
-        {
-            MessageCallbackMqtt callback = new MessageCallbackMqtt();
-            Counter counter = new Counter(0);
-            client.setMessageCallback(callback, counter);
-        }
-        else
-        {
-            MessageCallback callback = new MessageCallback();
-            Counter counter = new Counter(0);
-            client.setMessageCallback(callback, counter);
-        }
+        client.setMessageCallback(new MessageCallback(), null);
 
         System.out.println("Successfully set message callback.");
 
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open(false);
+        client.open(true);
 
         System.out.println("Opened connection to IoT Hub.");
 
@@ -272,16 +167,12 @@ public class SendReceiveModuleSample
 
         System.out.println("Sending the following event messages: ");
 
-        String deviceId = "MyJavaDevice";
-        double temperature;
-        double humidity;
-
         for (int i = 0; i < numRequests; ++i)
         {
-            temperature = 20 + Math.random() * 10;
-            humidity = 30 + Math.random() * 20;
+            double temperature = 20 + Math.random() * 10;
+            double humidity = 30 + Math.random() * 20;
 
-            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
+            String msgStr = "{\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
 
             try
             {
@@ -289,43 +180,23 @@ public class SendReceiveModuleSample
                 msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
-                msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
+                msg.setExpiryTime(D2C_MESSAGE_TIMEOUT_MILLISECONDS);
                 System.out.println(msgStr);
-                EventCallback eventCallback = new EventCallback();
-                client.sendEventAsync(msg, eventCallback, msg);
+                client.sendEvent(msg, D2C_MESSAGE_TIMEOUT_MILLISECONDS);
+                System.out.println("Successfully sent the message");
             }
-            catch (Exception e)
+            catch (IotHubClientException e)
             {
-                e.printStackTrace(); // Trace the exception
+                System.out.println("Failed to send the message. Status code: " + e.getStatusCode());
             }
         }
 
-        System.out.println("Wait for " + D2C_MESSAGE_TIMEOUT / 1000 + " second(s) for response from the IoT Hub...");
-
-        // Wait for IoT Hub to respond.
-        try
-        {
-            Thread.sleep(D2C_MESSAGE_TIMEOUT);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-
-        System.out.println("In receive mode. Waiting for receiving C2D messages (only for MQTT and AMQP). Press ENTER to close. To receive in Https, send message and then start the sample.");
-
+        System.out.println("In receive mode. Waiting for receiving C2D messages. Press any key to exit.");
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
 
         // close the connection
-        System.out.println("Closing");
+        System.out.println("Closing the client...");
         client.close();
-
-        if (!failedMessageListOnClose.isEmpty())
-        {
-            System.out.println("List of messages that were cancelled on close:" + failedMessageListOnClose.toString());
-        }
-
-        System.out.println("Shutting down...");
     }
 }

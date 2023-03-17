@@ -16,24 +16,8 @@ import java.util.List;
 /** Sends a number of event messages in batch to an IoT Hub. */
 public class SendBatchEvents
 {
-    private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private  static final List<Message> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
-
-    // Sample can safely assume the context will always be a List<Message> so the cast is safe
-    @SuppressWarnings("unchecked")
-    protected static class MessagesSentCallbackImpl implements MessagesSentCallback
-    {
-        public void onMessagesSent(List<Message> messages, IotHubClientException exception, Object context)
-        {
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-            System.out.println("IoT Hub responded to the batch message with status " + status.name());
-
-            if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
-            {
-                failedMessageListOnClose.addAll(messages);
-            }
-        }
-    }
+    // The maximum amount of time to wait for a message to be sent. Typically, this operation finishes in under a second.
+    private static final int D2C_MESSAGE_TIMEOUT_MILLISECONDS = 10000;
 
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
@@ -83,7 +67,7 @@ public class SendBatchEvents
      * args[2] = protocol (optional, one of 'mqtt' or 'amqps' or 'https' or 'amqps_ws')
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException, IotHubClientException
+        throws IOException, URISyntaxException, IotHubClientException, InterruptedException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -164,67 +148,42 @@ public class SendBatchEvents
 
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open(false);
+        client.open(true);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the following event messages in batch:");
-
-        String deviceId = "MyJavaDevice";
-        double temperature;
-        double humidity;
 
         List<Message> messageList = new ArrayList<>();
 
         for (int i = 0; i < numRequests; ++i)
         {
-            temperature = 20 + Math.random() * 10;
-            humidity = 30 + Math.random() * 20;
+            double temperature = 20 + Math.random() * 10;
+            double humidity = 30 + Math.random() * 20;
 
-            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
+            String msgStr = "{\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
 
-                Message msg = new Message(msgStr);
-                msg.setContentType("application/json");
-                msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
-                msg.setMessageId(java.util.UUID.randomUUID().toString());
-                msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
+            Message msg = new Message(msgStr);
+            msg.setContentType("application/json");
+            msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
+            msg.setMessageId(java.util.UUID.randomUUID().toString());
 
-                System.out.println(msgStr);
+            System.out.println(msgStr);
 
-                messageList.add(msg);
+            messageList.add(msg);
         }
 
         try
         {
-            MessagesSentCallbackImpl messagesSentCallbackImpl = new MessagesSentCallbackImpl();
-            client.sendEventsAsync(messageList, messagesSentCallbackImpl, null);
+            client.sendEvents(messageList, D2C_MESSAGE_TIMEOUT_MILLISECONDS);
+            System.out.println("Successfully sent the batch message");
         }
-        catch (Exception e)
+        catch (IotHubClientException e)
         {
-            e.printStackTrace(); // Trace the exception
-        }
-
-        System.out.println("Wait for " + D2C_MESSAGE_TIMEOUT / 1000 + " second(s) for response from the IoT Hub...");
-
-        // Wait for IoT Hub to respond.
-        try
-        {
-            Thread.sleep(D2C_MESSAGE_TIMEOUT);
-        }
-
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
+            System.out.println("Failed to send the batch message. Status code: " + e.getStatusCode());
         }
 
         // close the connection
-        System.out.println("Closing");
+        System.out.println("Closing the client...");
         client.close();
-
-        if (!failedMessageListOnClose.isEmpty())
-        {
-            System.out.println("List of messages that were cancelled on close:" + failedMessageListOnClose.toString());
-        }
-
-        System.out.println("Shutting down...");
     }
 }

@@ -39,22 +39,8 @@ public class SendEventX509
             "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n" +
             "-----END PRIVATE KEY-----\n";
 
-    private  static final int D2C_MESSAGE_TIMEOUT = 2000; // 2 seconds
-    private  static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
-  
-    protected static class EventCallback implements MessageSentCallback
-    {
-        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
-        {
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-            System.out.println("IoT Hub responded to message "+ sentMessage.getMessageId()  + " with status " + status.name());
-            
-            if (status== IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
-            {
-                failedMessageListOnClose.add(sentMessage.getMessageId());
-            }
-        }
-    }
+    // The maximum amount of time to wait for a message to be sent. Typically, this operation finishes in under a second.
+    private static final int D2C_MESSAGE_TIMEOUT_MILLISECONDS = 10000;
 
     /**
      * Sends a number of messages to an IoT Hub. Default protocol is to 
@@ -65,7 +51,7 @@ public class SendEventX509
      * args[1] = number of requests to send
      * args[2] = IoT Hub protocol to use, optional and defaults to MQTT
      */
-    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException, IotHubClientException
+    public static void main(String[] args) throws IOException, URISyntaxException, GeneralSecurityException, IotHubClientException, InterruptedException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -143,21 +129,17 @@ public class SendEventX509
 
         System.out.println("Successfully created an IoT Hub client.");
 
-        client.open(false);
+        client.open(true);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the following event messages:");
 
-        String deviceId = "MyJavaDevice";
-        double temperature;
-        double humidity;
-
         for (int i = 0; i < numRequests; ++i)
         {
-            temperature = 20 + Math.random() * 10;
-            humidity = 30 + Math.random() * 20;
+            double temperature = 20 + Math.random() * 10;
+            double humidity = 30 + Math.random() * 20;
 
-            String msgStr = "{\"deviceId\":\"" + deviceId +"\",\"messageId\":" + i + ",\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
+            String msgStr = "{\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
             
             try
             {
@@ -165,39 +147,19 @@ public class SendEventX509
                 msg.setContentType("application/json");
                 msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
                 msg.setMessageId(java.util.UUID.randomUUID().toString());
-                msg.setExpiryTime(D2C_MESSAGE_TIMEOUT);
                 System.out.println(msgStr);
 
-                EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, null);
+                client.sendEvent(msg, D2C_MESSAGE_TIMEOUT_MILLISECONDS);
+                System.out.println("Successfully sent the message");
             }
-            catch (Exception e)
+            catch (IotHubClientException e)
             {
-                 e.printStackTrace();
+                System.out.println("Failed to send the message. Status code: " + e.getStatusCode());
             }
         }
         
-        System.out.println("Wait for " + D2C_MESSAGE_TIMEOUT / 1000 + " second(s) for response from the IoT Hub...");
-        
-        // Wait for IoT Hub to respond.
-        try
-        {
-          Thread.sleep(D2C_MESSAGE_TIMEOUT);
-        }
-        catch (InterruptedException e)
-        {
-          e.printStackTrace();
-        }
-
-        // close the connection        
-        System.out.println("Closing"); 
+        // close the connection
+        System.out.println("Closing the client...");
         client.close();
-        
-        if (!failedMessageListOnClose.isEmpty())
-        {
-            System.out.println("List of messages that were cancelled on close:" + failedMessageListOnClose.toString()); 
-        }
-
-        System.out.println("Shutting down...");
     }
 }

@@ -18,21 +18,8 @@ import java.util.List;
 /** Sends a number of event messages to an IoT Hub. */
 public class SendEventWithProxy
 {
-    private static final List<String> failedMessageListOnClose = new ArrayList<>(); // List of messages that failed on close
-
-    protected static class EventCallback implements MessageSentCallback
-    {
-        public void onMessageSent(Message sentMessage, IotHubClientException exception,  Object context)
-        {
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-            System.out.println("IoT Hub responded to message "+ sentMessage.getMessageId()  + " with status " + status.name());
-
-            if (status==IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE)
-            {
-                failedMessageListOnClose.add(sentMessage.getMessageId());
-            }
-        }
-    }
+    // The maximum amount of time to wait for a message to be sent. Typically, this operation finishes in under a second.
+    private static final int D2C_MESSAGE_TIMEOUT_MILLISECONDS = 10000;
 
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
@@ -86,7 +73,7 @@ public class SendEventWithProxy
      * args[6] = (optional) proxy password
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException, IotHubClientException
+        throws IOException, URISyntaxException, IotHubClientException, InterruptedException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -192,56 +179,27 @@ public class SendEventWithProxy
         ClientOptions clientOptions = ClientOptions.builder().proxySettings(httpProxySettings).build();
         DeviceClient client = new DeviceClient(connString, protocol, clientOptions);
 
-
         System.out.println("Successfully created an IoT Hub client.");
 
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
-        client.open(false);
+        client.open(true);
 
         System.out.println("Opened connection to IoT Hub.");
         System.out.println("Sending the following event messages:");
 
-        for (int i = 0; i < numRequests; ++i)
-        {
-            String msgStr = "This is a message sent over proxy";
-
-            try
-            {
-                Message msg = new Message(msgStr);
-                System.out.println(msgStr);
-
-                EventCallback callback = new EventCallback();
-                client.sendEventAsync(msg, callback, null);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace(); // Trace the exception
-            }
-        }
-
-        System.out.println("Wait for a response from the IoT Hub...");
-
-        // Wait for IoT Hub to respond.
         try
         {
-            System.out.println("Waiting 10 seconds for all responses to return...");
-            Thread.sleep(10000);
+            client.sendEvent(new Message("This is a message sent over proxy"), D2C_MESSAGE_TIMEOUT_MILLISECONDS);
+            System.out.println("Successfully sent the message");
         }
-        catch (InterruptedException e)
+        catch (IotHubClientException e)
         {
-            e.printStackTrace();
+            System.out.println("Failed to send the message. Status code: " + e.getStatusCode());
         }
 
         // close the connection
-        System.out.println("Closing");
+        System.out.println("Closing the client...");
         client.close();
-
-        if (!failedMessageListOnClose.isEmpty())
-        {
-            System.out.println("List of messages that were cancelled on close:" + failedMessageListOnClose.toString());
-        }
-
-        System.out.println("Shutting down...");
     }
 }

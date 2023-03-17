@@ -58,7 +58,7 @@ public class UnixDomainSocketSample
         UnixDomainSocketChannel unixDomainSocketChannel = new UnixDomainSocketChannelImpl();
 
         ModuleClient moduleClient = ModuleClient.createFromEnvironment(unixDomainSocketChannel);
-        moduleClient.open(false);
+        moduleClient.open(true);
 
         // perform module operations. See other samples for examples of what this looks like
 

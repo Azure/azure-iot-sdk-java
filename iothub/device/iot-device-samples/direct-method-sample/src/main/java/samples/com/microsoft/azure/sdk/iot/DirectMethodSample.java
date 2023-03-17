@@ -17,58 +17,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 /**
- * Device Method Sample for an IoT Hub. Default protocol is to use
+ * Direct Method Sample for an IoT Hub. Default protocol is to use
  * MQTT transport.
  */
 public class DirectMethodSample
 {
-    private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
-    private static final int METHOD_SUCCESS = 200;
-    private static final int METHOD_HUNG = 300;
-    private static final int METHOD_NOT_FOUND = 404;
-    private static final int METHOD_NOT_DEFINED = 404;
-
-    private static int method_command(Object command)
-    {
-        System.out.println("invoking command on this device");
-        // Insert code to invoke command here
-        return METHOD_SUCCESS;
-    }
-
-    private static int method_default(Object data)
-    {
-        System.out.println("invoking default method for this device");
-        // Insert device specific code here
-        return METHOD_NOT_DEFINED;
-    }
-
-    protected static class DirectMethodStatusCallback implements SubscriptionAcknowledgedCallback
-    {
-        public void onSubscriptionAcknowledged(IotHubClientException exception, Object context)
-        {
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-            System.out.println("IoT Hub responded to device method operation with status " + status.name());
-        }
-    }
-
-    protected static class SampleMethodCallback implements MethodCallback
-    {
-        @Override
-        public DirectMethodResponse onMethodInvoked(String methodName, DirectMethodPayload methodData, Object context)
-        {
-            DirectMethodResponse deviceMethodData;
-            int status = method_default(methodData);
-            if ("command".equals(methodName))
-            {
-                status = method_command(methodData);
-            }
-
-            deviceMethodData = new DirectMethodResponse(status, methodData);
-
-            return deviceMethodData;
-        }
-    }
-
     protected static class IotHubConnectionStatusChangeCallbackLogger implements IotHubConnectionStatusChangeCallback
     {
         @Override
@@ -115,11 +68,10 @@ public class DirectMethodSample
      * args[0] = IoT Hub connection string
      */
     public static void main(String[] args)
-            throws IOException, URISyntaxException
+        throws IOException, URISyntaxException, IotHubClientException, InterruptedException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
-
 
         if (args.length < 1)
         {
@@ -180,23 +132,26 @@ public class DirectMethodSample
 
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
+        client.open(true);
+
         try
         {
-            client.open(false);
-
             System.out.println("Opened connection to IoT Hub.");
-
-            client.subscribeToMethodsAsync(new SampleMethodCallback(), null, new DirectMethodStatusCallback(), null);
-
-            System.out.println("Subscribed to device method");
-
-            System.out.println("Waiting for method trigger");
+            client.subscribeToMethods(
+                (methodName, methodData, context) ->
+                {
+                    System.out.println("Received a direct method invocation with name " + methodName + " and payload " + methodData.getPayloadAsJsonString());
+                    return new DirectMethodResponse(200, methodData);
+                },
+                null);
+            System.out.println("Successfully subscribed to direct methods");
         }
-        catch (Exception e)
+        catch (IotHubClientException e)
         {
-            System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
+            System.out.println("Failed to subscribe to direct methods. Error code: " + e.getStatusCode());
             client.close();
             System.out.println("Shutting down...");
+            return;
         }
 
         System.out.println("Press any key to exit...");
@@ -205,6 +160,5 @@ public class DirectMethodSample
         scanner.nextLine();
         client.close();
         System.out.println("Shutting down...");
-
     }
 }

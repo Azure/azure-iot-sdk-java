@@ -23,7 +23,10 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubStatusCode.OK;
 
@@ -217,41 +220,53 @@ public class Thermostat {
     {
         SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(StandardCharsets.UTF_8), registrationId);
         ProvisioningDeviceClient provisioningDeviceClient;
-        ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
         provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, scopeId, provisioningProtocol, securityClientSymmetricKey);
 
         AdditionalData additionalData = new AdditionalData();
         additionalData.setProvisioningPayload(String.format("{\"modelId\": \"%s\"}", MODEL_ID));
 
-        provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus, additionalData);
-
-        while (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
-        {
-            if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ERROR ||
-                    provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_DISABLED ||
-                    provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_FAILED)
+        final CountDownLatch registrationLatch = new CountDownLatch(1);
+        AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
+        AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
+        provisioningDeviceClient.registerDevice(
+            (provisioningDeviceClientRegistrationResult, e, context) ->
             {
-                provisioningStatus.exception.printStackTrace();
-                System.out.println("Registration error, bailing out");
-                break;
-            }
-            System.out.println("Waiting for Provisioning Service to register");
-            Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
+                registrationResultReference.set(provisioningDeviceClientRegistrationResult);
+                registrationExceptionReference.set(e);
+                registrationLatch.countDown();
+            },
+            null,
+            additionalData);
+
+        System.out.println("Waiting for Provisioning Service to register");
+        // Time out after 1 minute of waiting. Typically, this operation only takes a few seconds.
+        boolean timedOut = !registrationLatch.await(1, TimeUnit.MINUTES);
+        if (timedOut)
+        {
+            throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for provisioning to finish");
+        }
+
+        ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
+        Exception registrationException = registrationExceptionReference.get();
+
+        if (registrationException != null)
+        {
+            throw new IotHubClientException(IotHubStatusCode.ERROR, "Provisioning failed: " + registrationResult.getStatus());
         }
 
         ClientOptions options = ClientOptions.builder().modelId(MODEL_ID).build();
 
-        if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED) {
-            System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
-            System.out.println("Device ID : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
+        if (registrationResult.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED) {
+            System.out.println("IotHUb Uri : " + registrationResult.getIothubUri());
+            System.out.println("Device ID : " + registrationResult.getDeviceId());
 
-            String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
-            String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
+            String iotHubUri = registrationResult.getIothubUri();
+            String deviceId = registrationResult.getDeviceId();
 
             log.debug("Opening the device client.");
             deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT, options);
-            deviceClient.open(false);
+            deviceClient.open(true);
         }
     }
 
@@ -287,7 +302,7 @@ public class Thermostat {
             }
         }, deviceClient);
 
-        deviceClient.open(false);
+        deviceClient.open(true);
     }
 
     /**

@@ -4,6 +4,7 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 
@@ -25,7 +26,7 @@ public class ModuleTwinSample
     private static final String SAMPLE_USAGE_WITH_WRONG_ARGS = "Expected 2 or 3 arguments but received: %d.\n" + SAMPLE_USAGE;
     private static final String SAMPLE_USAGE_WITH_INVALID_PROTOCOL = "Expected argument 2 to be one of 'mqtt', 'amqps' or 'amqps_ws' but received %s\n" + SAMPLE_USAGE;
 
-    private enum LIGHTS{ ON, OFF }
+    private enum LIGHTS { ON, OFF }
 
     private static Twin twin;
 
@@ -95,7 +96,7 @@ public class ModuleTwinSample
      * @param args 
      * args[0] = IoT Hub connection string
      */
-    public static void main(String[] args) throws IOException, URISyntaxException
+    public static void main(String[] args) throws IOException, URISyntaxException, IotHubClientException, InterruptedException
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
@@ -148,10 +149,11 @@ public class ModuleTwinSample
 
         client.setConnectionStatusChangeCallback(new IotHubConnectionStatusChangeCallbackLogger(), new Object());
 
+        System.out.println("Opening connection to IoT Hub.");
+        client.open(true);
+
         try
         {
-            System.out.println("Open connection to IoT Hub.");
-            client.open(false);
 
             System.out.println("Subscribing to desired properties");
             client.subscribeToDesiredProperties(new DesiredPropertiesUpdatedHandler(), null);
@@ -197,20 +199,19 @@ public class ModuleTwinSample
             System.out.println("Current twin:");
             System.out.println(twin);
         }
-        catch (Exception e)
+        catch (IotHubClientException e)
         {
-            System.out.println("On exception, shutting down \n" + " Cause: " + e.getCause() + " \n" +  e.getMessage());
+            System.out.println("Failed to perform a twin operation. Error code: " + e.getStatusCode());
             client.close();
             System.out.println("Shutting down...");
+            return;
         }
 
         System.out.println("Press any key to exit...");
 
         Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
         scanner.nextLine();
-
-        client.close();
-
         System.out.println("Shutting down...");
+        client.close();
     }
 }
