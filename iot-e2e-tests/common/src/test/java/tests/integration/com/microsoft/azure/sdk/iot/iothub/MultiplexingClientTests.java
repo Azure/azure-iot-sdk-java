@@ -911,7 +911,8 @@ public class MultiplexingClientTests extends IntegrationTest
         Twin serviceClientTwin = twinClientServiceClient.get(deviceClient.getConfig().getDeviceId());
 
         com.microsoft.azure.sdk.iot.service.twin.TwinCollection retrievedReportedProperties = serviceClientTwin.getReportedProperties();
-        assertTrue(retrievedReportedProperties.size() > 0);
+        assertTrue("Twin had no reported properties", retrievedReportedProperties.size() > 0);
+        assertEquals("Twin had more reported properties than expected", 1, retrievedReportedProperties.size());
         String retrievedReportedPropertyKey = retrievedReportedProperties.keySet().iterator().next();
         assertEquals(expectedPropertyKey, retrievedReportedPropertyKey);
         String actualReportedPropertyValue = (String) retrievedReportedProperties.get(retrievedReportedPropertyKey);
