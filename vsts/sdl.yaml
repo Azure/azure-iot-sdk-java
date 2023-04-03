@@ -32,15 +32,6 @@ jobs:
       suppressionsFile: vsts/CredScanSuppressions.json
       toolMajorVersion: V3
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
-    displayName: AutoApplicability
-    inputs:
-      ApplyRules: All
-      VerboseWriter: true
-      ExternalRelease: true
-      InternalRelease: true
-      UsesHSM: true
-
     ## Spotbugs doesn't have a false positive list, but instead recommends annotating the lines of code in question
     ## with annotations like @SuppressFBWarnings("MS_SHOULD_BE_FINAL")
   - powershell: ./vsts/spotbugs.ps1
@@ -78,16 +69,16 @@ jobs:
       SignatureFreshness: 'UpToDate'
       TreatStaleSignatureAs: 'Error'
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@3
     displayName: 'Publish Security Analysis Logs'
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@1
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-postanalysis.PostAnalysis@2
     displayName: 'Post Analysis'
     inputs:
       CredScan: true
       Semmle: true
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@1
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@2
     displayName: 'TSA upload'
     inputs:
       tsaVersion: TsaV2
@@ -95,7 +86,7 @@ jobs:
       tsaEnvironment: PROD
       codeBaseName: 'Azure-Iot-SDK-Java-Master'
       notificationAlias: 'aziotdndmgdsdk@microsoft.com'
-      codeBaseAdmins: 'REDMOND\timtay;REDMOND\jamdavi;REDMOND\azabbasi'
+      codeBaseAdmins: 'REDMOND\timtay;'
       instanceUrlForTsaV2: MSAZURE
       projectNameMSAZURE: One
       areaPath: 'One\IoT\Platform and Devices\IoT Devices\SDKs\Managed'
