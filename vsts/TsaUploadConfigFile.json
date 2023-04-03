@@ -6,8 +6,8 @@
   "codebaseAdmins": [
     "REDMOND\\andykwong",
     "REDMOND\\drwill",
-	"REDMOND\\timtay",
-	"REDMOND\\abmisr"
+    "REDMOND\\timtay",
+    "REDMOND\\abmisr"
   ],
   "instanceUrl": "https://msazure.visualstudio.com/defaultcollection",
   "projectName": "One",
