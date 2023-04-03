@@ -30,7 +30,6 @@ jobs:
     inputs:
       debugMode: false
       suppressionsFile: vsts/CredScanSuppressions.json
-      toolMajorVersion: V3
 
     ## Spotbugs doesn't have a false positive list, but instead recommends annotating the lines of code in question
     ## with annotations like @SuppressFBWarnings("MS_SHOULD_BE_FINAL")
@@ -86,7 +85,7 @@ jobs:
       tsaEnvironment: PROD
       codeBaseName: 'Azure-Iot-SDK-Java-Master'
       notificationAlias: 'aziotdndmgdsdk@microsoft.com'
-      codeBaseAdmins: 'REDMOND\timtay;'
+      codeBaseAdmins: 'REDMOND\timtay;REDMOND\andykwong'
       instanceUrlForTsaV2: MSAZURE
       projectNameMSAZURE: One
       areaPath: 'One\IoT\Platform and Devices\IoT Devices\SDKs\Managed'
