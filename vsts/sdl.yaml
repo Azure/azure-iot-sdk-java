@@ -25,12 +25,12 @@ jobs:
       alertWarningLevel: High
       failOnAlert: true
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
     displayName: CredScan
     inputs:
       debugMode: false
       suppressionsFile: vsts/CredScanSuppressions.json
-      toolMajorVersion: V2
+      toolMajorVersion: V3
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-autoapplicability.AutoApplicability@1
     displayName: AutoApplicability
@@ -40,9 +40,6 @@ jobs:
       ExternalRelease: true
       InternalRelease: true
       UsesHSM: true
-
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-vulnerabilityassessment.VulnerabilityAssessment@0
-    displayName: 'Vulnerability Assessment'
 
     ## Spotbugs doesn't have a false positive list, but instead recommends annotating the lines of code in question
     ## with annotations like @SuppressFBWarnings("MS_SHOULD_BE_FINAL")
@@ -67,7 +64,7 @@ jobs:
       ram: '16384'
       addProjectDirToScanningExclusionList: true
 
-  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@1
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
     displayName: PoliCheck
     inputs:
       targetType: F
