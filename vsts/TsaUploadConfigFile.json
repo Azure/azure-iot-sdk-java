@@ -1,0 +1,17 @@
+{
+  "codebaseName": "Azure-Iot-SDK-Java-Master",
+  "notificationAliases": [
+    "AzIoTEdMgdSdk@microsoft.com"
+  ],
+  "codebaseAdmins": [
+    "REDMOND\\andykwong",
+    "REDMOND\\drwill",
+	"REDMOND\\timtay",
+	"REDMOND\\abmisr"
+  ],
+  "instanceUrl": "https://msazure.visualstudio.com/defaultcollection",
+  "projectName": "One",
+  "areaPath": "One\\IoT\\Platform and Devices\\IoT Devices\\SDKs\\Managed",
+  "iterationPath": "One\\Custom\\IoT\\Backlog",
+  "allTools": true
+}
