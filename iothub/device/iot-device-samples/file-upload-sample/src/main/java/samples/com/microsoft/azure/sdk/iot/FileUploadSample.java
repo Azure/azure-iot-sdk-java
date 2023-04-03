@@ -94,7 +94,9 @@ public class FileUploadSample
     }
 
     private static void uploadFileOrDirectory(DeviceClient client, String fullFileName) throws IOException, URISyntaxException, IotHubClientException {
-        File file = new File(fullFileName);
+        // Semmle flags this as a security issue as it accesses a file based on user input, but
+        // that is the point of this sample, so the warning can be suppressed
+        File file = new File(fullFileName); // lgtm
         if(file.isDirectory())
         {
             uploadFileOrDirectoryRecursive(client, file.getPath(), "");
