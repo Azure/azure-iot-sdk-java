@@ -18,4 +18,8 @@ public class AdditionalData
     @Getter
     @Setter
     private String provisioningPayload;
+
+    @Getter
+    @Setter
+    public String operationalCertificateRequest;
 }
