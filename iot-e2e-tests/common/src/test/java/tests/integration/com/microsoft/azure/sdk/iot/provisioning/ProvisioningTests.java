@@ -113,7 +113,13 @@ public class ProvisioningTests extends ProvisioningCommon
     private void basicRegistrationFlow(EnrollmentType enrollmentType) throws Exception
     {
         testInstance.securityProvider = getSecurityProviderInstance(enrollmentType);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, false, null, null, null);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, false, null, false, null);
+    }
+
+    private void basicRegistrationFlowUsingOperationalClientCertificate(EnrollmentType enrollmentType) throws Exception
+    {
+        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, false, null, true, null);
     }
 
     private void enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType enrollmentType) throws Exception
@@ -165,7 +171,7 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTrue("Expected an exception to be thrown due to invalid server certificates", expectedExceptionEncountered);
     }
 
-    // TODO -- move these to ProvisioningCommon.java?
+    // TODO -- move these to ProvisioningCommon.jafva
     private String GenerateClientCertKeyPairAndCsr(String registrationId)
     {
         return "";

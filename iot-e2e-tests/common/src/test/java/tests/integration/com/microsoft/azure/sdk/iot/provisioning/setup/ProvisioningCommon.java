@@ -315,18 +315,18 @@ public class ProvisioningCommon extends IntegrationTest
         assertFalse(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Expected uri", getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), testInstance.provisionedIotHubUri.isEmpty());
     }
 
-    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, String jsonPayload, String... expectedIotHubsToProvisionTo) throws Exception
+    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, String jsonPayload, boolean connectUsingOperationalCertificate, String... expectedIotHubsToProvisionTo) throws Exception
     {
         ArrayList<String> expectedHubsToProvisionTo = new ArrayList<>(Arrays.asList(expectedIotHubsToProvisionTo));
-        return registerDevice(protocol, securityProvider, globalEndpoint, withRetry, expectedHubsToProvisionTo, jsonPayload);
+        return registerDevice(protocol, securityProvider, globalEndpoint, withRetry, expectedHubsToProvisionTo, jsonPayload, connectUsingOperationalCertificate);
     }
 
-    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, List<String> expectedIotHubsToProvisionTo) throws Exception
+    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, List<String> expectedIotHubsToProvisionTo, boolean connectUsingOperationalCertificate) throws Exception
     {
-        return registerDevice(protocol, securityProvider, globalEndpoint, withRetry, expectedIotHubsToProvisionTo, null);
+        return registerDevice(protocol, securityProvider, globalEndpoint, withRetry, expectedIotHubsToProvisionTo, connectUsingOperationalCertificate);
     }
 
-    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, List<String> expectedIotHubsToProvisionTo, String jsonPayload) throws Exception
+    public ProvisioningStatus registerDevice(ProvisioningDeviceClientTransportProtocol protocol, SecurityProvider securityProvider, String globalEndpoint, boolean withRetry, List<String> expectedIotHubsToProvisionTo, String jsonPayload, boolean connectUsingOperationalCertificate) throws Exception
     {
         ProvisioningStatus provisioningStatus = null;
         long startTime = System.currentTimeMillis();
