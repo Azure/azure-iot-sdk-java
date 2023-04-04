@@ -134,7 +134,7 @@ public class ProvisioningTests extends ProvisioningCommon
         // Register identity
         try
         {
-            registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpointWithInvalidCert, false, null, null, null);
+            registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpointWithInvalidCert, false, null, false, null);
         }
         catch (Exception | AssertionError e)
         {
@@ -171,7 +171,7 @@ public class ProvisioningTests extends ProvisioningCommon
         assertTrue("Expected an exception to be thrown due to invalid server certificates", expectedExceptionEncountered);
     }
 
-    // TODO -- move these to ProvisioningCommon.jafva
+    // TODO -- move these to ProvisioningCommon.java?
     private String GenerateClientCertKeyPairAndCsr(String registrationId)
     {
         return "";
