@@ -164,4 +164,15 @@ public class ProvisioningTests extends ProvisioningCommon
 
         assertTrue("Expected an exception to be thrown due to invalid server certificates", expectedExceptionEncountered);
     }
+
+    // TODO -- move these to ProvisioningCommon.java?
+    private String GenerateClientCertKeyPairAndCsr(String registrationId)
+    {
+        return "";
+    }
+
+    private void CleanupCerts()
+    {
+        return;
+    }
 }
