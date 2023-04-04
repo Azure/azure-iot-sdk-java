@@ -68,7 +68,9 @@ public class FileUploadSimpleSample
 
         try
         {
-            File file = new File(fullFileName);
+            // Semmle flags this as a security issue as it accesses a file based on user input, but
+            // that is the point of this sample, so the warning can be suppressed
+            File file = new File(fullFileName); // lgtm
             if (file.isDirectory())
             {
                 throw new IllegalArgumentException(fullFileName + " is a directory, please provide a single file name, or use the FileUploadSample to upload directories.");
