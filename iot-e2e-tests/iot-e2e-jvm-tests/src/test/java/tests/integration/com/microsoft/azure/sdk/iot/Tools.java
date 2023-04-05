@@ -3,29 +3,13 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot;
 
-import com.azure.core.credential.TokenCredential;
-import com.azure.identity.ClientSecretCredentialBuilder;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.query.QueryClient;
-import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 public class Tools

@@ -106,11 +106,6 @@
                 <version>2.7</version> <!--samples only-->
             </dependency>
             <dependency>
-                <groupId>com.azure</groupId>
-                <artifactId>azure-identity</artifactId>
-                <version>1.4.0</version> <!--e2e tests and samples only-->
-            </dependency>
-            <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
                 <version>4.1.86.Final</version> <!--e2e tests and samples only-->
