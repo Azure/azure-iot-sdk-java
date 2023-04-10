@@ -40,7 +40,7 @@ public class DeviceDeletionSample
     /**
      * A simple sample for deleting all devices from an iothub
      */
-    public static void main(String[] args) throws InterruptedException
+    public static void main(String[] args) throws InterruptedException, Exception
     {
         if (args.length != 1 && args.length != 2)
         {
@@ -52,6 +52,10 @@ public class DeviceDeletionSample
             return;
         }
 
+        if ((args[0] == null || args[0].isEmpty()) && (args[1] == null || args[1].isEmpty()))
+        {
+            throw new Exception("No connection string info provided");
+        }
 
         String iotHubConnString = args[0];
         Thread hubCleanupRunnable = null;
