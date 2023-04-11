@@ -223,41 +223,27 @@ public class ProvisioningCommon extends IntegrationTest
 
         try
         {
-            final CountDownLatch registrationLatch = new CountDownLatch(1);
-            AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
-            AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
-            provisioningDeviceClient.registerDevice(
-                (provisioningDeviceClientRegistrationResult, e, context) ->
-                {
-                    registrationResultReference.set(provisioningDeviceClientRegistrationResult);
-                    registrationExceptionReference.set(e);
-                    registrationLatch.countDown();
-                },
-                null);
-
-            // Wait until registration finishes or for a max amount of time
-            boolean timedOut = !registrationLatch.await(MAX_TIME_TO_WAIT_FOR_REGISTRATION_SECONDS, TimeUnit.SECONDS);
-            if (timedOut)
+            ProvisioningDeviceClientRegistrationResult registrationResult;
+            try
             {
-                fail("Timed out waiting for device registration to complete.");
+                registrationResult = provisioningDeviceClient.registerDeviceSync();
             }
-
-            ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
-            Exception registrationException = registrationExceptionReference.get();
-
-            if (registrationException != null)
+            catch (Exception e)
             {
-                String errorContext = "";
-                errorContext += " Status=" + registrationResult.getStatus();
-                errorContext += " Substatus=" + registrationResult.getSubstatus();
-                if (registrationException instanceof ProvisioningDeviceClientException)
+                String errorContext = "Provisioning threw an exception.";
+                if (e instanceof ProvisioningDeviceClientException)
                 {
-                    errorContext += " Error code=" + ((ProvisioningDeviceHubException) registrationException).getErrorCode();
+                    errorContext += " Error code=" + ((ProvisioningDeviceHubException) e).getErrorCode();
                 }
 
                 // While this would normally throw an assertion failed exception, those exceptions do not allow for nesting
                 // of exception causes. The invalid server cert tests need to be able to check that inner exception, though.
-                throw new Exception("Registration finished with exception." + errorContext, registrationException);
+                throw new Exception("Registration finished with exception." + errorContext, e);
+            }
+
+            if (registrationResult.getProvisioningDeviceClientStatus() != PROVISIONING_DEVICE_STATUS_ASSIGNED)
+            {
+                fail("Provisioning finished with unsuccessful state. Status=" + registrationResult.getStatus() + " Substatus=" + registrationResult.getSubstatus());
             }
 
             Assert.assertEquals(CorrelationDetailsLoggingAssert.buildExceptionMessageDpsIndividualOrGroup("Unexpected status", Tools.getHostName(provisioningServiceConnectionString), testInstance.groupId, testInstance.registrationId), PROVISIONING_DEVICE_STATUS_ASSIGNED, registrationResult.getProvisioningDeviceClientStatus());

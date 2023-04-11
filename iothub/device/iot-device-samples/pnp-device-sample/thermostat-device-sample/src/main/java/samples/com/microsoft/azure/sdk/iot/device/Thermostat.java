@@ -69,7 +69,6 @@ public class Thermostat {
     private static final String registrationId = System.getenv("IOTHUB_DEVICE_DPS_DEVICE_ID");
 
     private static final ProvisioningDeviceClientTransportProtocol provisioningProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
-    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000; // in milli seconds
 
     // Plug and play features are available over MQTT, MQTT_WS, AMQPS, and AMQPS_WS.
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
@@ -87,33 +86,8 @@ public class Thermostat {
     private static double maxTemperature = 0.0d;
     private static boolean temperatureReset = true;
 
-    static class ProvisioningStatus
+    public static void main(String[] args) throws Exception
     {
-        ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationInfoClient = new ProvisioningDeviceClientRegistrationResult();
-        Exception exception;
-    }
-
-    static class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
-    {
-        @Override
-        public void run(ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult, Exception exception, Object context)
-        {
-            if (context instanceof ProvisioningStatus)
-            {
-                ProvisioningStatus status = (ProvisioningStatus) context;
-                status.provisioningDeviceClientRegistrationInfoClient = provisioningDeviceClientRegistrationResult;
-                status.exception = exception;
-            }
-            else
-            {
-                System.out.println("Received unknown context");
-            }
-        }
-    }
-
-    public static void main(String[] args) throws URISyntaxException, IOException, ProvisioningDeviceClientException, InterruptedException, IotHubClientException, TimeoutException
-    {
-
         // This sample follows the following workflow:
         // -> Initialize device client instance.
         // -> Set handler to receive "targetTemperature" updates, and send the received update over reported property.
@@ -216,7 +190,7 @@ public class Thermostat {
         }).start();
     }
 
-    private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException, IotHubClientException
+    private static void initializeAndProvisionDevice() throws Exception
     {
         SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(StandardCharsets.UTF_8), registrationId);
         ProvisioningDeviceClient provisioningDeviceClient;
@@ -226,34 +200,7 @@ public class Thermostat {
         AdditionalData additionalData = new AdditionalData();
         additionalData.setProvisioningPayload(String.format("{\"modelId\": \"%s\"}", MODEL_ID));
 
-        final CountDownLatch registrationLatch = new CountDownLatch(1);
-        AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
-        AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
-        provisioningDeviceClient.registerDevice(
-            (provisioningDeviceClientRegistrationResult, e, context) ->
-            {
-                registrationResultReference.set(provisioningDeviceClientRegistrationResult);
-                registrationExceptionReference.set(e);
-                registrationLatch.countDown();
-            },
-            null,
-            additionalData);
-
-        System.out.println("Waiting for Provisioning Service to register");
-        // Time out after 1 minute of waiting. Typically, this operation only takes a few seconds.
-        boolean timedOut = !registrationLatch.await(1, TimeUnit.MINUTES);
-        if (timedOut)
-        {
-            throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for provisioning to finish");
-        }
-
-        ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
-        Exception registrationException = registrationExceptionReference.get();
-
-        if (registrationException != null)
-        {
-            throw new IotHubClientException(IotHubStatusCode.ERROR, "Provisioning failed: " + registrationResult.getStatus());
-        }
+        ProvisioningDeviceClientRegistrationResult registrationResult = provisioningDeviceClient.registerDeviceSync(additionalData);
 
         ClientOptions options = ClientOptions.builder().modelId(MODEL_ID).build();
 
