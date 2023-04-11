@@ -56,6 +56,7 @@
         <module>provisioning-symmetrickey-individual-sample</module>
         <module>provisioning-tpm-sample</module>
         <module>provisioning-X509-sample</module>
+        <module>provisioning-certificate-issuance-sample</module>
     </modules>
     <build>
         <plugins>
