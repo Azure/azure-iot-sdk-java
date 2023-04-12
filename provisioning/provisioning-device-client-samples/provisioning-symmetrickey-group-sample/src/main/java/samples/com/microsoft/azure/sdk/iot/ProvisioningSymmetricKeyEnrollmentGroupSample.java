@@ -8,12 +8,9 @@
 package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
@@ -27,10 +24,11 @@ import java.util.Scanner;
 public class ProvisioningSymmetricKeyEnrollmentGroupSample
 {
     // The scope Id of your DPS instance. This value can be retrieved from the Azure Portal
-    private static final String SCOPE_ID = "[Your scope ID here]";
+    private static final String ID_SCOPE = "[Your ID scope here]";
 
-    // Typically "global.azure-devices-provisioning.net"
-    private static final String GLOBAL_ENDPOINT = "[Your Provisioning Service Global Endpoint here]";
+    // Note that a different value is required here when connecting to a private or government cloud instance. This
+    // value is fine for most DPS instances otherwise.
+    private static final String GLOBAL_ENDPOINT = "global.azure-devices-provisioning.net";
 
     // Not to be confused with the symmetric key of the enrollment group itself, this key is derived from the symmetric
     // key of the enrollment group and the desired device id of the device to provision. See the
@@ -49,127 +47,44 @@ public class ProvisioningSymmetricKeyEnrollmentGroupSample
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS_WS;
 
-    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milliseconds
-
-    static class ProvisioningStatus
-    {
-        ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationInfoClient = new ProvisioningDeviceClientRegistrationResult();
-        Exception exception;
-    }
-
-    static class ProvisioningDeviceClientRegistrationCallbackImpl implements ProvisioningDeviceClientRegistrationCallback
-    {
-        @Override
-        public void run(ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult, Exception exception, Object context)
-        {
-            if (context instanceof ProvisioningStatus)
-            {
-                ProvisioningStatus status = (ProvisioningStatus) context;
-                status.provisioningDeviceClientRegistrationInfoClient = provisioningDeviceClientRegistrationResult;
-                status.exception = exception;
-            }
-            else
-            {
-                System.out.println("Received unknown context");
-            }
-        }
-    }
-
-    private static class MessageSentCallbackImpl implements MessageSentCallback
-    {
-        @Override
-        public void onMessageSent(Message sentMessage, IotHubClientException exception, Object callbackContext)
-        {
-            IotHubStatusCode status = exception == null ? IotHubStatusCode.OK : exception.getStatusCode();
-            System.out.println("Message received! Response status: " + status);
-        }
-    }
-
     public static void main(String[] args) throws Exception
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
-        SecurityProviderSymmetricKey securityClientSymmetricKey;
-        Scanner scanner = new Scanner(System.in, StandardCharsets.UTF_8.name());
-        DeviceClient deviceClient = null;
 
         // For the sake of security, you shouldn't save keys into String variables as that places them in heap memory. For the sake
         // of simplicity within this sample, though, we will save it as a string. Typically this key would be loaded as byte[] so that
         // it can be removed from stack memory.
         byte[] derivedSymmetricKey = DERIVED_ENROLLMENT_GROUP_SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8);
 
-        securityClientSymmetricKey = new SecurityProviderSymmetricKey(derivedSymmetricKey, PROVISIONED_DEVICE_ID);
+        SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(derivedSymmetricKey, PROVISIONED_DEVICE_ID);
 
-        ProvisioningDeviceClient provisioningDeviceClient = null;
-        try
+        ProvisioningDeviceClient provisioningDeviceClient = ProvisioningDeviceClient.create(
+            GLOBAL_ENDPOINT,
+            ID_SCOPE,
+            PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL,
+            securityClientSymmetricKey);
+
+        ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult = provisioningDeviceClient.registerDeviceSync();
+        provisioningDeviceClient.close();
+
+        if (provisioningDeviceClientRegistrationResult.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
         {
-            ProvisioningStatus provisioningStatus = new ProvisioningStatus();
+            System.out.println("IotHub Uri : " + provisioningDeviceClientRegistrationResult.getIothubUri());
+            System.out.println("Device ID : " + provisioningDeviceClientRegistrationResult.getDeviceId());
 
-            provisioningDeviceClient = ProvisioningDeviceClient.create(GLOBAL_ENDPOINT, SCOPE_ID, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, securityClientSymmetricKey);
+            // connect to iothub
+            String iotHubUri = provisioningDeviceClientRegistrationResult.getIothubUri();
+            String deviceId = provisioningDeviceClientRegistrationResult.getDeviceId();
+            DeviceClient deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
+            deviceClient.open(false);
 
-            provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus);
-            while (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
-            {
-                if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ERROR ||
-                        provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_DISABLED ||
-                        provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_FAILED)
-                {
-                    provisioningStatus.exception.printStackTrace();
-                    System.out.println("Registration error, bailing out");
-                    break;
-                }
-                System.out.println("Waiting for Provisioning Service to register");
-                Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
-            }
-
-            if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
-            {
-                System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
-                System.out.println("Device ID : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId());
-
-                // connect to iothub
-                String iotHubUri = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri();
-                String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
-                try
-                {
-                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientSymmetricKey, IotHubClientProtocol.MQTT);
-                    deviceClient.open(false);
-                    Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
-
-                    System.out.println("Sending message from device to IoT Hub...");
-                    deviceClient.sendEventAsync(messageToSendFromDeviceToHub, new MessageSentCallbackImpl(), null);
-                }
-                catch (IOException e)
-                {
-                    System.out.println("Device client threw an exception: " + e.getMessage());
-                    if (deviceClient != null)
-                    {
-                        deviceClient.close();
-                    }
-                }
-            }
-        }
-        catch (ProvisioningDeviceClientException | InterruptedException e)
-        {
-            System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
-            if (provisioningDeviceClient != null)
-            {
-                provisioningDeviceClient.close();
-            }
-        }
-
-        System.out.println("Press any key to exit...");
-
-        scanner.nextLine();
-        if (provisioningDeviceClient != null)
-        {
-            provisioningDeviceClient.close();
-        }
-        if (deviceClient != null)
-        {
+            System.out.println("Sending message from device to IoT Hub...");
+            deviceClient.sendEvent(new Message("Hello world!"));
             deviceClient.close();
         }
 
-        System.out.println("Shutting down...");
+        System.out.println("Press any key to exit...");
+        new Scanner(System.in, StandardCharsets.UTF_8.name()).nextLine();
     }
 }

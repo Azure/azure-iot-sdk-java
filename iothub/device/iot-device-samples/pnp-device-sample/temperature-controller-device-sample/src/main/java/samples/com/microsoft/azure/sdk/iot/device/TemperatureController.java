@@ -80,8 +80,6 @@ public class TemperatureController {
     private static final ProvisioningDeviceClientTransportProtocol provisioningProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
     private static final IotHubClientProtocol protocol = IotHubClientProtocol.MQTT;
 
-    private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 1000; // in milli seconds
-
     private static final Random random = new Random();
     private static final Gson gson = new Gson();
     private static DeviceClient deviceClient;
@@ -97,9 +95,8 @@ public class TemperatureController {
     // HashMap to hold the max temperature since last reboot, for each "Thermostat" component.
     private static final Map<String, Double> maxTemperature = new HashMap<>();
 
-    public static void main(String[] args) throws IOException, URISyntaxException, ProvisioningDeviceClientException, InterruptedException, IotHubClientException, TimeoutException
+    public static void main(String[] args) throws Exception
     {
-
         // This sample follows the following workflow:
         // -> Initialize device client instance.
         // -> Set handler to receive "reboot" command - root interface.
@@ -225,7 +222,7 @@ public class TemperatureController {
                 && (deviceSymmetricKey == null || deviceSymmetricKey.isEmpty()));
     }
 
-    private static void initializeAndProvisionDevice() throws ProvisioningDeviceClientException, IOException, URISyntaxException, InterruptedException, IotHubClientException
+    private static void initializeAndProvisionDevice() throws Exception
     {
         SecurityProviderSymmetricKey securityClientSymmetricKey = new SecurityProviderSymmetricKey(deviceSymmetricKey.getBytes(StandardCharsets.UTF_8), registrationId);
         ProvisioningDeviceClient provisioningDeviceClient;
@@ -235,34 +232,7 @@ public class TemperatureController {
         AdditionalData additionalData = new AdditionalData();
         additionalData.setProvisioningPayload(com.microsoft.azure.sdk.iot.provisioning.device.plugandplay.PnpHelper.createDpsPayload(MODEL_ID));
 
-        final CountDownLatch registrationLatch = new CountDownLatch(1);
-        AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
-        AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
-        provisioningDeviceClient.registerDevice(
-            (provisioningDeviceClientRegistrationResult, e, context) ->
-            {
-                registrationResultReference.set(provisioningDeviceClientRegistrationResult);
-                registrationExceptionReference.set(e);
-                registrationLatch.countDown();
-            },
-            null,
-            additionalData);
-
-        System.out.println("Waiting for Provisioning Service to register");
-        // Time out after 1 minute of waiting. Typically, this operation only takes a few seconds.
-        boolean timedOut = !registrationLatch.await(1, TimeUnit.MINUTES);
-        if (timedOut)
-        {
-            throw new IotHubClientException(IotHubStatusCode.DEVICE_OPERATION_TIMED_OUT, "Timed out waiting for provisioning to finish");
-        }
-
-        ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
-        Exception registrationException = registrationExceptionReference.get();
-
-        if (registrationException != null)
-        {
-            throw new IotHubClientException(IotHubStatusCode.ERROR, "Provisioning failed: " + registrationResult.getStatus());
-        }
+        ProvisioningDeviceClientRegistrationResult registrationResult = provisioningDeviceClient.registerDeviceSync(additionalData);
 
         ClientOptions options = ClientOptions.builder().modelId(MODEL_ID).build();
 

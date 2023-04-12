@@ -9,15 +9,12 @@ package samples.com.microsoft.azure.sdk.iot;
 
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
@@ -27,7 +24,7 @@ import static org.apache.commons.codec.binary.Base64.encodeBase64;
 @SuppressWarnings("CommentedOutCode") // Ignored in samples as we use these comments to show other options.
 public class ProvisioningTpmSample
 {
-    private static final String SCOPE_ID = "[Your scope ID here]";
+    private static final String ID_SCOPE = "[Your ID scope here]";
 
     // Note that a different value is required here when connecting to a private or government cloud instance. This
     // value is fine for most DPS instances otherwise.
@@ -64,100 +61,32 @@ public class ProvisioningTpmSample
             System.exit(-1);
         }
 
-        ProvisioningDeviceClient provisioningDeviceClient = null;
-        try
+        ProvisioningDeviceClient provisioningDeviceClient = ProvisioningDeviceClient.create(
+            GLOBAL_ENDPOINT,
+            ID_SCOPE,
+            PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL,
+            securityClientTPMEmulator);
+
+        ProvisioningDeviceClientRegistrationResult provisioningDeviceClientRegistrationResult = provisioningDeviceClient.registerDeviceSync();
+        provisioningDeviceClient.close();
+
+        if (provisioningDeviceClientRegistrationResult.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
         {
+            System.out.println("IotHub Uri : " + provisioningDeviceClientRegistrationResult.getIothubUri());
+            System.out.println("Device ID : " + provisioningDeviceClientRegistrationResult.getDeviceId());
 
-            provisioningDeviceClient = ProvisioningDeviceClient.create(GLOBAL_ENDPOINT, SCOPE_ID, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL, securityClientTPMEmulator);
+            // connect to iothub
+            String iotHubUri = provisioningDeviceClientRegistrationResult.getIothubUri();
+            String deviceId = provisioningDeviceClientRegistrationResult.getDeviceId();
+            DeviceClient deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientTPMEmulator, IotHubClientProtocol.MQTT);
+            deviceClient.open(false);
 
-            final Object deviceRegistrationLock = new Object();
-            AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
-            AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
-
-            provisioningDeviceClient.registerDevice(
-                (callbackRegistrationResult, callbackException, callbackContext) -> {
-                    // This callback function executes once the registration request has completed
-                    // (successfully or unsuccessfully) with the details of the new registration
-                    // including what IoT hub it was provisioned to, what its device Id is, and more.
-
-                    // Save the returned registration result and exception (if there was one)
-                    registrationResultReference.set(callbackRegistrationResult);
-                    registrationExceptionReference.set(callbackException);
-
-                    synchronized (deviceRegistrationLock)
-                    {
-                        // Unlock the deviceRegistrationLock so the sample can continue
-                        deviceRegistrationLock.notify();
-                    }
-                },
-                null);
-
-            System.out.println("Waiting for the Provisioning service to finish your device registration.");
-            synchronized (deviceRegistrationLock)
-            {
-                deviceRegistrationLock.wait(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
-            }
-
-            ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
-            Exception registrationException = registrationExceptionReference.get();
-
-            if (registrationException != null)
-            {
-                System.out.println("Encountered an exception while registering your device");
-                registrationException.printStackTrace();
-                System.exit(-1);
-            }
-
-            if (registrationResult.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
-            {
-                System.out.println("Device provisioning completed unsuccessfully. Encountered an unexpected registration status: " + registrationResult.getStatus());
-                System.exit(-1);
-            }
-            else
-            {
-                System.out.println("Device provisioning completed successfully");
-                System.out.println("IotHUb Uri : " + registrationResult.getIothubUri());
-                System.out.println("Device ID : " + registrationResult.getDeviceId());
-
-                // connect to iothub
-                String iotHubUri = registrationResult.getIothubUri();
-                String deviceId = registrationResult.getDeviceId();
-                DeviceClient deviceClient = null;
-                try
-                {
-                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityClientTPMEmulator, IotHubClientProtocol.MQTT);
-                    deviceClient.open(false);
-                    Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
-
-                    System.out.println("Sending message from device to IoT Hub...");
-                    deviceClient.sendEvent(messageToSendFromDeviceToHub);
-                }
-                catch (IOException e)
-                {
-                    System.out.println("Device client threw an exception: " + e.getMessage());
-                    if (deviceClient != null)
-                    {
-                        deviceClient.close();
-                    }
-                }
-            }
-        }
-        catch (ProvisioningDeviceClientException | InterruptedException e)
-        {
-            System.out.println("Provisioning Device Client threw an exception" + e.getMessage());
-            if (provisioningDeviceClient != null)
-            {
-                provisioningDeviceClient.close();
-            }
+            System.out.println("Sending message from device to IoT Hub...");
+            deviceClient.sendEvent(new Message("Hello world!"));
+            deviceClient.close();
         }
 
         System.out.println("Press any key to exit...");
         scanner.nextLine();
-
-        System.out.println("Shutting down...");
-        if (provisioningDeviceClient != null)
-        {
-            provisioningDeviceClient.close();
-        }
     }
 }

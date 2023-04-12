@@ -18,6 +18,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.Attestation;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.IndividualEnrollment;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.TpmAttestation;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
+import junit.framework.AssertionFailedError;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static com.microsoft.azure.sdk.iot.provisioning.service.configs.AttestationMechanismType.TPM;
 import static junit.framework.TestCase.*;
 import static org.apache.commons.codec.binary.Base64.encodeBase64;
@@ -67,46 +69,25 @@ public class ProvisioningTPMTests
                 ProvisioningDeviceClientTransportProtocol.AMQPS,
                 securityProvider);
 
-        final CountDownLatch registrationLatch = new CountDownLatch(1);
-        AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
-        AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
-        provisioningDeviceClient.registerDevice(
-            (provisioningDeviceClientRegistrationResult, e, context) ->
-            {
-                log.debug("Provisioning registration callback fired with result {}", provisioningDeviceClientRegistrationResult.getProvisioningDeviceClientStatus());
-
-                registrationResultReference.set(provisioningDeviceClientRegistrationResult);
-                if (e != null)
-                {
-                    registrationExceptionReference.set(e);
-                }
-
-                registrationLatch.countDown();
-            },
-            null);
-
-        boolean timedOut = !registrationLatch.await(REGISTRATION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-        if (timedOut)
+        ProvisioningDeviceClientRegistrationResult registrationResult;
+        try
         {
-            fail("Timed out waiting for device registration to complete.");
+            registrationResult = provisioningDeviceClient.registerDeviceSync();
+        }
+        catch (Exception e)
+        {
+            String errorContext = "Provisioning threw an exception.";
+            if (e instanceof ProvisioningDeviceClientException)
+            {
+                errorContext += " Error code=" + ((ProvisioningDeviceHubException) e).getErrorCode();
+            }
+
+            throw new AssertionFailedError("Registration finished with exception." + errorContext);
         }
 
-        provisioningDeviceClient.close();
-
-        ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
-        Exception registrationException = registrationExceptionReference.get();
-        log.info("Registration completed with status {}", registrationResult.getStatus());
-
-        if (registrationException != null)
+        if (registrationResult.getProvisioningDeviceClientStatus() != PROVISIONING_DEVICE_STATUS_ASSIGNED)
         {
-            String errorContext = "";
-            errorContext += " Status=" + registrationResult.getStatus();
-            errorContext += " Substatus=" + registrationResult.getSubstatus();
-            if (registrationException instanceof ProvisioningDeviceClientException)
-            {
-                errorContext += " Error code=" + ((ProvisioningDeviceHubException) registrationException).getErrorCode();
-            }
-            fail("Registration finished with exception." + errorContext);
+            fail("Provisioning finished with unsuccessful state. Status=" + registrationResult.getStatus() + " Substatus=" + registrationResult.getSubstatus());
         }
 
         assertEquals("Registration completed, but not successfully", registrationResult.getProvisioningDeviceClientStatus(), ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED);
