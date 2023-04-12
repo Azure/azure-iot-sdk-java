@@ -77,7 +77,7 @@ public class ProvisioningTPMTests
         catch (Exception e)
         {
             String errorContext = "Provisioning threw an exception.";
-            if (e instanceof ProvisioningDeviceClientException)
+            if (e instanceof ProvisioningDeviceHubException)
             {
                 errorContext += " Error code=" + ((ProvisioningDeviceHubException) e).getErrorCode();
             }
