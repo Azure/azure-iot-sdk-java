@@ -81,7 +81,6 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
                  ProvisioningDeviceClientContract provisioningDeviceClientContract, Authorization authorization)
             throws ProvisioningDeviceClientException
     {
-        //SRS_RegisterTask_25_002: [ Constructor throw ProvisioningDeviceClientException if provisioningDeviceClientConfig , securityProvider, authorization or provisioningDeviceClientContract is null.]
         if (provisioningDeviceClientContract == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("provisioningDeviceClientContract cannot be null"));
@@ -108,7 +107,6 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
             this.operationalClientCertificateRequest = provisioningDeviceClientConfig.getOperationalCertificateRequest();
         }
 
-        //SRS_RegisterTask_25_001: [ Constructor shall save provisioningDeviceClientConfig , securityProvider, provisioningDeviceClientContract and authorization.]
         this.provisioningDeviceClientConfig = provisioningDeviceClientConfig;
         this.securityProvider = securityProvider;
         this.provisioningDeviceClientContract = provisioningDeviceClientContract;
@@ -135,7 +133,6 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
                 }
                 catch (IllegalArgumentException e)
                 {
-                    //SRS_StatusTask_34_010: [ If the response data cannot be parsed into a RegistrationOperationStatusParser,
                     // this function shall parse it into a ProvisioningErrorParser and throw a ProvisioningDeviceClientException with the parsed message. ]
                     ProvisioningErrorParser provisioningErrorParser = ProvisioningErrorParser.createFromJson(jsonBody);
                     throw new ProvisioningDeviceClientException(provisioningErrorParser.getExceptionMessage());
@@ -143,7 +140,6 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
             }
             else
             {
-                //SRS_RegisterTask_25_007: [ If the provided security client is for X509 then, this method shall throw ProvisioningDeviceClientException if null response is received. ]
                 throw new ProvisioningDeviceClientException("Did not receive DPS registration successfully");
             }
         }
@@ -196,16 +192,15 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
             throws IOException, InterruptedException, ProvisioningDeviceClientException, SecurityProviderException
 
     {
-           /*SRS_RegisterTask_25_014: [ If the provided security client is for Key then, this method shall construct SasToken by doing the following
+           /*If the provided security client is for Key then, this method shall construct SasToken by doing the following
 
             1. Build a tokenScope of format <scope>/registrations/<registrationId>
             2. Sign the HSM with the string of format <tokenScope>/n<expiryTime> and receive a token
-            3. Encode the token to Base64 format and UrlEncode it to generate the signature. ]*/
+            3. Encode the token to Base64 format and UrlEncode it to generate the signature.*/
 
             String sasToken = this.constructSasToken();
             requestData.setSasToken(sasToken);
 
-            //SRS_RegisterTask_25_016: [ If the provided security client is for Key then, this method shall trigger authenticateWithProvisioningService on the contract API using the sasToken generated and wait for response and return it. ]
             ResponseData responseDataForSasTokenAuth = new ResponseData();
             this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, responseCallback, responseDataForSasTokenAuth);
             waitForResponse(responseDataForSasTokenAuth);
@@ -228,7 +223,6 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
             }
             else
             {
-                //SRS_RegisterTask_25_017: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if null response to authenticateWithProvisioningService is received. ]
                 throw new ProvisioningDeviceClientAuthenticationException("Service did not authorize SasToken");
             }
     }
@@ -240,7 +234,6 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
             if (securityProvider instanceof SecurityProviderTpm)
             {
                 SecurityProviderTpm securityClientTpm = (SecurityProviderTpm) securityProvider;
-                //SRS_RegisterTask_25_011: [ If the provided security client is for Key then, this method shall trigger authenticateWithTPM on the contract API and wait for Authentication Key and decode it from Base64. Also this method shall pass the exception back to the user if it fails. ]
                 ResponseData nonceResponseData = new ResponseData();
 
                 log.debug("Requesting service nonce for tpm authentication");
@@ -252,13 +245,11 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
                 {
                     if (nonceResponseData.getResponseData() != null)
                     {
-                        //SRS_RegisterTask_25_018: [ If the provided security client is for Key then, this method shall import the Base 64 encoded Authentication Key into the HSM using the security client and pass the exception to the user on failure. ]
                         log.debug("Received service nonce, activating tpm identity key with it");
                         securityClientTpm.activateIdentityKey(nonceResponseData.getResponseData());
                     }
                     else
                     {
-                        //SRS_RegisterTask_25_013: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if Authentication Key received is null. ]
                         throw new ProvisioningDeviceClientAuthenticationException("Service did not send authentication key");
                     }
 
@@ -267,7 +258,6 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
                 }
                 else
                 {
-                    //SRS_RegisterTask_25_012: [ If the provided security client is for Key then, this method shall throw ProvisioningDeviceClientException if null response is received. ]
                     throw new ProvisioningDeviceClientException("Did not receive DPS registration nonce successfully");
                 }
             }
@@ -313,7 +303,6 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
                     throw new ProvisioningDeviceSecurityException(new IllegalArgumentException("Ek or SRK cannot be null"));
                 }
 
-                //SRS_RegisterTask_25_009: [ If the provided security client is for Key then, this method shall save the SSL context to Authorization if it is not null and throw ProvisioningDeviceClientException otherwise. ]
                 RequestData requestData = new RequestData(securityProviderTpm.getEndorsementKey(), securityProviderTpm.getStorageRootKey(), securityProvider.getRegistrationId(), sslContext, null, this.provisioningDeviceClientConfig.getPayload());
 
                 log.info("Authenticating with device provisioning service using tpm");
