@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX509Cert;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.jcajce.provider.asymmetric.X509;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
@@ -22,6 +23,7 @@ import org.bouncycastle.util.io.pem.PemReader;
 import java.io.*;
 import java.security.Key;
 import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -122,7 +124,7 @@ public class ProvisioningCertificateIssuanceSample
             // TODO -- needed?
             //signerCertificatePemList.add("<Your Signer/intermediate Certificate Here>");
 
-            // TODO -- use x509 instead of symmetric key?
+            // TODO -- figure out how this works for below
 /*            X509Certificate leafPublicCert = parsePublicKeyCertificate(leafPublicPem);
             Key leafPrivateKey = parsePrivateKey(leafPrivateKeyPem);
             Collection<X509Certificate> signerCertificates = new LinkedList<>();
@@ -187,8 +189,9 @@ public class ProvisioningCertificateIssuanceSample
             }
 
             System.out.println("Creatign an X509 certifiate from the issued client certificate...");
-            GeneratePfxFromPublicCertificateAndPrivateKey();
-            // TODO -- finish sample flow
+            GeneratePfxFromPublicCertificateAndPrivateKey(securityProviderSymmetricKey.getRegistrationId(), csrDirectory);
+            X509Certificate clientCertificate = CreateX509CertificateFromPfxFile(securityProviderSymmetricKey.getRegistrationId(), csrDirectory);
+            SecurityProviderX509Cert auth = new SecurityProviderX509Cert(clientCertificate);
 
             if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
             {
@@ -200,8 +203,7 @@ public class ProvisioningCertificateIssuanceSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    // TODO -- should this auth use the new certificate?
-                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityProviderSymmetricKey, IotHubClientProtocol.MQTT);
+                    deviceClient = new DeviceClient(iotHubUri, deviceId, auth, IotHubClientProtocol.MQTT);
                     deviceClient.open(false);
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
@@ -275,15 +277,32 @@ public class ProvisioningCertificateIssuanceSample
         }
     }
 
-    private static void GeneratePfxFromPublicCertificateAndPrivateKey()
+    private static void GeneratePfxFromPublicCertificateAndPrivateKey(String subject, File certificateDirectory)
     {
+        // TODO -- linux file formatting
+        String keyFile = String.format("%s\\%s.key", certificateDirectory.getAbsolutePath(), subject);
+        String cerFile = String.format("%s\\%s.cer", certificateDirectory.getAbsolutePath(), subject);
+        String pfxFile = String.format("%s\\%s.pfx", certificateDirectory.getAbsolutePath(), subject);
 
+        System.out.println("Generating .pfx file...");
+        String pfxGen = String.format("openssl pkcs12 -export -in \"%s\" -inkey \"%s\" -out \"%s\" -passout pass:", cerFile, keyFile, pfxFile);
+
+        try
+        {
+            Process pfxGenProcess = Runtime.getRuntime().exec(pfxGen);
+        }
+        catch (IOException ex)
+        {
+            System.out.println("An exception was thrown while running an openssl command: " + ex.getMessage());
+        }
     }
 
-    // TODO -- this should not return void
-    private static void CreateX509CertificateFromPfxFile()
+    private static X509Certificate CreateX509CertificateFromPfxFile(String subject, File certificateDirectory) throws FileNotFoundException, CertificateException
     {
-
+        // TODO -- linux file formatting
+        String pfxFile = String.format("%s\\%s.pfx", certificateDirectory.getAbsolutePath(), subject);
+        CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+        return (X509Certificate) certFactory.generateCertificate(new FileInputStream(pfxFile));
     }
 
 
