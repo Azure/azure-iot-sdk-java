@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.AdditionalData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX509Cert;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -19,6 +20,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.Key;
@@ -39,16 +41,29 @@ public class ProvisioningCertificateIssuanceSample
 {
     private static final String idScope = "[Your ID scope here]";
     private static final String globalEndpoint = "[Your Provisioning Service Global Endpoint here]";
+
+    // For the sake of security, you shouldn't save keys into String variables as that places them in heap memory. For the sake
+    // of simplicity within this sample, though, we will save it as a string. Typically this key would be loaded as byte[] so that
+    // it can be removed from stack memory.
+    private static final String SYMMETRIC_KEY = "[Enter your Symmetric Key here]";
+
+    // The registration Id to provision the device to. When creating an individual enrollment prior to running this sample, you choose this value.
+    private static final String REGISTRATION_ID = "[Enter your Registration ID here]";
+
+    // TODO -- where to actually create this directory?
+    private static final String DPS_CLIENT_CERTIFICATE_FOLDER = "DpsClientCertificates";
+
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS_WS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT_WS;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
-    private static final String leafPublicPem = "<Your Public Leaf Certificate Here>";
-    private static final String leafPrivateKeyPem = "<Your Leaf Key Here>";
 
-    private static final Collection<String> signerCertificatePemList = new LinkedList<>();
+    // TODO -- needed?
+/*    private static final String leafPublicPem = "<Your Public Leaf Certificate Here>";
+    private static final String leafPrivateKeyPem = "<Your Leaf Key Here>";*/
+    //private static final Collection<String> signerCertificatePemList = new LinkedList<>();
 
     static class ProvisioningStatus
     {
@@ -87,16 +102,30 @@ public class ProvisioningCertificateIssuanceSample
     {
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), REGISTRATION_ID);
         ProvisioningDeviceClient provisioningDeviceClient = null;
         DeviceClient deviceClient = null;
         try
         {
             ProvisioningStatus provisioningStatus = new ProvisioningStatus();
 
+            File csrDirectory = new File(DPS_CLIENT_CERTIFICATE_FOLDER);
+            if (csrDirectory.mkdir())
+            {
+                System.out.println("Certificate directory created.");
+            }
+            else
+            {
+                System.out.println("Failed to create directory for certificates.");
+                throw new IOException();
+            }
+
             // For group enrollment uncomment this line
+            // TODO -- needed?
             //signerCertificatePemList.add("<Your Signer/intermediate Certificate Here>");
 
-            X509Certificate leafPublicCert = parsePublicKeyCertificate(leafPublicPem);
+            // TODO -- use x509 instead of symmetric key?
+/*            X509Certificate leafPublicCert = parsePublicKeyCertificate(leafPublicPem);
             Key leafPrivateKey = parsePrivateKey(leafPrivateKeyPem);
             Collection<X509Certificate> signerCertificates = new LinkedList<>();
             for (String signerCertificatePem : signerCertificatePemList)
@@ -105,13 +134,18 @@ public class ProvisioningCertificateIssuanceSample
             }
 
             SecurityProvider securityProviderX509 = new SecurityProviderX509Cert(leafPublicCert, leafPrivateKey, signerCertificates);
-            provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, idScope, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL,
-                                                                       securityProviderX509);
+            */
 
-            AdditionalData additionalData = new AdditionalData
-            {
-                operationalCertificateRequest = "someString",
-            };
+            provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, idScope, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL,
+                                                                       securityProviderSymmetricKey);
+
+            // TODO -- generate CSR
+            GenerateCertificateSigningRequestFiles(securityProviderSymmetricKey.getRegistrationId(), DPS_CLIENT_CERTIFICATE_FOLDER);
+            String csrFile;
+            String certificateSigningRequest;
+
+            AdditionalData additionalData = new AdditionalData();
+            additionalData.setOperationalCertificateRequest(certificateSigningRequest);
 
             provisioningDeviceClient.registerDevice(new ProvisioningDeviceClientRegistrationCallbackImpl(), provisioningStatus, additionalData);
 
@@ -182,6 +216,15 @@ public class ProvisioningCertificateIssuanceSample
         }
     }
 
+    private static void GenerateCertificateSigningRequestFiles(String subject, String destinationCertificateFolderPath)
+    {
+        String keyfile;
+        String csrFile;
+        return;
+    }
+
+
+    // TODO -- needed?
     private static Key parsePrivateKey(String privateKeyString) throws IOException
     {
         Security.addProvider(new BouncyCastleProvider());
@@ -190,6 +233,7 @@ public class ProvisioningCertificateIssuanceSample
         return getPrivateKey(possiblePrivateKey);
     }
 
+    // TODO -- needed?
     private static X509Certificate parsePublicKeyCertificate(String publicKeyCertificateString) throws IOException, CertificateException
     {
         Security.addProvider(new BouncyCastleProvider());
@@ -199,6 +243,7 @@ public class ProvisioningCertificateIssuanceSample
         return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(possiblePublicKeyCertificate.getContent()));
     }
 
+    // TODO -- needed?
     private static Key getPrivateKey(Object possiblePrivateKey) throws IOException
     {
         if (possiblePrivateKey instanceof PEMKeyPair)

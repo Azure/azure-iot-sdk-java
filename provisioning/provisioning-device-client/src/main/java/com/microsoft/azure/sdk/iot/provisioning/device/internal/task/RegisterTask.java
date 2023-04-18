@@ -102,11 +102,7 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
         }
 
         // check if using operational CSR
-        if (provisioningDeviceClientConfig.getOperationalCertificateRequest() != null)
-        {
-            this.operationalClientCertificateRequest = provisioningDeviceClientConfig.getOperationalCertificateRequest();
-        }
-
+        this.operationalClientCertificateRequest = provisioningDeviceClientConfig.getOperationalCertificateRequest();
         this.provisioningDeviceClientConfig = provisioningDeviceClientConfig;
         this.securityProvider = securityProvider;
         this.provisioningDeviceClientContract = provisioningDeviceClientContract;
@@ -118,7 +114,6 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
     {
         try
         {
-            //SRS_RegisterTask_25_006: [ If the provided security client is for X509 then, this method shall trigger authenticateWithProvisioningService on the contract API and wait for response and return it. ]
             ResponseData dpsRegistrationData = new ResponseData();
             this.provisioningDeviceClientContract.authenticateWithProvisioningService(requestData, responseCallback, dpsRegistrationData);
 
