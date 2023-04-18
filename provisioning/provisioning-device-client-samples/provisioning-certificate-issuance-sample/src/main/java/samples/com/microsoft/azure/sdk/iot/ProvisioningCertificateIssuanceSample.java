@@ -19,10 +19,7 @@ import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemReader;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.security.Key;
 import java.security.Security;
 import java.security.cert.CertificateException;
@@ -51,7 +48,8 @@ public class ProvisioningCertificateIssuanceSample
     private static final String REGISTRATION_ID = "[Enter your Registration ID here]";
 
     // TODO -- where to actually create this directory?
-    private static final String DPS_CLIENT_CERTIFICATE_FOLDER = "DpsClientCertificates";
+    // TODO -- is this path specficied correctly?
+    private static final String DPS_CLIENT_CERTIFICATE_FOLDER = ".\\DpsClientCertificates";
 
     private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
@@ -139,11 +137,14 @@ public class ProvisioningCertificateIssuanceSample
             provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, idScope, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL,
                                                                        securityProviderSymmetricKey);
 
-            // TODO -- generate CSR
-            GenerateCertificateSigningRequestFiles(securityProviderSymmetricKey.getRegistrationId(), DPS_CLIENT_CERTIFICATE_FOLDER);
-            String csrFile;
-            String certificateSigningRequest;
+            GenerateCertificateSigningRequestFiles(securityProviderSymmetricKey.getRegistrationId(), csrDirectory);
+            String csrFile = String.format("%s\\%s.csr", csrDirectory.getAbsolutePath(), securityProviderSymmetricKey.getRegistrationId());
 
+            // Read certificate signing request
+            Scanner sc = new Scanner(new File(csrFile));
+            String certificateSigningRequest = sc.next();
+
+            // Inform provisioning device client about the CSR
             AdditionalData additionalData = new AdditionalData();
             additionalData.setOperationalCertificateRequest(certificateSigningRequest);
 
@@ -164,6 +165,31 @@ public class ProvisioningCertificateIssuanceSample
                 Thread.sleep(MAX_TIME_TO_WAIT_FOR_REGISTRATION);
             }
 
+            String issuedClientCertificate = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIssuedClientCertificate();
+
+            if (issuedClientCertificate == null)
+            {
+                System.out.println("Expected client certificate was not returned by DPS, exiting sample.");
+                return;
+            }
+
+            // Write issued certificate to disk
+            String cerFile = String.format("%s\\%s.cer", csrDirectory.getAbsolutePath(), provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getRegistrationId());
+            try
+            {
+                BufferedWriter writer = new BufferedWriter(new FileWriter(cerFile));
+                writer.write(issuedClientCertificate);
+            }
+            catch (IOException ex)
+            {
+                System.out.println("Encountered an exception writing issued client certificate to disk: " + ex.getMessage());
+                return;
+            }
+
+            System.out.println("Creatign an X509 certifiate from the issued client certificate...");
+            GeneratePfxFromPublicCertificateAndPrivateKey();
+            // TODO -- finish sample flow
+
             if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
             {
                 System.out.println("IotHUb Uri : " + provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getIothubUri());
@@ -174,7 +200,8 @@ public class ProvisioningCertificateIssuanceSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityProviderX509, IotHubClientProtocol.MQTT);
+                    // TODO -- should this auth use the new certificate?
+                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityProviderSymmetricKey, IotHubClientProtocol.MQTT);
                     deviceClient.open(false);
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
@@ -216,11 +243,47 @@ public class ProvisioningCertificateIssuanceSample
         }
     }
 
-    private static void GenerateCertificateSigningRequestFiles(String subject, String destinationCertificateFolderPath)
+    private static void GenerateCertificateSigningRequestFiles(String subject, File certificateDirectory)
     {
-        String keyfile;
-        String csrFile;
-        return;
+        // TODO -- linux file path formatting
+        String path = certificateDirectory.getAbsolutePath();
+        String keyfile = String.format("%s\\%s.key", path, subject);
+        String csrFile = String.format("%s\\%s.csr", path, subject);
+
+        System.out.println(String.format("Generating private key for the certificate with subject %s", subject));
+        String keyGen = String.format("openssl genpkey -out \"%s\" -algorithm RSA -pkeyopt rsa_keygen_bits:2048", keyfile);
+
+        try
+        {
+            Process keyGenProcess = Runtime.getRuntime().exec(keyGen);
+        }
+        catch (IOException ex)
+        {
+            System.out.println("An exception was thrown while running an openssl command: " + ex.getMessage());
+        }
+
+        System.out.println(String.format("Generating CSR for certificate with subject %s", subject));
+        String csrGen = String.format("req -new -subj /CN=%s -key \"%s\" -out \"%s\"", keyfile, csrFile);
+
+        try
+        {
+            Process csrGenProcess = Runtime.getRuntime().exec(csrGen);
+        }
+        catch (IOException ex)
+        {
+            System.out.println("An exception was thrown while running an openssl command: " + ex.getMessage());
+        }
+    }
+
+    private static void GeneratePfxFromPublicCertificateAndPrivateKey()
+    {
+
+    }
+
+    // TODO -- this should not return void
+    private static void CreateX509CertificateFromPfxFile()
+    {
+
     }
 
 
