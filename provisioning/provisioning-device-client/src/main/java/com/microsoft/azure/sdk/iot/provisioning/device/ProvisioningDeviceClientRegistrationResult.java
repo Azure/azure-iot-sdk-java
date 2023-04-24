@@ -44,7 +44,7 @@ public class ProvisioningDeviceClientRegistrationResult
     @Getter
     protected String provisioningPayload;
 
-    /*
+    /**
      * The client certificate used by IoT Hub to authenticate a device.
      */
     @Getter

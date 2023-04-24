@@ -19,6 +19,10 @@ public class AdditionalData
     @Setter
     private String provisioningPayload;
 
+    /**
+     * The PEM encoded operational client certificate request that DPS will send to a linked certificate authority which
+     * signs and returns an X.509 certificate that the IoT device can use to authenticate itself with an IoT Hub.
+     */
     @Getter
     @Setter
     public String operationalCertificateRequest;

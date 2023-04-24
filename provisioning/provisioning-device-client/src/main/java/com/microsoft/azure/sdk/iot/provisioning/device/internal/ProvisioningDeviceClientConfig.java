@@ -50,7 +50,7 @@ public final class ProvisioningDeviceClientConfig
     @Setter
     private String payload;
 
-    /*
+    /**
      * Certificate request that DPS sends to its CA to sign and return an X509 certificate that is then linked to a device.  
      */
     @Getter
