@@ -176,35 +176,22 @@ This folder contains scripts to build and run Java SDK provided proper environme
 
 For guidance and important information about certificates, please refer to [this blog post](https://techcommunity.microsoft.com/t5/internet-of-things/azure-iot-tls-changes-are-coming-and-why-you-should-care/ba-p/1658456) from the security team.
 
-## Long-term support
+## Support
 
-The project offers a Long-Term Support (LTS) releases to allow users that do not need the latest features to be shielded from unwanted changes.
+The Azure IoT Hub Device Client supported releases is outlined in the following table.
 
-Going forward, LTS repo tags are to be named lts_*yyyy*-*mm*-*dd*, where *yyyy*, *mm*, and *dd* are the year, month, and day when the tag was created. An example of such a tag is *lts_2021-03-18*.
+Refer to the [Azure IoT Device SDK lifecycle and support](https://learn.microsoft.com/azure/iot/iot-device-sdks-lifecycle-and-support) for details on the different supported stages.
 
-The lifetime of an LTS release is 12 months. During this time, LTS releases may receive bug fixes that fall in these categories:
+| Release | Category | End-of-life |
+|-|-|-|
+| 2.1.5 | Active | - |
+| 1.34.3 | Deprecated | 2023-03-30 |
 
-* security bug fixes
-* critical bug fixes (e.g., unavoidable/unrecoverable crashes, significant memory leaks)
-
-> No new features or improvements are in scope to be picked up in an LTS branch. A patch will not extend the maintenance or expiry date.
-
-LTS releases may include additional extended support for security bug fixes as listed in the LTS schedule.
-
-### Schedule
-
-This table shows previous LTS releases and end dates.
-
-|                                   Release Link                                    | GitHub Tag  | LTS Start Date | Maintenance End Date | LTS End Date |
-|:---------------------------------------------------------------------------------:| :---------: |:--------------:|:--------------------:|:------------:|
-| [2022-06-17](https://github.com/Azure/azure-iot-sdk-java/releases/tag/2022-03-04) | 2022-03-04 |   2020-03-04   |      2021-09-31      |  2023-03-31  |
-| [2021-06-17](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2021) | lts_06_2021 |   2020-06-17   |      2021-12-31      |  2022-06-30  |
-| [2020-07-07](https://github.com/Azure/azure-iot-sdk-java/releases/tag/lts_7_2020) | lts_07_2020 |   2020-07-07   |      2020-12-31      |  2021-06-30  |
 
 ---
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-Microsoft collects performance and usage information which may be used to provide and improve Microsoft products and services and enhance your experience.  To learn more, review the [privacy statement](https://go.microsoft.com/fwlink/?LinkId=521839&clcid=0x409). 
+Microsoft collects performance and usage information which may be used to provide and improve Microsoft products and services and enhance your experience.  To learn more, review the [privacy statement](https://go.microsoft.com/fwlink/?LinkId=521839&clcid=0x409).
 
 [iot-hub-documentation]: https://docs.microsoft.com/en-us/azure/iot-hub/
 [azure-iot-sdks]: http://github.com/azure/azure-iot-sdks
