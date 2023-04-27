@@ -15,9 +15,9 @@ def STRING='String'
 
 android {
     compileSdkVersion 28
+    namespace 'com.microsoft.azure.sdk.iot'
 
     defaultConfig {
-        javaCompileOptions.annotationProcessorOptions.includeCompileClasspath true
         applicationId "com.iothub.azure.microsoft.com.androide2e"
         minSdkVersion 24
         targetSdkVersion 28
