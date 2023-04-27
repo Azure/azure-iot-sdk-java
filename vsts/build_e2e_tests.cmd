@@ -3,6 +3,10 @@
 
 setlocal
 
+@REM Use Java 11
+echo %[JAVA_HOME_11_X64]%
+setx [JAVA_HOME] %[JAVA_HOME_11_X64]%
+
 set build-root=%~dp0..
 @REM // resolve to fully qualified path
 for %%i in ("%build-root%") do set build-root=%%~fi
