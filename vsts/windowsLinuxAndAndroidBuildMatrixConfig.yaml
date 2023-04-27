@@ -32,7 +32,6 @@ jobs:
         displayName: 'Echo Versions'
         env:
           COMMIT_FROM: $(COMMIT_FROM)
-          JAVA_VERSION: 11 # Android build doesn't need to run for both JDK 8 and 11
         condition: always()
 
       - powershell: ./vsts/build_e2e_tests.cmd
