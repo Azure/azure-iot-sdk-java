@@ -20,6 +20,7 @@ else
 }
 
 cd ./iot-e2e-tests/android
+ls
 gradle wrapper --gradle-version 7.3.1 --warning-mode all --stacktrace --scan
 gradlew :clean :app:clean :app:assembleDebug
 
