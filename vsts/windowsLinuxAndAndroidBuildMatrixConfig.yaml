@@ -34,11 +34,13 @@ jobs:
           COMMIT_FROM: $(COMMIT_FROM)
         condition: always()
 
-      - powershell: ./vsts/build_e2e_tests.cmd
+      - powershell: ./vsts/build_e2e_tests.ps1
         displayName: 'E2E Tests Build'
         condition: always()
+        env:
+          JAVA_VERSION: 11
 
-      - powershell: ./vsts/gradle_build.cmd
+      - powershell: ./vsts/gradle_build.ps1
         displayName: 'Gradle Build'
         env:
           IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -48,6 +50,7 @@ jobs:
           IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
           RECYCLE_TEST_IDENTITIES: true
+          JAVA_VERSION: 11
         condition: always()
 
       - task: CopyFiles@2
