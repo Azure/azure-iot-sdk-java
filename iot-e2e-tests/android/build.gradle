@@ -24,3 +24,7 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '6.8.3'
+}
