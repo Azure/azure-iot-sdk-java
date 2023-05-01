@@ -23,4 +23,13 @@ cd ./iot-e2e-tests/android
 gradle wrapper --warning-mode all --stacktrace --scan
 ./gradlew :clean :app:clean :app:assembleDebug
 
+if ("" -eq $env:IOTHUB_CONNECTION_STRING)
+{
+    Write-Host "Empty env vars!"
+}
+else
+{
+    Write-Host "Not empty env vars!"
+}
+
 ./gradlew :app:assembleDebugAndroidTest `-PIOTHUB_CONNECTION_STRING=$env:IOTHUB_CONNECTION_STRING `-PIOT_DPS_CONNECTION_STRING=$env:IOT_DPS_CONNECTION_STRING `-PIOT_DPS_ID_SCOPE=$env:DEVICE_PROVISIONING_SERVICE_ID_SCOPE `-PDPS_GLOBALDEVICEENDPOINT_INVALIDCERT=$env:INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT `-PPROVISIONING_CONNECTION_STRING_INVALIDCERT=$env:INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING `-PIS_BASIC_TIER_HUB=$env:IS_BASIC_TIER_HUB `-PIS_PULL_REQUEST=$env:isPullRequestBuild `-PRECYCLE_TEST_IDENTITIES=true
