@@ -10,7 +10,7 @@ if "%TARGET_BRANCH%" == "$(System.PullRequest.TargetBranch)" (SET isPullRequestB
 
 cd %build-root%\iot-e2e-tests\android
 call gradle wrapper
-call gradlew :clean :app:clean :app:assembleDebug
+call gradlew :clean :app:clean :app:assembleDebug --info
 
 if %ERRORLEVEL% NEQ 0 (
   echo "Gradle build failed with error code %ERRORLEVEL%"
