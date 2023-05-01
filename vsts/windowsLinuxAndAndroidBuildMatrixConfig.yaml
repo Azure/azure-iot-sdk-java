@@ -81,7 +81,7 @@ jobs:
     pool:
       vmImage: 'macOS-latest'
     strategy:
-      maxParallel: 12
+      maxParallel: 2
       matrix:
         TestGroup1:
           ANDROID_TEST_GROUP_ID: TestGroup1
