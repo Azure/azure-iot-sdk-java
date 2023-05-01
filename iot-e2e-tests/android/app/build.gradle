@@ -94,3 +94,7 @@ repositories {
     mavenLocal()
     mavenCentral()
 }
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '6.8.3'
+}
