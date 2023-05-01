@@ -15,7 +15,7 @@ def STRING='String'
 
 android {
     buildFeatures {
-        buildConfig=false
+        buildConfig=true
     }
     compileSdkVersion 28
     namespace 'com.microsoft.azure.sdk.iot.android.iothub'
