@@ -17,7 +17,7 @@ android {
     compileSdkVersion 30
     namespace = "com.microsoft.azure.sdk.iot.android"
     defaultConfig {
-        javaCompileOptions.annotationProcessorOptions.includeCompileClasspath = true
+        javaCompileOptions.annotationProcessorOptions.includeCompileClasspath true
         applicationId "com.iothub.azure.microsoft.com.androide2e"
         minSdkVersion 24
         targetSdkVersion 30
