@@ -5,7 +5,7 @@ set build-root=%~dp0..
 
 echo %JAVA_HOME_11_X64%
 
-setx JAVA_HOME=%JAVA_HOME_11_X64%
+setx JAVA_HOME "%JAVA_HOME_11_X64%"
 
 echo %JAVA_HOME%
 
