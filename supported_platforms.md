@@ -42,7 +42,7 @@ OS name: "linux", version: "4.15.0-1113-azure", arch: "amd64", family: "unix"
 
 This SDK supports Android API versions 24, 25, 26, 27, and 28.
 
-The gradle version used in nightly tests is 3.6.3 and the API version used in nightly tests is 28.
+The gradle version used in nightly tests is 7.4.2 and the API version used in nightly tests is 28.
 
 The build.gradle file that outlines more specifics can be found [here](./iot-e2e-tests/android/app/build.gradle).
 
