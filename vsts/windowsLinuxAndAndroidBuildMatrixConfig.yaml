@@ -28,6 +28,11 @@ jobs:
     displayName: Android Build
 
     steps:
+      - task : JavaToolInstaller@0
+        inputs :
+          versionSpec : '11'
+          jdkArchitectureOption : 'x64'
+          jdkSourceOption : 'PreInstalled'
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
