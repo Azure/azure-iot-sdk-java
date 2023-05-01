@@ -15,6 +15,7 @@ def STRING='String'
 
 android {
     compileSdkVersion 30
+    javaCompileOptions.annotationProcessorOptions.includeCompileClasspath true
     namespace = "com.microsoft.azure.sdk.iot.android"
     defaultConfig {
         applicationId "com.iothub.azure.microsoft.com.androide2e"
