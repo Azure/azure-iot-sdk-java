@@ -15,7 +15,7 @@ def STRING='String'
 
 android {
     compileSdkVersion 28
-    namespace 'com.microsoft.azure.sdk.iot'
+    namespace 'com.microsoft.azure.sdk.iot.android.iothub'
 
     defaultConfig {
         applicationId "com.iothub.azure.microsoft.com.androide2e"
