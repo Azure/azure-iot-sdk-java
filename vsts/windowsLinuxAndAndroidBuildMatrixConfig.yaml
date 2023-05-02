@@ -289,7 +289,7 @@ jobs:
   - job: AndroidBuild
     timeoutInMinutes: 30
     pool:
-      vmImage: windows-latest
+      vmImage: ubuntu-latest
     displayName: Android Build
 
     steps:
@@ -300,11 +300,11 @@ jobs:
           JAVA_VERSION: 8 # Android build doesn't need to run for both JDK 8 and 11
         condition: always()
 
-      - powershell: ./vsts/build_e2e_tests.cmd
+      - powershell: ./vsts/build_e2e_tests.ps1
         displayName: 'E2E Tests Build'
         condition: always()
 
-      - powershell: ./vsts/gradle_build.cmd
+      - powershell: ./vsts/gradle_build.ps1
         displayName: 'Gradle Build'
         env:
           IOTHUB_CONNECTION_STRING: $(IOTHUB-CONNECTION-STRING)
@@ -327,6 +327,7 @@ jobs:
         condition: always()
 
       - task: PublishPipelineArtifact@0
+        displayName: 'Publish APKs to test in next job'
         inputs:
           artifactName: 'androidBuildFiles'
           targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
@@ -386,6 +387,7 @@ jobs:
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
       - task: DownloadPipelineArtifact@0
+        displayName: "Download APKs to test from previous job"
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         inputs:
           artifactName: 'androidBuildFiles'
