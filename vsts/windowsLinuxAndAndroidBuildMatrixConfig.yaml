@@ -289,7 +289,7 @@ jobs:
   - job: AndroidBuild
     timeoutInMinutes: 30
     pool:
-      vmImage: windows-latest
+      vmImage: linux-latest
     displayName: Android Build
 
     steps:
