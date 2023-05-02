@@ -12,7 +12,11 @@ Write-Host "Starting the Gradle Wrapper"
 Write-Host "Assembling the source APK"
 ./gradlew :app:assembleDebug
 
-Write-Host "Assembling the test APK"
+# Unlike in the Linux/Windows e2e tests, these secrets are loaded into the Android BuildConfig.java
+# file that is generated during this assembly. This is done because the android tests run on emulators
+# and the emulators have no access to the environment variables on the OS that runs the emulator,
+# so this is the only way to pass along these secrets.
+Write-Host "Assembling the test APK with the provided secrets"
 ./gradlew :app:assembleDebugAndroidTest `
     `-PIOTHUB_CONNECTION_STRING=$env:IOTHUB_CONNECTION_STRING `
     `-PIOT_DPS_CONNECTION_STRING=$env:IOT_DPS_CONNECTION_STRING `
