@@ -6,7 +6,7 @@
 @REM SET isPullRequestBuild=true
 @REM if "%TARGET_BRANCH%" == "$(System.PullRequest.TargetBranch)" (SET isPullRequestBuild=false)
 
-cd %build-root%\iot-e2e-tests\android
+cd iot-e2e-tests\android
 gradle wrapper
 @REM gradlew :clean :app:clean :app:assembleDebug
 
