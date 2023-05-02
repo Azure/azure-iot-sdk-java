@@ -122,6 +122,7 @@ jobs:
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
       - task: DownloadPipelineArtifact@0
+        displayName: "Download APK to test"
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         inputs:
           artifactName: 'androidBuildFiles'
