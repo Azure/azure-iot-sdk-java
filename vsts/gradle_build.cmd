@@ -7,7 +7,7 @@
 @REM if "%TARGET_BRANCH%" == "$(System.PullRequest.TargetBranch)" (SET isPullRequestBuild=false)
 
 cd iot-e2e-tests\android
-./gradlew wrapper --gradle-version 5.5
+gradlew wrapper --gradle-version 5.5
 @REM gradlew :clean :app:clean :app:assembleDebug
 
 @REM if %ERRORLEVEL% NEQ 0 (
