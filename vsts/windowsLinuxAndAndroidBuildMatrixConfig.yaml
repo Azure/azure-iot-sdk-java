@@ -24,7 +24,7 @@ jobs:
   - job: AndroidBuild
     timeoutInMinutes: 30
     pool:
-      vmImage: windows-latest
+      vmImage: ubuntu-latest
     displayName: Android Build
 
     steps:
