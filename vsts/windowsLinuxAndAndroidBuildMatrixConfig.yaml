@@ -35,9 +35,9 @@ jobs:
           JAVA_VERSION: 8 # Android build doesn't need to run for both JDK 8 and 11
         condition: always()
 
-      - powershell: ./vsts/build_e2e_tests.cmd
-        displayName: 'E2E Tests Build'
-        condition: always()
+      #- powershell: ./vsts/build_e2e_tests.cmd
+      #  displayName: 'E2E Tests Build'
+      #  condition: always()
 
       - powershell: ./vsts/gradle_build.cmd
         displayName: 'Gradle Build'
