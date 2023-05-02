@@ -7,9 +7,11 @@ wget https://downloads.gradle-dn.com/distributions/gradle-7.6-bin.zip
 Expand-Archive ./gradle-7.6-bin.zip
 
 ls
+cd ./gradle-7.6-bin
+ls
 
 Write-Host "Starting the Gradle Wrapper"
-./gradle-7.6-bin/bin/gradle wrapper
+./gradle-7.6-bin/gradle-7.6/bin/gradle wrapper
 
 Write-Host "Assembling the source APK"
 ./gradlew :app:assembleDebug
