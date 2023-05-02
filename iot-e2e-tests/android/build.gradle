@@ -6,8 +6,6 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        //This value is overridden by gradle_build.ps1 since that script downloads
-        // a particular version of gradle to build this project with
         classpath 'com.android.tools.build:gradle:3.6.3'
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -25,11 +23,4 @@ allprojects {
 
 task clean(type: Delete) {
     delete rootProject.buildDir
-}
-
-tasks.wrapper {
-    gradleVersion = "6.8.3"
-    // You can either download the binary-only version of Gradle (BIN) or
-    // the full version (with sources and documentation) of Gradle (ALL)
-    distributionType = Wrapper.DistributionType.BIN
 }
