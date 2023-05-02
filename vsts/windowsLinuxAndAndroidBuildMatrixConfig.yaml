@@ -35,12 +35,12 @@ jobs:
           JAVA_VERSION: 8 # Android build doesn't need to run for both JDK 8 and 11
         condition: always()
 
-      - script: |
-          wget https://downloads.gradle-dn.com/distributions/gradle-6.8.3-bin.zip
-          unzip -d . gradle-6.8.3-bin.zip
-          ls
-          ./gradle-6.8.3/bin/gradle bundleRelease
-        displayName: Download Gradle 6.8.3
+      #- script: |
+      #    wget https://downloads.gradle-dn.com/distributions/gradle-6.8.3-bin.zip
+      #    unzip -d . gradle-6.8.3-bin.zip
+      #    ls
+      #    ./gradle-6.8.3/bin/gradle bundleRelease
+      #  displayName: Download Gradle 6.8.3
 
       #- powershell: ./vsts/build_e2e_tests.cmd
       #  displayName: 'E2E Tests Build'
