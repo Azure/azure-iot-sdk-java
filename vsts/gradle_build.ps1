@@ -6,12 +6,6 @@ cd iot-e2e-tests\android
 wget https://downloads.gradle-dn.com/distributions/gradle-7.6-bin.zip
 Expand-Archive ./gradle-7.6-bin.zip
 
-ls
-cd ./gradle-7.6-bin
-ls
-cd ./gradle-7.6
-ls
-
 Write-Host "Starting the Gradle Wrapper"
 ./gradle-7.6-bin/gradle-7.6/bin/gradle wrapper
 
