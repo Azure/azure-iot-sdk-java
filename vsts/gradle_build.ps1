@@ -3,11 +3,11 @@ cd iot-e2e-tests\android
 
 # This script pulls down this version of gradle because the default version installed on ADO
 # can change over time. This allows us more control over when we want to upgrade gradle versions
-wget https://downloads.gradle-dn.com/distributions/gradle-6.8.3-bin.zip
-Expand-Archive ./gradle-6.8.3-bin.zip
+Invoke-WebRequest -Uri "https://downloads.gradle-dn.com/distributions/gradle-6.8.3-bin.zip" -OutFile ./gradle.zip
+Expand-Archive ./gradle.zip
 
 Write-Host "Starting the Gradle Wrapper"
-./gradle-6.8.3-bin/gradle-6.8.3/bin/gradle wrapper
+./gradle/gradle-6.8.3/bin/gradle wrapper
 
 Write-Host "Assembling the source APK"
 ./gradlew :app:assembleDebug
