@@ -42,6 +42,14 @@ jobs:
       - powershell: ./vsts/gradle_build.ps1
         displayName: 'Gradle Build'
         condition: always()
+        env:
+          IOTHUB_CONNECTION_STRING : $(IOTHUB-CONNECTION-STRING)
+          DEVICE_PROVISIONING_SERVICE_ID_SCOPE : $(IOT-DPS-ID-SCOPE)
+          IOT_DPS_CONNECTION_STRING : $(IOT-DPS-CONNECTION-STRING)
+          INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT : $(DPS-GLOBALDEVICEENDPOINT-INVALIDCERT)
+          IS_BASIC_TIER_HUB : $(IS-BASIC-TIER-HUB)
+          TARGET_BRANCH : $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES : true
 
       - task: CopyFiles@2
         displayName: 'Copy Test Results to Artifact Staging Directory'
