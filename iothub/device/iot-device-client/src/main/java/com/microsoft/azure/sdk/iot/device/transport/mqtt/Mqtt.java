@@ -13,7 +13,9 @@ import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptio
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.*;
+import org.eclipse.paho.mqttv5.client.*;
+import org.eclipse.paho.mqttv5.common.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -36,7 +38,7 @@ public abstract class Mqtt implements MqttCallback
     static final int MAX_IN_FLIGHT_COUNT = 65000;
 
     private MqttAsyncClient mqttAsyncClient;
-    private final MqttConnectOptions connectOptions;
+    private final MqttConnectionOptions connectOptions;
     private final MqttMessageListener messageListener;
     private final Map<Integer, Message> unacknowledgedSentMessages;
 
@@ -86,7 +88,7 @@ public abstract class Mqtt implements MqttCallback
     Mqtt(
         MqttMessageListener messageListener,
         String deviceId,
-        MqttConnectOptions connectOptions,
+        MqttConnectionOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, MqttMessage>> receivedMessages)
     {
@@ -201,22 +203,6 @@ public abstract class Mqtt implements MqttCallback
             }
 
             byte[] payload = message.getBytes();
-
-            // Wait until either the number of in flight messages is below the limit before publishing another message
-            // Or wait until the connection is lost so the message can be requeued for later
-            while (this.mqttAsyncClient.getPendingDeliveryTokens().length >= MAX_IN_FLIGHT_COUNT)
-            {
-                //noinspection BusyWait
-                Thread.sleep(10);
-
-                if (!this.mqttAsyncClient.isConnected())
-                {
-                    TransportException transportException = new TransportException("Cannot publish when mqtt client is holding " + MAX_IN_FLIGHT_COUNT + " tokens and is disconnected");
-                    transportException.setRetryable(true);
-                    throw transportException;
-                }
-            }
-
             MqttMessage mqttMessage = (payload.length == 0) ? new MqttMessage() : new MqttMessage(payload);
 
             mqttMessage.setQos(QOS);
@@ -224,7 +210,7 @@ public abstract class Mqtt implements MqttCallback
             synchronized (this.unacknowledgedSentMessagesLock)
             {
                 log.trace("Publishing message ({}) to MQTT topic {}", message, publishTopic);
-                IMqttDeliveryToken publishToken = this.mqttAsyncClient.publish(publishTopic, mqttMessage);
+                IMqttToken publishToken = this.mqttAsyncClient.publish(publishTopic, mqttMessage);
                 unacknowledgedSentMessages.put(publishToken.getMessageId(), message);
                 log.trace("Message published to MQTT topic {}. Mqtt message id {} added to list of messages to wait for acknowledgement ({})", publishTopic, publishToken.getMessageId(), message);
             }
@@ -271,7 +257,6 @@ public abstract class Mqtt implements MqttCallback
 
                 subToken.waitForCompletion(MAX_SUBSCRIBE_ACK_WAIT_TIME);
                 log.debug("Sent MQTT SUBSCRIBE packet for topic {} was acknowledged", topic);
-
             }
             catch (MqttException e)
             {

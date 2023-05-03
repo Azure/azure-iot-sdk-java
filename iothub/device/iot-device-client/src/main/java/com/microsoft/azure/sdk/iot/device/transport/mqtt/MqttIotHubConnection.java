@@ -8,11 +8,9 @@ import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -29,8 +27,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
-import static com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt.MAX_IN_FLIGHT_COUNT;
-import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1_1;
 
 @Slf4j
 public class MqttIotHubConnection implements IotHubTransportConnection, MqttMessageListener
@@ -179,12 +175,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
         }
 
-        MqttConnectOptions connectOptions = new MqttConnectOptions();
+        MqttConnectionOptions connectOptions = new MqttConnectionOptions();
         connectOptions.setKeepAliveInterval(config.getKeepAliveInterval());
-        connectOptions.setCleanSession(SET_CLEAN_SESSION);
-        connectOptions.setMqttVersion(MQTT_VERSION);
+        connectOptions.setCleanStart(SET_CLEAN_SESSION);
         connectOptions.setUserName(iotHubUserName);
-        connectOptions.setMaxInflight(MAX_IN_FLIGHT_COUNT);
         ProxySettings proxySettings = config.getProxySettings();
         if (proxySettings != null)
         {

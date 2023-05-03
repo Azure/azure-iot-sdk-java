@@ -6,14 +6,15 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions;
 
 import com.microsoft.azure.sdk.iot.device.transport.ProtocolException;
-import org.eclipse.paho.client.mqttv3.MqttException;
+import org.eclipse.paho.mqttv5.common.MqttException;
 
 import java.net.NoRouteToHostException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
-import static org.eclipse.paho.client.mqttv3.MqttException.*;
+import static org.eclipse.paho.mqttv5.client.MqttClientException.*;
+import static org.eclipse.paho.mqttv5.common.MqttException.REASON_CODE_CLIENT_EXCEPTION;
 
 public class PahoExceptionTranslator
 {
