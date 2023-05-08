@@ -477,6 +477,15 @@ public final class ClientConfiguration
     }
 
     /**
+     * Getter for MqttGatewayHostName.
+     * @return the value of MqttGatewayHostName
+     */
+    public String getMqttGatewayHostName()
+    {
+        return this.authenticationProvider.getMqttGatewayHostname();
+    }
+
+    /**
      * Getter for the device ID.
      *
      * @return the device ID.
