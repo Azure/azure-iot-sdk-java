@@ -32,6 +32,12 @@ public abstract class IotHubAuthenticationProvider
         Objects.requireNonNull(hostname);
         Objects.requireNonNull(deviceId);
 
+        if (gatewayHostname != null && !gatewayHostname.isEmpty()
+            && mqttGatewayHostname != null && !mqttGatewayHostname.isEmpty())
+        {
+            throw new IllegalArgumentException("[GatewayHostname] and [MqttGatewayHostname] should NOT be specified at the same time.");
+        }
+
         this.hostname = hostname;
         this.gatewayHostname = gatewayHostname;
         this.mqttGatewayHostname = mqttGatewayHostname;

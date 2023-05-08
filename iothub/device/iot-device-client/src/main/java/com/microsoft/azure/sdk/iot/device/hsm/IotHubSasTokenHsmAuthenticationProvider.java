@@ -164,7 +164,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
     private static IotHubSasToken createNewSasToken(
         String hostname,
         String gatewayHostName,
-        String mqttGatewayHostname,
+        String mqttGatewayHostName,
         String deviceId,
         String moduleId,
         String generationId,
@@ -179,8 +179,22 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
             String data = audience + "\n" + expiresOn;
             String signature = signatureProvider.sign(moduleId, data, generationId);
 
-            String host = gatewayHostName != null && !gatewayHostName.isEmpty() ? gatewayHostName : hostname;
-            host = mqttGatewayHostname != null && !mqttGatewayHostname.isEmpty() ? mqttGatewayHostname : hostname;
+            if (gatewayHostName != null && !gatewayHostName.isEmpty()
+                    && mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+            {
+                throw new IllegalArgumentException("[GatewayHostName] and [MqttGatewayHostName] should NOT be specified at the same time.");
+            }
+
+            String host = hostname;
+
+            if (gatewayHostName != null && !gatewayHostName.isEmpty())
+            {
+                host = gatewayHostName;
+            }
+            else if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+            {
+                host = mqttGatewayHostName;
+            }
 
             String sharedAccessToken = IotHubSasToken.buildSharedAccessToken(audience, signature, expiresOn);
 

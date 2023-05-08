@@ -122,6 +122,12 @@ public class IotHubConnectionString
             }
         }
 
+        if (gatewayHostName != null && !gatewayHostName.isEmpty()
+                && mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            throw new IllegalArgumentException("[GatewayHostName] and [MqttGatewayHostName] should NOT be specified at the same time.");
+        }
+
         this.isUsingX509 = connectionString.contains(X509_ENABLED_ATTRIBUTE);
         validateTerms(this.hostName, this.deviceId, this.sharedAccessKey, this.sharedAccessToken, this.isUsingX509);
 
@@ -145,7 +151,7 @@ public class IotHubConnectionString
         String sharedAccessToken)
             throws IllegalArgumentException
     {
-        this(hostName, deviceId, sharedAccessKey, sharedAccessToken, null, null);
+        this(hostName, deviceId, sharedAccessKey, sharedAccessToken, null);
     }
 
     private IotHubConnectionString(
@@ -153,8 +159,7 @@ public class IotHubConnectionString
         String deviceId,
         String sharedAccessKey,
         String sharedAccessToken,
-        String gatewayHostName,
-        String mqttGatewayHostName)
+        String gatewayHostName)
             throws IllegalArgumentException
     {
         this.isUsingX509 = (sharedAccessKey == null && sharedAccessToken == null);
@@ -171,12 +176,6 @@ public class IotHubConnectionString
         if (this.gatewayHostName != null && !this.gatewayHostName.isEmpty())
         {
             this.hostName = gatewayHostName;
-        }
-
-        this.mqttGatewayHostName = mqttGatewayHostName;
-        if (this.mqttGatewayHostName != null && !this.mqttGatewayHostName.isEmpty())
-        {
-            this.hostName = mqttGatewayHostName;
         }
     }
 
