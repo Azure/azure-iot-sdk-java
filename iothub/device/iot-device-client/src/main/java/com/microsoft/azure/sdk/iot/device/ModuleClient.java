@@ -66,7 +66,7 @@ public class ModuleClient extends InternalClient
      *                         or
      *
      *                         HostName=xxxx;DeviceId=xxxx;SharedAccessKey=
-     *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
+     *                         xxxx;moduleId=xxxx;GatewayHostName=xxxx
      * @param protocol The protocol to use when communicating with the module
      * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
      * the "moduleId" field, or if the connection string uses x509
