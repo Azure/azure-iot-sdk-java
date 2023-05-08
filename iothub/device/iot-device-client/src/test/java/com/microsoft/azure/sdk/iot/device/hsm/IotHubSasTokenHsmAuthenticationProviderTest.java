@@ -28,6 +28,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
 
     private static final String expectedHostname = "hostname";
     private static final String expectedGatewayHostname = "gatewayHostname";
+    private static final String expectedMqttGatewayHostname = "mqttGatewayHostname";
     private static final String expectedDeviceId = "device";
     private static final String expectedModuleId = "module";
     private static final int expectedTimeToLive = 56;
@@ -66,7 +67,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
     }
 
     // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_006: [If the gatewayHostname is present, this function shall construct the sas token using the gateway hostname instead of the hostname.]
@@ -98,7 +99,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
     }
 
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_004: [If the gatewayHostname is null or empty, this function shall construct the sas token using the hostname instead of the gateway hostname.]
@@ -131,7 +132,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, null, "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, null, null, "gen1", expectedTimeToLive, expectedBufferPercent);
     }
 
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_005: [This function shall create a new sas token and save it locally.]
@@ -163,9 +164,10 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenHsmAuthenticationProvider auth = IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, "", "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider auth = IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, "", "", "gen1", expectedTimeToLive, expectedBufferPercent);
         Deencapsulation.setField(auth, "hostname", expectedHostname);
         Deencapsulation.setField(auth, "gatewayHostname", "");
+        Deencapsulation.setField(auth, "mqttGatewayHostname", "");
         Deencapsulation.setField(auth, "deviceId", expectedDeviceId);
         Deencapsulation.setField(auth, "moduleId", expectedModuleId);
         Deencapsulation.setField(auth, "signatureProvider", mockedSignatureProvider);
@@ -180,6 +182,6 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
     public void staticConstructorThrowsForNullSignatureProvider() throws IOException, TransportException
     {
         //act
-        IotHubSasTokenHsmAuthenticationProvider.create(null, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(null, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
     }
 }

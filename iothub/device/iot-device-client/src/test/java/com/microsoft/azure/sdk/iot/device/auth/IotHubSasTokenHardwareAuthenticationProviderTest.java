@@ -45,7 +45,8 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     private static final String expectedDeviceId = "deviceId";
     private static final String expectedModuleId = "moduleId";
     private static final String expectedHostname = "hostname";
-    private static final String expectedGatewayHostname = "gateway";
+    private static final String expectedGatewayHostname = "gatewayHostname";
+    private static final String expectedMqttGatewayHostname = "mqttGatewayHostname";
     private static final String expectedSasToken = "sasToken";
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_033: [This constructor shall generate and save a sas token from the security provider with the default time to live.]
@@ -77,7 +78,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //assert
         String actualHostname = sasTokenAuthentication.getHostname();
@@ -95,7 +96,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
     public void securityProviderConstructorThrowsForInvalidSecurityProviderInstance() throws IOException, InvalidKeyException, SecurityProviderException
     {
         //act
-        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProvider);
+        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProvider);
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_023: [If the security provider throws an exception while retrieving a sas token or ssl context from it, this function shall throw an IOException.]
@@ -126,7 +127,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         };
 
         //act
-        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_035: [If the saved sas token has expired and there is a security provider, the saved sas token shall be refreshed with a new token from the security provider.]
@@ -156,7 +157,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
         sasAuth.getSasToken();
@@ -189,7 +190,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
         sasAuth.getSasToken();
@@ -225,7 +226,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
         sasAuth.getSasToken();
@@ -256,7 +257,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
         char[] actualSasToken = sasAuth.getSasToken();
@@ -327,7 +328,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
         SSLContext actualSSLContext = sasTokenAuthentication.getSSLContext();
@@ -350,7 +351,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         };
 
         //act
-        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_010: [If the call for the saved security provider to sign with identity returns null or empty bytes, this function shall throw an IOException.]
@@ -370,7 +371,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         };
 
         //act
-        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_010: [If the call for the saved security provider to sign with identity returns null or empty bytes, this function shall throw an IOException.]
@@ -390,7 +391,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         };
 
         //act
-        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_011: [When generating the sas token signature from the security provider, if an UnsupportedEncodingException or SecurityProviderException is thrown, this function shall throw an IOException.]
@@ -407,7 +408,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         };
 
         //act
-        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_011: [When generating the sas token signature from the security provider, if an UnsupportedEncodingException or SecurityProviderException is thrown, this function shall throw an IOException.]
@@ -427,7 +428,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
         };
 
         //act
-        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
     }
 
     //Tests_SRS_IOTHUBSASTOKENHARDWAREAUTHENTICATION_34_012: [This function shall return false.]
@@ -460,7 +461,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
         boolean result = sasTokenAuthentication.isAuthenticationProviderRenewalNecessary();
@@ -499,7 +500,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+        IotHubSasTokenAuthenticationProvider sasTokenAuthentication = new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
 
         //act
         boolean result = sasTokenAuthentication.canRefreshToken();

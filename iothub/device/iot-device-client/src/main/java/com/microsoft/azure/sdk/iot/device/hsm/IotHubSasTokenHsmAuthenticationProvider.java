@@ -27,8 +27,9 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
      * @param signatureProvider the signature provider to be used when generating sas tokens
      * @param deviceId the id of the device the module belongs to
      * @param moduleId the id of the module to be authenticated for
-     * @param hostname the hostname of the iothub to be authenticated for. May be null if gatewayHostname is not
-     * @param gatewayHostname the gatewayHostname of the edge hub to be authenticated for. May be null if hostname is not
+     * @param hostname the hostname of the iothub to be authenticated for. May be null if both gatewayHostname and mqttGatewayHostname are not
+     * @param gatewayHostname the gatewayHostname of the edge hub to be authenticated for. May be null if both hostname and mqttGatewayHostname are not
+     * @param mqttGatewayHostname the mqttGatewayHostname of the edge hub to be authenticated for. May be null if both hostname and gatewayHostname are not
      * @param generationId the generation id
      * @param suggestedTimeToLiveSeconds the time for the generated sas tokens to live for
      * @param timeBufferPercentage the percent of the life a sas token will live before attempting to be renewed. (100 means don't renew until end of life)
@@ -42,6 +43,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         String moduleId,
         String hostname,
         String gatewayHostname,
+        String mqttGatewayHostname,
         String generationId,
         int suggestedTimeToLiveSeconds,
         int timeBufferPercentage) throws IOException, TransportException
@@ -54,6 +56,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         IotHubSasToken sasToken = createNewSasToken(
             hostname,
             gatewayHostname,
+            mqttGatewayHostname,
             deviceId,
             moduleId,
             generationId,
@@ -63,6 +66,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         return new IotHubSasTokenHsmAuthenticationProvider(
             hostname,
             gatewayHostname,
+            mqttGatewayHostname,
             deviceId,
             moduleId,
             generationId,
@@ -77,8 +81,9 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
      * @param signatureProvider the signature provider to be used when generating sas tokens
      * @param deviceId the id of the device the module belongs to
      * @param moduleId the id of the module to be authenticated for
-     * @param hostname the hostname of the iothub to be authenticated for. May be null if gatewayHostname is not
-     * @param gatewayHostname the gatewayHostname of the edge hub to be authenticated for. May be null if hostname is not
+     * @param hostname the hostname of the iothub to be authenticated for. May be null if both gatewayHostname and mqttGatewayHostname are not
+     * @param gatewayHostname the gatewayHostname of the edge hub to be authenticated for. May be null if both hostname and mqttGatewayHostname are not
+     * @param mqttGatewayHostname the mqttGatewayHostname of the edge hub to be authenticated for. May be null if both hostname and gatewayHostname are not
      * @param generationId the generation id
      * @param suggestedTimeToLiveSeconds the time for the generated sas tokens to live for
      * @param timeBufferPercentage the percent of the life a sas token will live before attempting to be renewed. (100 means don't renew until end of life)
@@ -93,6 +98,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         String moduleId,
         String hostname,
         String gatewayHostname,
+        String mqttGatewayHostname,
         String generationId,
         int suggestedTimeToLiveSeconds,
         int timeBufferPercentage,
@@ -107,6 +113,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
             createNewSasToken(
                 hostname,
                 gatewayHostname,
+                mqttGatewayHostname,
                 deviceId,
                 moduleId,
                 generationId,
@@ -116,6 +123,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         return new IotHubSasTokenHsmAuthenticationProvider(
             hostname,
             gatewayHostname,
+            mqttGatewayHostname,
             deviceId,
             moduleId,
             generationId,
@@ -136,6 +144,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         this.sasToken = createNewSasToken(
             this.hostname,
             this.gatewayHostname,
+            this.mqttGatewayHostname,
             this.deviceId,
             this.moduleId,
             this.generationId,
@@ -155,6 +164,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
     private static IotHubSasToken createNewSasToken(
         String hostname,
         String gatewayHostName,
+        String mqttGatewayHostname,
         String deviceId,
         String moduleId,
         String generationId,
@@ -170,6 +180,8 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
             String signature = signatureProvider.sign(moduleId, data, generationId);
 
             String host = gatewayHostName != null && !gatewayHostName.isEmpty() ? gatewayHostName : hostname;
+            host = mqttGatewayHostname != null && !mqttGatewayHostname.isEmpty() ? mqttGatewayHostname : hostname;
+
             String sharedAccessToken = IotHubSasToken.buildSharedAccessToken(audience, signature, expiresOn);
 
             return new IotHubSasToken(host, deviceId, null, sharedAccessToken, moduleId, expiresOn);
@@ -183,6 +195,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
     private IotHubSasTokenHsmAuthenticationProvider(
         String hostname,
         String gatewayHostName,
+        String mqttGatewayHostname,
         String deviceId,
         String moduleId,
         String generationId,
@@ -191,7 +204,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         int suggestedTimeToLiveSeconds,
         int timeBufferPercentage)
     {
-        super(hostname, gatewayHostName, deviceId, moduleId, sharedAccessToken, suggestedTimeToLiveSeconds, timeBufferPercentage);
+        super(hostname, gatewayHostName, mqttGatewayHostname, deviceId, moduleId, sharedAccessToken, suggestedTimeToLiveSeconds, timeBufferPercentage);
         this.signatureProvider = signatureProvider;
         this.generationId = generationId;
     }
@@ -199,6 +212,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
     private IotHubSasTokenHsmAuthenticationProvider(
         String hostname,
         String gatewayHostName,
+        String mqttGatewayHostname,
         String deviceId,
         String moduleId,
         String generationId,
@@ -208,7 +222,7 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
         int timeBufferPercentage,
         SSLContext sslContext)
     {
-        super(hostname, gatewayHostName, deviceId, moduleId, sharedAccessToken, suggestedTimeToLiveSeconds, timeBufferPercentage, sslContext);
+        super(hostname, gatewayHostName, mqttGatewayHostname, deviceId, moduleId, sharedAccessToken, suggestedTimeToLiveSeconds, timeBufferPercentage, sslContext);
         this.signatureProvider = signatureProvider;
         this.generationId = generationId;
     }

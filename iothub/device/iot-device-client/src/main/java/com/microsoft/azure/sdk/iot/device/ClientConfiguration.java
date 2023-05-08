@@ -154,6 +154,7 @@ public final class ClientConfiguration
         this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
                 iotHubConnectionString.getHostName(),
                 iotHubConnectionString.getGatewayHostName(),
+                iotHubConnectionString.getMqttGatewayHostName(),
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getModuleId(),
                 iotHubConnectionString.getSharedAccessKey(),
@@ -276,6 +277,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubX509SoftwareAuthenticationProvider(
                     iotHubConnectionString.getHostName(),
                     iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getMqttGatewayHostName(),
                     iotHubConnectionString.getDeviceId(),
                     iotHubConnectionString.getModuleId(),
                     sslContext);
@@ -287,6 +289,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
                     iotHubConnectionString.getHostName(),
                     iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getMqttGatewayHostName(),
                     iotHubConnectionString.getDeviceId(),
                     iotHubConnectionString.getModuleId(),
                     iotHubConnectionString.getSharedAccessKey(),
@@ -319,6 +322,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubSasTokenHardwareAuthenticationProvider(
                     connectionString.getHostName(),
                     connectionString.getGatewayHostName(),
+                    connectionString.getMqttGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
                     securityProvider);
@@ -328,6 +332,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
                     connectionString.getHostName(),
                     connectionString.getGatewayHostName(),
+                    connectionString.getMqttGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
                     new String(((SecurityProviderSymmetricKey) securityProvider).getSymmetricKey(), StandardCharsets.UTF_8),
@@ -338,6 +343,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubX509HardwareAuthenticationProvider(
                     connectionString.getHostName(),
                     connectionString.getGatewayHostName(),
+                    connectionString.getMqttGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
                     securityProvider);

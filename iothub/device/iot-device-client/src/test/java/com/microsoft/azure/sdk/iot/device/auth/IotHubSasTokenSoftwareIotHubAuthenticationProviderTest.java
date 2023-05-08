@@ -29,7 +29,8 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
 {
     private static final String expectedDeviceId = "deviceId";
     private static final String expectedHostname = "hostname";
-    private static final String expectedGatewayHostname = "gateway";
+    private static final String expectedGatewayHostname = "gatewayHostname";
+    private static final String expectedMqttGatewayHostname = "mqttGatewayHostname";
     private static final String expectedModuleId = "moduleId";
     private static final String expectedDeviceKey = "deviceKey";
     private static final String expectedSasToken = "sasToken";
@@ -57,7 +58,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenSoftwareAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenSoftwareAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //assert
         String actualDeviceId = sasAuth.getDeviceId();
@@ -92,7 +93,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenSoftwareAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken, mockSSLContext);
+        IotHubSasTokenSoftwareAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken, mockSSLContext);
 
         //assert
         String actualDeviceId = sasAuth.getDeviceId();
@@ -125,7 +126,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenSoftwareAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken, 10, 10);
+        IotHubSasTokenSoftwareAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken, 10, 10);
 
         //assert
         String actualDeviceId = sasAuth.getDeviceId();
@@ -159,7 +160,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         };
 
         //arrange
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         sasAuth.getSasToken();
@@ -192,7 +193,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         };
 
         //arrange
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         sasAuth.getSasToken();
@@ -223,7 +224,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         };
 
         //arrange
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         sasAuth.getSasToken();
@@ -253,7 +254,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
         };
 
         //arrange
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         sasAuth.getSasToken();
@@ -273,7 +274,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         char[] actualSasToken = sasAuth.getSasToken();
@@ -295,7 +296,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, null, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, null, expectedSasToken);
 
         //act
         boolean needsToRenew = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
@@ -319,7 +320,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         boolean needsToRenew = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
@@ -341,7 +342,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         boolean needsToRenew = Deencapsulation.invoke(sasAuth, "isAuthenticationProviderRenewalNecessary");
@@ -355,7 +356,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
     public void isRenewalNecessaryReturnsTrueIfDeviceKeyPresent()
     {
         //arrange
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         boolean result = sasAuth.isAuthenticationProviderRenewalNecessary();
@@ -369,7 +370,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
     public void canRefreshTokenReturnsTrueIfDeviceKeyPresent()
     {
         //arrange
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, expectedDeviceKey, expectedSasToken);
 
         //act
         boolean result = sasAuth.canRefreshToken();
@@ -383,7 +384,7 @@ public class IotHubSasTokenSoftwareIotHubAuthenticationProviderTest
     public void canRefreshTokenReturnsFalseIfDeviceKeyAbsent()
     {
         //arrange
-        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, null, expectedSasToken);
+        IotHubSasTokenAuthenticationProvider sasAuth = new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId, null, expectedSasToken);
 
         //act
         boolean result = sasAuth.canRefreshToken();
