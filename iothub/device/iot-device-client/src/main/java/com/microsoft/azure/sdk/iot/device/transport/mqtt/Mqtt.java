@@ -16,6 +16,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.mqttv5.client.*;
 import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -102,9 +103,9 @@ public abstract class Mqtt implements MqttCallback
         this.unacknowledgedSentMessages = unacknowledgedSentMessages;
     }
 
-    void updatePassword(char[] newPassword)
+    void updatePassword(String newPassword)
     {
-        this.connectOptions.setPassword(newPassword);
+        this.connectOptions.setPassword(newPassword.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -220,10 +221,6 @@ public abstract class Mqtt implements MqttCallback
             log.warn("Message could not be published to MQTT topic {} ({})", publishTopic, message, e);
             throw PahoExceptionTranslator.convertToMqttException(e, "Unable to publish message on topic : " + publishTopic);
         }
-        catch (InterruptedException e)
-        {
-            throw new TransportException("Interrupted, Unable to publish message on topic : " + publishTopic, e);
-        }
     }
 
     /**
@@ -305,94 +302,6 @@ public abstract class Mqtt implements MqttCallback
         }
     }
 
-    /**
-     * Event fired when the connection with the MQTT broker is lost.
-     * @param throwable Reason for losing the connection.
-     */
-    @Override
-    public void connectionLost(Throwable throwable)
-    {
-        log.warn("Mqtt connection lost", throwable);
-
-        this.disconnect();
-
-        if (this.listener != null)
-        {
-            TransportException transportException;
-            if (throwable instanceof MqttException)
-            {
-                transportException = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
-                log.trace("Mqtt connection loss interpreted into transport exception", throwable);
-            }
-            else
-            {
-                transportException = new TransportException(throwable);
-            }
-
-            this.listener.onConnectionLost(transportException, this.connectionId);
-        }
-    }
-
-    /**
-     * Event fired when the message arrived on the MQTT broker.
-     * @param topic the topic on which message arrived.
-     * @param mqttMessage  the message arrived on the Mqtt broker.
-     */
-    @Override
-    public void messageArrived(String topic, MqttMessage mqttMessage)
-    {
-        log.trace("Mqtt message arrived on topic {} with mqtt message id {}", topic, mqttMessage.getId());
-        this.receivedMessages.add(new MutablePair<>(topic, mqttMessage));
-
-        if (this.messageListener != null)
-        {
-            this.messageListener.onMessageArrived(mqttMessage.getId());
-        }
-    }
-
-    /**
-     * Event fired when the message arrived on the MQTT broker.
-     * @param iMqttDeliveryToken the MqttDeliveryToken for which the message was successfully sent.
-     */
-    @Override
-    public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken)
-    {
-        Message deliveredMessage = null;
-        log.trace("Mqtt message with message id {} was acknowledged by service", iMqttDeliveryToken.getMessageId());
-        synchronized (this.unacknowledgedSentMessagesLock)
-        {
-            if (unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
-            {
-                log.trace("Mqtt message with message id {} that was acknowledged by service was sent by this client", iMqttDeliveryToken.getMessageId());
-                deliveredMessage = unacknowledgedSentMessages.remove(iMqttDeliveryToken.getMessageId());
-            }
-            else
-            {
-                log.warn("Mqtt message with message id {} that was acknowledged by service was not sent by this client, will be ignored", iMqttDeliveryToken.getMessageId());
-            }
-        }
-
-        if (deliveredMessage instanceof IotHubTransportMessage)
-        {
-            DeviceOperations deviceOperation = ((IotHubTransportMessage) deliveredMessage).getDeviceOperationType();
-            if (deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
-                    || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
-                    || deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
-            {
-                // no need to alert the IotHubTransport layer about these messages as they are not tracked in the inProgressQueue
-                return;
-            }
-        }
-
-        if (this.listener != null)
-        {
-            this.listener.onMessageSent(deliveredMessage, this.deviceId, null);
-        }
-        else
-        {
-            log.warn("Message sent, but no listener set");
-        }
-    }
 
     /**
      * Send ack for the provided message.
@@ -522,5 +431,91 @@ public abstract class Mqtt implements MqttCallback
         // should never be set to null
         // mqttAsyncClients are single use, so this setter is used when the MqttIotHubConnection layer needs to open a new connection
         this.mqttAsyncClient = mqttAsyncClient;
+    }
+
+    @Override
+    public void disconnected(MqttDisconnectResponse disconnectResponse)
+    {
+        log.warn("Mqtt connection lost", disconnectResponse.getException());
+
+        this.disconnect();
+
+        if (this.listener != null)
+        {
+            TransportException transportException = PahoExceptionTranslator.convertToMqttException(disconnectResponse.getException(), "Mqtt connection lost");
+            log.trace("Mqtt connection loss interpreted into transport exception", disconnectResponse.getException());
+
+            this.listener.onConnectionLost(transportException, this.connectionId);
+        }
+    }
+
+    @Override
+    public void mqttErrorOccurred(MqttException var1)
+    {
+        //TODO
+    }
+
+    @Override
+    public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception
+    {
+        log.trace("Mqtt message arrived on topic {} with mqtt message id {}", topic, mqttMessage.getId());
+        this.receivedMessages.add(new MutablePair<>(topic, mqttMessage));
+
+        if (this.messageListener != null)
+        {
+            this.messageListener.onMessageArrived(mqttMessage.getId());
+        }
+    }
+
+    @Override
+    public void deliveryComplete(IMqttToken iMqttDeliveryToken)
+    {
+        Message deliveredMessage = null;
+        log.trace("Mqtt message with message id {} was acknowledged by service", iMqttDeliveryToken.getMessageId());
+        synchronized (this.unacknowledgedSentMessagesLock)
+        {
+            if (unacknowledgedSentMessages.containsKey(iMqttDeliveryToken.getMessageId()))
+            {
+                log.trace("Mqtt message with message id {} that was acknowledged by service was sent by this client", iMqttDeliveryToken.getMessageId());
+                deliveredMessage = unacknowledgedSentMessages.remove(iMqttDeliveryToken.getMessageId());
+            }
+            else
+            {
+                log.warn("Mqtt message with message id {} that was acknowledged by service was not sent by this client, will be ignored", iMqttDeliveryToken.getMessageId());
+            }
+        }
+
+        if (deliveredMessage instanceof IotHubTransportMessage)
+        {
+            DeviceOperations deviceOperation = ((IotHubTransportMessage) deliveredMessage).getDeviceOperationType();
+            if (deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST
+                || deviceOperation == DeviceOperations.DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST
+                || deviceOperation == DeviceOperations.DEVICE_OPERATION_TWIN_UNSUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
+            {
+                // no need to alert the IotHubTransport layer about these messages as they are not tracked in the inProgressQueue
+                return;
+            }
+        }
+
+        if (this.listener != null)
+        {
+            this.listener.onMessageSent(deliveredMessage, this.deviceId, null);
+        }
+        else
+        {
+            log.warn("Message sent, but no listener set");
+        }
+    }
+
+    @Override
+    public void connectComplete(boolean var1, String var2)
+    {
+
+    }
+
+    @Override
+    public void authPacketArrived(int var1, MqttProperties var2)
+    {
+
     }
 }

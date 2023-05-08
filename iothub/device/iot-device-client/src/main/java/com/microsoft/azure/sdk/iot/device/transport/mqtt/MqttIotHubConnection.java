@@ -10,7 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.mqttv5.client.MqttAsyncClient;
 import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
+import org.eclipse.paho.mqttv5.common.MqttException;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -19,9 +22,7 @@ import java.net.Proxy;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -40,7 +41,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final String SSL_PREFIX = "ssl://";
     private static final String SSL_PORT_SUFFIX = ":8883";
 
-    private static final int MQTT_VERSION = MQTT_VERSION_3_1_1;
     private static final boolean SET_CLEAN_SESSION = false;
 
     private static final String MODEL_ID = "model-id";
@@ -131,28 +131,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.clientId = deviceId;
         }
 
-        String serviceParams;
-        String modelId = this.config.getModelId();
-        if (modelId == null || modelId.isEmpty())
-        {
-            serviceParams = TransportUtils.IOTHUB_API_VERSION;
-        }
-        else
-        {
-            try
-            {
-                // URLEncoder follows HTML spec for encoding urls, which includes substituting space characters with '+'
-                // We want "%20" for spaces, not '+', however, so replace them manually after utf-8 encoding.
-                serviceParams = TransportUtils.IOTHUB_API_VERSION + "&" + MODEL_ID + "=" + URLEncoder.encode(modelId, StandardCharsets.UTF_8.name()).replaceAll("\\+", "%20");
-            }
-            catch (UnsupportedEncodingException e)
-            {
-                throw new TransportException("Failed to URLEncode the modelId string", e);
-            }
-        }
-
-        String iotHubUserName = this.config.getIotHubHostname() + "/" + clientId + "/?api-version=" + serviceParams + "&" + clientUserAgentIdentifier;
-
         String host = this.config.getGatewayHostname();
         if (host == null || host.isEmpty())
         {
@@ -175,10 +153,33 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.serverUri = SSL_PREFIX + host + SSL_PORT_SUFFIX;
         }
 
+        String sasData = "";
+        try
+        {
+            sasData = new String(this.config.getSasTokenAuthentication().getSasToken());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        // Details for the Connect packet format
+        //https://learn.microsoft.com/en-us/azure/iot/iot-mqtt-5-preview#connection-lifecycle
+        // TODO something about this connect packet is still wrong
         MqttConnectionOptions connectOptions = new MqttConnectionOptions();
         connectOptions.setKeepAliveInterval(config.getKeepAliveInterval());
         connectOptions.setCleanStart(SET_CLEAN_SESSION);
-        connectOptions.setUserName(iotHubUserName);
+        connectOptions.setAuthMethod("SAS");
+        List<UserProperty> userProperties = new ArrayList<>();
+        userProperties.add(new UserProperty("Client_Id", this.clientId));
+        userProperties.add(new UserProperty("api-version", "2020-10-10"));
+        userProperties.add(new UserProperty("host", this.config.getIotHubHostname()));
+        userProperties.add(new UserProperty("sas-at", String.valueOf(System.currentTimeMillis())));
+        userProperties.add(new UserProperty("sas-expiry", String.valueOf(System.currentTimeMillis() + 60 * 1000)));
+        connectOptions.setUserProperties(userProperties);
+        //connectOptions.setServerURIs(new String[] { this.config.getIotHubHostname() });
+        connectOptions.setAuthData(sasData.getBytes(StandardCharsets.UTF_8));
+
         ProxySettings proxySettings = config.getProxySettings();
         if (proxySettings != null)
         {
@@ -255,19 +256,6 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
 
             log.debug("Opening MQTT connection...");
-
-            if (this.config.getSasTokenAuthentication() != null)
-            {
-                try
-                {
-                    log.trace("Setting password for MQTT connection since it is a SAS token authenticated connection");
-                    this.deviceMessaging.updatePassword(this.config.getSasTokenAuthentication().getSasToken());
-                }
-                catch (IOException e)
-                {
-                    throw new TransportException("Failed to open the MQTT connection because a SAS token could not be retrieved", e);
-                }
-            }
 
             // MqttAsyncClient's are unusable after they have been closed. This logic creates a new client
             // each time an open is called

@@ -10,8 +10,8 @@ import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.mqttv5.client.MqttConnectionOptions;
+import org.eclipse.paho.mqttv5.common.MqttMessage;
 
 import java.util.Map;
 import java.util.Queue;
@@ -38,7 +38,7 @@ class MqttDirectMethod extends Mqtt
 
     public MqttDirectMethod(
         String deviceId,
-        MqttConnectOptions connectOptions,
+        MqttConnectionOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, MqttMessage>> receivedMessages)
     {
