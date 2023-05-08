@@ -20,17 +20,29 @@ public class IotHubConnectionString
 {
     /** The hostName attribute name in a connection string. */
     private static final String HOSTNAME_ATTRIBUTE = "HostName=";
+
     /** The device ID attribute name in a connection string. */
     private static final String DEVICE_ID_ATTRIBUTE = "DeviceId=";
+
     /** The shared access key attribute name in a connection string. */
     private static final String SHARED_ACCESS_KEY_ATTRIBUTE = "SharedAccessKey=";
+
     /** The shared access signature attribute name in a connection string. */
     private static final String SHARED_ACCESS_TOKEN_ATTRIBUTE = "SharedAccessSignature=";
 
+    /** The module ID attribute name in a connection string. */
     private static final String MODULE_ID_ATTRIBUTE = "ModuleId=";
 
+    /**
+     * IP address or internet name of the host machine working as a device or protocol gateway.
+     * Used when communicating with Azure Edge devices.
+     * */
     private static final String GATEWAY_HOST_NAME_ATTRIBUTE = "GatewayHostName=";
 
+    /** Used for E4K. */
+    private static final String MQTT_GATEWAY_HOST_NAME_ATTRIBUTE = "MqttGatewayHostName=";
+
+    /** Specify when using X.509 certificate to authenticate */
     private static final String X509_ENABLED_ATTRIBUTE = "x509=true";
 
     /**
@@ -47,6 +59,7 @@ public class IotHubConnectionString
     private String moduleId;
     private final boolean isUsingX509;
     private String gatewayHostName;
+    private String mqttGatewayHostName;
 
     /**
      * CONSTRUCTOR.
@@ -103,6 +116,10 @@ public class IotHubConnectionString
             {
                 this.gatewayHostName = attr.substring(GATEWAY_HOST_NAME_ATTRIBUTE.length());
             }
+            else if (attr.toLowerCase().startsWith(MQTT_GATEWAY_HOST_NAME_ATTRIBUTE.toLowerCase()))
+            {
+                this.mqttGatewayHostName = attr.substring(MQTT_GATEWAY_HOST_NAME_ATTRIBUTE.length());
+            }
         }
 
         this.isUsingX509 = connectionString.contains(X509_ENABLED_ATTRIBUTE);
@@ -128,7 +145,7 @@ public class IotHubConnectionString
         String sharedAccessToken)
             throws IllegalArgumentException
     {
-        this(hostName, deviceId, sharedAccessKey, sharedAccessToken, null);
+        this(hostName, deviceId, sharedAccessKey, sharedAccessToken, null, null);
     }
 
     private IotHubConnectionString(
@@ -136,7 +153,8 @@ public class IotHubConnectionString
         String deviceId,
         String sharedAccessKey,
         String sharedAccessToken,
-        String gatewayHostName)
+        String gatewayHostName,
+        String mqttGatewayHostName)
             throws IllegalArgumentException
     {
         this.isUsingX509 = (sharedAccessKey == null && sharedAccessToken == null);
@@ -150,10 +168,15 @@ public class IotHubConnectionString
         this.sharedAccessToken = sharedAccessToken;
 
         this.gatewayHostName = gatewayHostName;
-
         if (this.gatewayHostName != null && !this.gatewayHostName.isEmpty())
         {
             this.hostName = gatewayHostName;
+        }
+
+        this.mqttGatewayHostName = mqttGatewayHostName;
+        if (this.mqttGatewayHostName != null && !this.mqttGatewayHostName.isEmpty())
+        {
+            this.hostName = mqttGatewayHostName;
         }
     }
 
@@ -170,6 +193,8 @@ public class IotHubConnectionString
     {
         return this.gatewayHostName;
     }
+
+    public String getMqttGatewayHostName() { return this.mqttGatewayHostName; }
 
     /**
      * Getter for the hubName.
