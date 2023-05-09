@@ -695,4 +695,17 @@ public class IotHubConnectionStringTest
         //assert
         assertFalse(isUsingX509);
     }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void IotHubConnectionStringWithGatewayHostNameAndMqttGatewayHostNameThrows()
+    {
+        // arrange
+        final String connString ="HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey" +
+                ";DeviceId=" + VALID_DEVICEID + ";SharedAccessKey=" + VALID_SHARED_ACCESS_KEY + ";ModuleId=" +
+                VALID_MODULEID +";GatewayHostName=" + VALID_GATEWAYHOSTNAME + ";MqttGatewayHostName=" +
+                VALID_MQTTGATEWAYHOSTNAME + ";";
+
+        // act
+        new IotHubConnectionString(connString);
+    }
 }
