@@ -86,6 +86,10 @@ public final class ClientConfiguration
     @Setter(AccessLevel.PACKAGE)
     private int sendInterval = DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
 
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private boolean isConnectingToMqttGateway; //TODO populate this field, Bryce
+
     private IotHubAuthenticationProvider authenticationProvider;
 
     /**

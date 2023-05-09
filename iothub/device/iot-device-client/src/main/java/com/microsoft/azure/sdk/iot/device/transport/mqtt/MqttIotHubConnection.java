@@ -8,10 +8,7 @@ import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.eclipse.paho.client.mqttv3.*;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 
 import javax.net.ssl.SSLContext;
@@ -58,10 +55,29 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private final String clientId;
     private final String serverUri;
 
+    private static final String E4K_WILL_TOPIC = "to be defined later";
+    private static final byte[] E4K_WILL_MESSAGE_PAYLOAD = "to be defined later".getBytes(StandardCharsets.UTF_8);
+    private static final int E4K_WILL_MESSAGE_QOS = 1;
+    private static final boolean E4K_WILL_MESSAGE_RETAINED = true;
+
+    private static final String E4K_CONNECTION_CLOSE_TOPIC = "to be defined later";
+    private static final byte[] E4K_CONNECTION_CLOSE_MESSAGE_PAYLOAD = "to be defined later".getBytes(StandardCharsets.UTF_8);
+    private static final int E4K_CONNECTION_CLOSE_MESSAGE_QOS = 1;
+    private static final boolean E4K_CONNECTION_CLOSE_MESSAGE_RETAINED = true;
+    private static final int E4K_CONNECTION_CLOSE_MESSAGE_TIMEOUT_MILLISECONDS = 15 * 1000; // 15 seconds
+
+    private static final String E4K_CONNECTION_OPEN_TOPIC = "to be defined later";
+    private static final byte[] E4K_CONNECTION_OPEN_MESSAGE_PAYLOAD = "to be defined later".getBytes(StandardCharsets.UTF_8);
+    private static final int E4K_CONNECTION_OPEN_MESSAGE_QOS = 1;
+    private static final boolean E4K_CONNECTION_OPEN_MESSAGE_RETAINED = true;
+    private static final int E4K_CONNECTION_OPEN_MESSAGE_TIMEOUT_MILLISECONDS = 15 * 1000; // 15 seconds
+
     //Messaging clients, never null
     private final MqttMessaging deviceMessaging;
     private final MqttTwin deviceTwin;
     private final MqttDirectMethod directMethod;
+
+    private MqttAsyncClient mqttAsyncClient;
 
     private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
 
@@ -185,6 +201,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
         connectOptions.setMqttVersion(MQTT_VERSION);
         connectOptions.setUserName(iotHubUserName);
         connectOptions.setMaxInflight(MAX_IN_FLIGHT_COUNT);
+        if (this.config.isConnectingToMqttGateway())
+        {
+            connectOptions.setWill(E4K_WILL_TOPIC, E4K_WILL_MESSAGE_PAYLOAD, E4K_WILL_MESSAGE_QOS, E4K_WILL_MESSAGE_RETAINED);
+        }
         ProxySettings proxySettings = config.getProxySettings();
         if (proxySettings != null)
         {
@@ -277,13 +297,48 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
             // MqttAsyncClient's are unusable after they have been closed. This logic creates a new client
             // each time an open is called
-            MqttAsyncClient mqttAsyncClient = buildMqttAsyncClient(this.serverUri, this.clientId);
-            mqttAsyncClient.setCallback(this.deviceMessaging);
-            this.deviceMessaging.setMqttAsyncClient(mqttAsyncClient);
-            this.deviceTwin.setMqttAsyncClient(mqttAsyncClient);
-            this.directMethod.setMqttAsyncClient(mqttAsyncClient);
+            this.mqttAsyncClient = buildMqttAsyncClient(this.serverUri, this.clientId);
+            this.mqttAsyncClient.setCallback(this.deviceMessaging);
+            this.deviceMessaging.setMqttAsyncClient(this.mqttAsyncClient);
+            this.deviceTwin.setMqttAsyncClient(this.mqttAsyncClient);
+            this.directMethod.setMqttAsyncClient(this.mqttAsyncClient);
 
             this.deviceMessaging.start();
+
+            // When connecting to E4K, the client is expected to publish a message after opening the connection
+            // so that E4K knows to start the upstream connection for this device.
+            if (this.config.isConnectingToMqttGateway())
+            {
+                try
+                {
+                    log.debug("Sending the ");
+                    IMqttDeliveryToken token = this.mqttAsyncClient.publish(
+                        E4K_CONNECTION_OPEN_TOPIC,
+                        E4K_CONNECTION_OPEN_MESSAGE_PAYLOAD,
+                        E4K_CONNECTION_OPEN_MESSAGE_QOS,
+                        E4K_CONNECTION_OPEN_MESSAGE_RETAINED);
+
+                    // If the message fails to be sent/acknowledged in this time span, an MqttException will be thrown here
+                    token.waitForCompletion(E4K_CONNECTION_OPEN_MESSAGE_TIMEOUT_MILLISECONDS);
+                }
+                catch (MqttException e)
+                {
+                    try
+                    {
+                        this.mqttAsyncClient.close();
+                    }
+                    catch (MqttException ex)
+                    {
+                        log.warn("Encountered an error while closing the MQTT connection", ex);
+                    }
+
+                    TransportException transportException =
+                        new TransportException("Successfully opened the MQTT connection but failed to send the \"Connection established\" message to the MQTT gateway. Closing the connection...");
+                    transportException.setRetryable(true);
+                    throw transportException;
+                }
+            }
+
             this.state = IotHubConnectionStatus.CONNECTED;
 
             log.debug("MQTT connection opened successfully");
@@ -306,6 +361,29 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
 
             log.debug("Closing MQTT connection");
+
+            // When connecting to E4K, the client is expected to publish a message before gracefully closing the connection
+            // so that E4K knows to end the upstream connection for this device. Note that the MQTT connection's "will"
+            // message isn't sufficient to handle this case because the "will" message is only sent on ungraceful disconnections.
+            if (this.config.isConnectingToMqttGateway())
+            {
+                try
+                {
+                    IMqttDeliveryToken token = this.mqttAsyncClient.publish(
+                        E4K_CONNECTION_CLOSE_TOPIC,
+                        E4K_CONNECTION_CLOSE_MESSAGE_PAYLOAD,
+                        E4K_CONNECTION_CLOSE_MESSAGE_QOS,
+                        E4K_CONNECTION_CLOSE_MESSAGE_RETAINED);
+
+                    // If the message fails to be sent/acknowledged in this time span, an MqttException will be thrown here
+                    token.waitForCompletion(E4K_CONNECTION_CLOSE_MESSAGE_TIMEOUT_MILLISECONDS);
+                }
+                catch (MqttException e)
+                {
+                    log.warn("Failed to send the \"Connection will be closed gracefully\" message to the MQTT gateway. " +
+                        "Still closing the connection anyways", e);
+                }
+            }
 
             this.directMethod.stop();
             this.deviceTwin.stop();
