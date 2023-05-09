@@ -325,6 +325,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 {
                     try
                     {
+                        // To avoid the case where the SDK has a connection open to the MQTT broker but E4K isn't aware,
+                        // tear down the connection and make the user retry the entire "open" operation
                         this.mqttAsyncClient.close();
                     }
                     catch (MqttException ex)
@@ -332,8 +334,10 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                         log.warn("Encountered an error while closing the MQTT connection", ex);
                     }
 
-                    TransportException transportException =
-                        new TransportException("Successfully opened the MQTT connection but failed to send the \"Connection established\" message to the MQTT gateway. Closing the connection...");
+                    TransportException transportException = new TransportException(
+                        "Successfully opened the MQTT connection but failed to send the " +
+                            "\"Connection established\" message to the MQTT gateway. Closing the connection...");
+
                     transportException.setRetryable(true);
                     throw transportException;
                 }
@@ -380,6 +384,9 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
                 }
                 catch (MqttException e)
                 {
+                    // This is a bit of an odd case, but it seems likely that this catch block on executes if the connection
+                    // was ungracefully dropped while sending this message. In that case, the "will" message will be read
+                    // by the MQTT broker so we don't need to re-send this message or throw an exception to the user.
                     log.warn("Failed to send the \"Connection will be closed gracefully\" message to the MQTT gateway. " +
                         "Still closing the connection anyways", e);
                 }
