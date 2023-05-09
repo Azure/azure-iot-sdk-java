@@ -86,6 +86,10 @@ public final class ClientConfiguration
     @Setter(AccessLevel.PACKAGE)
     private int sendInterval = DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
 
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private boolean isConnectingToMqttGateway = false;
+
     private IotHubAuthenticationProvider authenticationProvider;
 
     /**
@@ -143,6 +147,12 @@ public final class ClientConfiguration
      */
     ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol) throws IllegalArgumentException
     {
+        String mqttGatewayHostName = iotHubConnectionString.getMqttGatewayHostName();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         this.protocol = protocol;
         configSasAuth(iotHubConnectionString);
     }
@@ -170,6 +180,12 @@ public final class ClientConfiguration
             throw new UnsupportedOperationException("This constructor only support sas token authentication currently");
         }
 
+        String mqttGatewayHostName = authenticationProvider.getMqttGatewayHostname();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         this.protocol = protocol;
         this.authenticationProvider = authenticationProvider;
         this.useWebsocket = false;
@@ -192,6 +208,12 @@ public final class ClientConfiguration
 
     ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
+        String mqttGatewayHostName = iotHubConnectionString.getMqttGatewayHostName();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         this.protocol = protocol;
 
         if (clientOptions != null && clientOptions.getSslContext() != null)
@@ -265,6 +287,12 @@ public final class ClientConfiguration
 
     ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext)
     {
+        String mqttGatewayHostName = iotHubConnectionString.getMqttGatewayHostName();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         this.protocol = protocol;
         configSsl(iotHubConnectionString, sslContext);
     }
@@ -309,6 +337,12 @@ public final class ClientConfiguration
     ClientConfiguration(IotHubConnectionString connectionString, SecurityProvider securityProvider, IotHubClientProtocol protocol) throws IOException
     {
         commonConstructorSetup(connectionString);
+
+        String mqttGatewayHostName = connectionString.getMqttGatewayHostName();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
+        }
 
         this.protocol = protocol;
 
