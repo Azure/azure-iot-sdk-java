@@ -9,8 +9,8 @@ import javax.net.ssl.SSLContext;
 
 public class IotHubX509SoftwareAuthenticationProvider extends IotHubAuthenticationProvider
 {
-    public IotHubX509SoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext) throws IllegalArgumentException
+    public IotHubX509SoftwareAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, SSLContext sslContext) throws IllegalArgumentException
     {
-        super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
+        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId, sslContext);
     }
 }

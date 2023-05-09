@@ -28,14 +28,15 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
      *
      * @param hostname The host name of the hub to authenticate against
      * @param gatewayHostname The gateway hostname to use, or null if connecting to an IotHub
+     * @param mqttGatewayHostname The mqttGatewayHostname to use in E4K context, or null if connecting to an IotHub
      * @param deviceId The unique id of the device to authenticate
      * @param moduleId the module id. May be null if not using a module
      * @param securityProvider the security provider to use for authentication
      * @throws IOException if the provided securityProvider throws while retrieving a sas token or ssl context instance
      */
-    public IotHubSasTokenHardwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider) throws IOException
+    public IotHubSasTokenHardwareAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider) throws IOException
     {
-        super(hostname, gatewayHostname, deviceId, moduleId);
+        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId);
 
         try
         {

@@ -32,16 +32,28 @@ public class IotHubX509HardwareIotHubAuthenticationProviderTest
     @Mocked SSLContext mockSSLContext;
 
     private static final String hostname = "hostname";
-    private static final String gatewayHostname = "gateway";
+    private static final String gatewayHostname = "gatewayHostname";
+    private static final String mqttGatewayHostname = "mqttGatewayHostname";
     private static final String deviceId = "deviceId";
     private static final String moduleId = "moduleId";
 
     //Tests_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_001: [This function shall save the provided security provider.]
     @Test
-    public void constructorSuccess()
+    public void constructorWithGatewayHostnameSuccess()
     {
         //act
-        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, mockSecurityProviderX509);
+        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, gatewayHostname, null, deviceId, moduleId, mockSecurityProviderX509);
+
+        //assert
+        SecurityProvider actualSecurityProvider = Deencapsulation.getField(authentication, "securityProviderX509");
+        assertEquals(mockSecurityProviderX509, actualSecurityProvider);
+    }
+
+    @Test
+    public void constructorWithMqttGatewayHostnameSuccess()
+    {
+        //act
+        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, null, mqttGatewayHostname, deviceId, moduleId, mockSecurityProviderX509);
 
         //assert
         SecurityProvider actualSecurityProvider = Deencapsulation.getField(authentication, "securityProviderX509");
@@ -53,7 +65,14 @@ public class IotHubX509HardwareIotHubAuthenticationProviderTest
     public void constructorThrowsForInvalidSecurityProviderInstance()
     {
         //act
-        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, mockSecurityProvider);
+        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, gatewayHostname, null, deviceId, moduleId, mockSecurityProvider);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorWithGatewayHostnameAndMqttGatewayHostnameThrows()
+    {
+        //act
+        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId, mockSecurityProvider);
     }
 
     //Tests_SRS_IOTHUBX509HARDWAREAUTHENTICATION_34_004: [If the security provider throws a SecurityProviderException while generating an SSLContext, this function shall throw an IOException.]
@@ -61,7 +80,7 @@ public class IotHubX509HardwareIotHubAuthenticationProviderTest
     public void getSSLContextThrowsIOExceptionIfExceptionEncountered() throws SecurityProviderException, IOException, TransportException
     {
         //arrange
-        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, mockSecurityProviderX509);
+        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, gatewayHostname, null, deviceId, moduleId, mockSecurityProviderX509);
 
         new NonStrictExpectations()
         {
@@ -81,7 +100,7 @@ public class IotHubX509HardwareIotHubAuthenticationProviderTest
     public void getSSLContextSuccess() throws SecurityProviderException, IOException, TransportException
     {
         //arrange
-        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, gatewayHostname, deviceId, moduleId, mockSecurityProviderX509);
+        IotHubAuthenticationProvider authentication = new IotHubX509HardwareAuthenticationProvider(hostname, gatewayHostname, null, deviceId, moduleId, mockSecurityProviderX509);
 
         new NonStrictExpectations()
         {

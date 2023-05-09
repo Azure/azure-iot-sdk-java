@@ -16,23 +16,31 @@ public abstract class IotHubAuthenticationProvider
 {
     protected String hostname;
     protected final String gatewayHostname;
+    protected final String mqttGatewayHostname;
     protected String deviceId;
     protected final String moduleId;
 
     IotHubSSLContext iotHubSSLContext;
 
-    public IotHubAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
+    public IotHubAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId)
     {
-        this(hostname, gatewayHostname, deviceId, moduleId, null);
+        this(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId, null);
     }
 
-    public IotHubAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
+    public IotHubAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
     {
         Objects.requireNonNull(hostname);
         Objects.requireNonNull(deviceId);
 
+        if (gatewayHostname != null && !gatewayHostname.isEmpty()
+            && mqttGatewayHostname != null && !mqttGatewayHostname.isEmpty())
+        {
+            throw new IllegalArgumentException("[GatewayHostname] and [MqttGatewayHostname] should NOT be specified at the same time.");
+        }
+
         this.hostname = hostname;
         this.gatewayHostname = gatewayHostname;
+        this.mqttGatewayHostname = mqttGatewayHostname;
         this.deviceId = deviceId;
         this.moduleId = moduleId;
 
@@ -67,6 +75,15 @@ public abstract class IotHubAuthenticationProvider
     public String getGatewayHostname()
     {
         return this.gatewayHostname;
+    }
+
+    /**
+     * Get the mqttGatewayHostname
+     * @return the saved mqttGatewayHostname
+     */
+    public String getMqttGatewayHostname()
+    {
+        return mqttGatewayHostname;
     }
 
     /**

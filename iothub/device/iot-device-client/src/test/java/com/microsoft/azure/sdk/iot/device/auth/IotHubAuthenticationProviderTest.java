@@ -26,36 +26,58 @@ public class IotHubAuthenticationProviderTest
     
     private static final String expectedHostname = "hostname";
     private static final String expectedGatewayHostname = "gatewayhostname";
+    private static final String expectedMqttGatewayHostname = "mqttGatewayHostname";
     private static final String expectedDeviceId = "deviceId";
     private static final String expectedModuleId = "moduleId";
     
     private static class IotHubAuthenticationProviderMock extends IotHubAuthenticationProvider
     {
-        public IotHubAuthenticationProviderMock(String hostname, String gatewayHostname, String deviceId, String moduleId)
+        public IotHubAuthenticationProviderMock(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId)
         {
-            super(hostname, gatewayHostname, deviceId, moduleId);
+            super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId);
         }
 
-        public IotHubAuthenticationProviderMock(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
+        public IotHubAuthenticationProviderMock(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
         {
-            super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
+            super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId, sslContext);
         }
     }
 
     // Tests_SRS_AUTHENTICATIONPROVIDER_34_001: [The constructor shall save the provided hostname, gatewayhostname, deviceid and moduleid.]
     @Test
-    public void constructorSavesArguments()
+    public void constructorSavesArgumentsWithGatewayHostname()
     {
         //act
-        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, null, expectedDeviceId, expectedModuleId);
         
         //assert
         assertEquals(expectedHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "hostname"));
         assertEquals(expectedGatewayHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "gatewayHostname"));
+        assertEquals(null, Deencapsulation.getField(iotHubAuthenticationProvider, "mqttGatewayHostname"));
         assertEquals(expectedDeviceId, Deencapsulation.getField(iotHubAuthenticationProvider, "deviceId"));
         assertEquals(expectedModuleId, Deencapsulation.getField(iotHubAuthenticationProvider, "moduleId"));
     }
 
+    @Test
+    public void constructorSavesArgumentsWithMqttGatewayHostname()
+    {
+        //act
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, null, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId);
+
+        //assert
+        assertEquals(expectedHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "hostname"));
+        assertEquals(null, Deencapsulation.getField(iotHubAuthenticationProvider, "gatewayHostname"));
+        assertEquals(expectedMqttGatewayHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "mqttGatewayHostname"));
+        assertEquals(expectedDeviceId, Deencapsulation.getField(iotHubAuthenticationProvider, "deviceId"));
+        assertEquals(expectedModuleId, Deencapsulation.getField(iotHubAuthenticationProvider, "moduleId"));
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void constructorWithGatewayHostnameAndMqttGatewayHostnameThrows()
+    {
+        //act
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId);
+    }
 
     @Test
     public void constructorSuccessWithSSLContext()
@@ -70,7 +92,7 @@ public class IotHubAuthenticationProviderTest
         };
 
         //act
-        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId, mockedSSLContext);
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, null, expectedDeviceId, expectedModuleId, mockedSSLContext);
 
         //assert
         assertEquals(expectedHostname, Deencapsulation.getField(iotHubAuthenticationProvider, "hostname"));
@@ -86,10 +108,10 @@ public class IotHubAuthenticationProviderTest
     // Tests_SRS_AUTHENTICATIONPROVIDER_34_008: [This function shall return the saved iotHubTrustedCert.]
     // Tests_SRS_AUTHENTICATIONPROVIDER_34_009: [This function shall return the saved pathToIotHubTrustedCert.]
     @Test
-    public void gettersWork()
+    public void gettersWorkWithGatewayHostname()
     {
         //arrange
-        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, null, expectedDeviceId, expectedModuleId);
 
         //act
         String actualHostName = iotHubAuthenticationProvider.getHostname();
@@ -104,12 +126,31 @@ public class IotHubAuthenticationProviderTest
         assertEquals(expectedModuleId, actualModuleId);
     }
 
+    @Test
+    public void gettersWorkWithMqttGatewayHostname()
+    {
+        //arrange
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, null, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId);
+
+        //act
+        String actualHostName = iotHubAuthenticationProvider.getHostname();
+        String actualMqttGatewayHostname = iotHubAuthenticationProvider.getMqttGatewayHostname();
+        String actualDeviceId = iotHubAuthenticationProvider.getDeviceId();
+        String actualModuleId = iotHubAuthenticationProvider.getModuleId();
+
+        //assert
+        assertEquals(expectedHostname, actualHostName);
+        assertEquals(expectedMqttGatewayHostname, actualMqttGatewayHostname);
+        assertEquals(expectedDeviceId, actualDeviceId);
+        assertEquals(expectedModuleId, actualModuleId);
+    }
+
     // Tests_SRS_AUTHENTICATIONPROVIDER_34_006: [If the provided hostname is null, this function shall throw an IllegalArgumentException.]
     @Test (expected = NullPointerException.class)
     public void constructorThrowsForNullHostname()
     {
         //act
-        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(null, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(null, expectedGatewayHostname, expectedMqttGatewayHostname, expectedDeviceId, expectedModuleId);
     }
 
     // Tests_SRS_AUTHENTICATIONPROVIDER_34_007: [If the provided device id is null, this function shall throw an IllegalArgumentException.]
@@ -117,7 +158,7 @@ public class IotHubAuthenticationProviderTest
     public void constructorThrowsForNullDeviceId()
     {
         //act
-        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, null, expectedModuleId);
+        IotHubAuthenticationProvider iotHubAuthenticationProvider = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, null, expectedModuleId);
     }
 
     //Codes_SRS_AUTHENTICATIONPROVIDER_34_012: [If a CertificateException, NoSuchAlgorithmException, KeyManagementException, or KeyStoreException is thrown during this function, this function shall throw an IOException.]
@@ -134,7 +175,7 @@ public class IotHubAuthenticationProviderTest
             }
         };
 
-        IotHubAuthenticationProvider sasAuth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
+        IotHubAuthenticationProvider sasAuth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, null, expectedDeviceId, expectedModuleId);
 
         //act
         sasAuth.getSSLContext();
@@ -156,7 +197,7 @@ public class IotHubAuthenticationProviderTest
             }
         };
 
-        IotHubAuthenticationProvider sasAuth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, expectedDeviceId, expectedModuleId);
+        IotHubAuthenticationProvider sasAuth = new IotHubAuthenticationProviderMock(expectedHostname, expectedGatewayHostname, null, expectedDeviceId, expectedModuleId);
 
         //act
         SSLContext actualSSLContext = sasAuth.getSSLContext();
