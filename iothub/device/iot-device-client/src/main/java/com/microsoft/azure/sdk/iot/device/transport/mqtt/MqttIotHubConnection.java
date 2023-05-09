@@ -311,7 +311,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             {
                 try
                 {
-                    log.debug("Sending the ");
+                    log.debug("Sending the \"Opened a connection\" message to the MQTT broker");
                     IMqttDeliveryToken token = this.mqttAsyncClient.publish(
                         E4K_CONNECTION_OPEN_TOPIC,
                         E4K_CONNECTION_OPEN_MESSAGE_PAYLOAD,
@@ -373,6 +373,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             {
                 try
                 {
+                    log.debug("Sending the \"Closing a connection\" message to the MQTT broker");
                     IMqttDeliveryToken token = this.mqttAsyncClient.publish(
                         E4K_CONNECTION_CLOSE_TOPIC,
                         E4K_CONNECTION_CLOSE_MESSAGE_PAYLOAD,
