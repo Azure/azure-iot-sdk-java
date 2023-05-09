@@ -47,7 +47,6 @@ public class ModuleClient extends InternalClient
     private static final String IotEdgedUriVariableName = "IOTEDGE_WORKLOADURI";
     private static final String IotHubHostnameVariableName = "IOTEDGE_IOTHUBHOSTNAME";
     private static final String GatewayHostnameVariableName = "IOTEDGE_GATEWAYHOSTNAME";
-    private static final String MqttGatewayHostnameVariableName = "IOTEDGE_MQTTGATEWAYHOSTNAME";
     private static final String DeviceIdVariableName = "IOTEDGE_DEVICEID";
     private static final String ModuleIdVariableName = "IOTEDGE_MODULEID";
     private static final String ModuleGenerationIdVariableName = "IOTEDGE_MODULEGENERATIONID";
@@ -66,7 +65,7 @@ public class ModuleClient extends InternalClient
      *                         or
      *
      *                         HostName=xxxx;DeviceId=xxxx;SharedAccessKey=
-     *                         xxxx;moduleId=xxxx;GatewayHostName=xxxx
+     *                         xxxx;moduleId=xxxx;HostNameGateway=xxxx
      * @param protocol The protocol to use when communicating with the module
      * @throws UnsupportedOperationException if using any protocol besides MQTT, if the connection string is missing
      * the "moduleId" field, or if the connection string uses x509
@@ -246,7 +245,6 @@ public class ModuleClient extends InternalClient
             String hostname = envVariables.get(IotHubHostnameVariableName);
             String authScheme = envVariables.get(AuthSchemeVariableName);
             String gatewayHostname = envVariables.get(GatewayHostnameVariableName);
-            String mqttGatewayHostname = envVariables.get(MqttGatewayHostnameVariableName);
             String generationId = envVariables.get(ModuleGenerationIdVariableName);
 
             if (edgedUri == null)
@@ -297,8 +295,7 @@ public class ModuleClient extends InternalClient
             try
             {
                 SSLContext sslContext;
-                if ((gatewayHostname != null && !gatewayHostname.isEmpty())
-                    || (mqttGatewayHostname != null && !mqttGatewayHostname.isEmpty()))
+                if (gatewayHostname != null && !gatewayHostname.isEmpty())
                 {
                     TrustBundleProvider trustBundleProvider = new HttpsHsmTrustBundleProvider();
                     String trustCertificates = trustBundleProvider.getTrustBundleCerts(edgedUri, DEFAULT_API_VERSION, unixDomainSocketChannel);
@@ -317,7 +314,6 @@ public class ModuleClient extends InternalClient
                             moduleId,
                             hostname,
                             gatewayHostname,
-                            mqttGatewayHostname,
                             generationId,
                             DEFAULT_SAS_TOKEN_TIME_TO_LIVE_SECONDS,
                             DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE,

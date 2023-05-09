@@ -36,19 +36,19 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
     public abstract boolean canRefreshToken();
     public abstract char[] getSasToken() throws IOException, TransportException;
 
-    public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId)
+    public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId)
     {
-        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId);
+        super(hostname, gatewayHostname, deviceId, moduleId);
     }
 
-    IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
+    IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SSLContext sslContext)
     {
-        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId, sslContext);
+        super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
     }
 
-    public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, long tokenValidSecs, int timeBufferPercentage)
+    public IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, long tokenValidSecs, int timeBufferPercentage)
     {
-        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId);
+        super(hostname, gatewayHostname, deviceId, moduleId);
 
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_015: [This function shall save the provided tokenValidSecs as the number of seconds that created sas tokens are valid for.]
         //Codes_SRS_IOTHUBSASTOKENAUTHENTICATION_34_016: [If the provided tokenValidSecs is less than 1, this function shall throw an IllegalArgumentException.]
@@ -64,9 +64,9 @@ public abstract class IotHubSasTokenAuthenticationProvider extends IotHubAuthent
         this.timeBufferPercentage = timeBufferPercentage;
     }
 
-    IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, long tokenValidSecs, int timeBufferPercentage, SSLContext sslContext)
+    IotHubSasTokenAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, long tokenValidSecs, int timeBufferPercentage, SSLContext sslContext)
     {
-        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId, sslContext);
+        super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
 
         this.setTokenValidSecs(tokenValidSecs);
 

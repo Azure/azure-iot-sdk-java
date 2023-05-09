@@ -146,7 +146,7 @@ public class ClientConfigurationTest
         new NonStrictExpectations()
         {
             {
-                new IotHubSasTokenSoftwareAuthenticationProvider(anyString, anyString, anyString, anyString, anyString, anyString, anyString);
+                new IotHubSasTokenSoftwareAuthenticationProvider(anyString, anyString, anyString, anyString, anyString, anyString);
                 result = mockSasTokenSoftwareAuthentication;
 
                 mockSasTokenSoftwareAuthentication.getDeviceId();
@@ -638,7 +638,6 @@ public class ClientConfigurationTest
     {
         final String hostname = "hostname";
         final String gatewayhostname = "gatewayhostname";
-        final String mqttGatewayHostname = "mqttGatewayHostname";
         final String deviceId = "deviceId";
         final String moduleId = "moduleId";
         new Expectations()
@@ -653,16 +652,13 @@ public class ClientConfigurationTest
                 mockIotHubConnectionString.getGatewayHostName();
                 result = gatewayhostname;
 
-                mockIotHubConnectionString.getMqttGatewayHostName();
-                result = mqttGatewayHostname;
-
                 mockIotHubConnectionString.getDeviceId();
                 result = deviceId;
 
                 mockIotHubConnectionString.getModuleId();
                 result = moduleId;
 
-                new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayhostname, mqttGatewayHostname, deviceId, moduleId, mockSSLContext);
+                new IotHubX509SoftwareAuthenticationProvider(hostname, gatewayhostname, deviceId, moduleId, mockSSLContext);
             }
         };
 
@@ -674,7 +670,6 @@ public class ClientConfigurationTest
     {
         final String hostname = "hostname";
         final String gatewayhostname = "gatewayhostname";
-        final String mqttGatewayHostname = "mqttgatewayhostname";
         final String deviceId = "deviceId";
         final String moduleId = "moduleId";
         final String sharedAccessKey = "sharedAccessKey";
@@ -691,9 +686,6 @@ public class ClientConfigurationTest
                 mockIotHubConnectionString.getGatewayHostName();
                 result = gatewayhostname;
 
-                mockIotHubConnectionString.getMqttGatewayHostName();
-                result = mqttGatewayHostname;
-
                 mockIotHubConnectionString.getDeviceId();
                 result = deviceId;
 
@@ -706,7 +698,7 @@ public class ClientConfigurationTest
                 mockIotHubConnectionString.getSharedAccessToken();
                 result = sharedAccessToken;
 
-                new IotHubSasTokenSoftwareAuthenticationProvider(hostname, gatewayhostname, mqttGatewayHostname, deviceId, moduleId, sharedAccessKey, sharedAccessToken, mockSSLContext);
+                new IotHubSasTokenSoftwareAuthenticationProvider(hostname, gatewayhostname, deviceId, moduleId, sharedAccessKey, sharedAccessToken, mockSSLContext);
             }
         };
 
@@ -794,9 +786,6 @@ public class ClientConfigurationTest
                 mockIotHubConnectionString.getGatewayHostName();
                 result = "gatewayHostname";
 
-                mockIotHubConnectionString.getMqttGatewayHostName();
-                result = "mqttGatewayHostname";
-
                 mockIotHubConnectionString.getDeviceId();
                 result = "deviceId";
 
@@ -812,7 +801,7 @@ public class ClientConfigurationTest
         new Verifications()
         {
             {
-                new IotHubX509HardwareAuthenticationProvider("hostname", "gatewayHostname", "mqttGatewayHostname", "deviceId", "moduleId", mockSecurityProviderX509);
+                new IotHubX509HardwareAuthenticationProvider("hostname", "gatewayHostname", "deviceId", "moduleId", mockSecurityProviderX509);
                 times = 1;
             }
         };
@@ -844,7 +833,7 @@ public class ClientConfigurationTest
         new Verifications()
         {
             {
-                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, null, null, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
+                new IotHubSasTokenHardwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, mockSecurityProviderTpm);
                 times = 1;
             }
         };
@@ -875,7 +864,7 @@ public class ClientConfigurationTest
         new Verifications()
         {
             {
-                new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, null, null, expectedDeviceId, expectedModuleId, new String(mockSecurityProviderSymKey.getSymmetricKey(), StandardCharsets.UTF_8), null);
+                new IotHubSasTokenSoftwareAuthenticationProvider(expectedHostname, null, expectedDeviceId, expectedModuleId, new String(mockSecurityProviderSymKey.getSymmetricKey(), StandardCharsets.UTF_8), null);
                 times = 1;
             }
         };

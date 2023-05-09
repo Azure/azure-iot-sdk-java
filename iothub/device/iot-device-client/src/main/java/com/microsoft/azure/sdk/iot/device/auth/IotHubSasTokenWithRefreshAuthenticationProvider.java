@@ -24,16 +24,15 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
      * Constructor for IotHubSasTokenWithRefreshAuthenticationProvider
      * @param hostname the hostname
      * @param gatewayHostName the gateway hostname
-     * @param mqttGatewayHostname the mqttGatewayHostname
      * @param deviceId the device id
      * @param moduleId the module id
      * @param sharedAccessToken the shared access token
      * @param suggestedTimeToLiveSeconds the time to live for generated tokens
      * @param timeBufferPercentage the percent of a sas token's life to live before renewing
      */
-    protected IotHubSasTokenWithRefreshAuthenticationProvider(String hostname, String gatewayHostName, String mqttGatewayHostname, String deviceId, String moduleId, String sharedAccessToken, int suggestedTimeToLiveSeconds, int timeBufferPercentage)
+    protected IotHubSasTokenWithRefreshAuthenticationProvider(String hostname, String gatewayHostName, String deviceId, String moduleId, String sharedAccessToken, int suggestedTimeToLiveSeconds, int timeBufferPercentage)
     {
-        super(hostname, gatewayHostName, mqttGatewayHostname, deviceId, moduleId, suggestedTimeToLiveSeconds, timeBufferPercentage);
+        super(hostname, gatewayHostName, deviceId, moduleId, suggestedTimeToLiveSeconds, timeBufferPercentage);
         this.sasToken = new IotHubSasToken(hostname, deviceId, null, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
 
@@ -41,7 +40,6 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
      * Constructor for IotHubSasTokenWithRefreshAuthenticationProvider
      * @param hostname the hostname
      * @param gatewayHostName the gateway hostname
-     * @param mqttGatewayHostname the mqttGatewayHostname
      * @param deviceId the device id
      * @param moduleId the module id
      * @param sharedAccessToken the shared access token
@@ -49,9 +47,9 @@ public abstract class IotHubSasTokenWithRefreshAuthenticationProvider extends Io
      * @param timeBufferPercentage the percent of a sas token's life to live before renewing
      * @param sslContext the SSLContext the connection will use
      */
-    protected IotHubSasTokenWithRefreshAuthenticationProvider(String hostname, String gatewayHostName, String mqttGatewayHostname, String deviceId, String moduleId, String sharedAccessToken, int suggestedTimeToLiveSeconds, int timeBufferPercentage, SSLContext sslContext)
+    protected IotHubSasTokenWithRefreshAuthenticationProvider(String hostname, String gatewayHostName, String deviceId, String moduleId, String sharedAccessToken, int suggestedTimeToLiveSeconds, int timeBufferPercentage, SSLContext sslContext)
     {
-        super(hostname, gatewayHostName, mqttGatewayHostname, deviceId, moduleId, suggestedTimeToLiveSeconds, timeBufferPercentage, sslContext);
+        super(hostname, gatewayHostName, deviceId, moduleId, suggestedTimeToLiveSeconds, timeBufferPercentage, sslContext);
         this.sasToken = new IotHubSasToken(hostname, deviceId, null, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
 

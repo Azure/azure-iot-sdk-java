@@ -43,7 +43,7 @@ public class IotHubSasTokenAuthenticationProviderTest
     {
         public mockIotHubSasTokenAuthenticationImplementation()
         {
-            super(expectedHostname, null, null, expectedDeviceId, null);
+            super(expectedHostname, null, expectedDeviceId, null);
             this.sasToken = mockSasToken;
             this.deviceId = expectedDeviceId;
             this.hostname = expectedHostname;
@@ -51,7 +51,7 @@ public class IotHubSasTokenAuthenticationProviderTest
 
         public mockIotHubSasTokenAuthenticationImplementation(long expectedTimeToLive, int expectedBufferPercentage)
         {
-            super(expectedHostname, null, null, expectedDeviceId, null, expectedTimeToLive, expectedBufferPercentage);
+            super(expectedHostname, null, expectedDeviceId, null, expectedTimeToLive, expectedBufferPercentage);
             this.sasToken = mockSasToken;
             this.deviceId = expectedDeviceId;
             this.hostname = expectedHostname;
