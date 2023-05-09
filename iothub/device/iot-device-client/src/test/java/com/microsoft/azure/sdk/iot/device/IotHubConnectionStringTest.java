@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  * Methods: 100%
  * Lines: 97%
  */
-public class IotHubConnectionStringTest 
+public class IotHubConnectionStringTest
 {
     private static final String VALID_HUBNAME = "iothub";
     private static final String VALID_HOSTNAME = VALID_HUBNAME + ".device.com";
@@ -26,6 +26,8 @@ public class IotHubConnectionStringTest
     private static final String IOTHUB_CONNECTION_STRING_CLASS = "com.microsoft.azure.sdk.iot.device.IotHubConnectionString";
     private static final String VALID_MODULEID = "moduleId";
     private static final String VALID_GATEWAYHOSTNAME = "edgeHubHostName";
+
+    private static final String VALID_MQTTGATEWAYHOSTNAME = "mqttGatewayHostName";
 
     @SuppressWarnings("SameParameterValue") // Since this is a helper method, the expected assertion param can be passed any value.
     private void assertConnectionString(Object iotHubConnectionString, String expectedHostName,
@@ -74,11 +76,11 @@ public class IotHubConnectionStringTest
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_041: [The constructor shall save the gateway host name as the value of 'GatewayHostName' in the connection string.]
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_043: [The getGatewayHostName shall return the stored gateway host name.]
     @Test
-    public void ConstructorSavesModuleIdAndGatewayHostname() throws URISyntaxException
+    public void ConstructorSavesModuleIdAndGatewayHostName() throws URISyntaxException
     {
         //arrange
-        final String connString = "HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey;" +
-                "DeviceId=" + VALID_DEVICEID + ";SharedAccessKey=" + VALID_SHARED_ACCESS_KEY + ";ModuleId=" +
+        final String connString = "HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey" +
+                ";DeviceId=" + VALID_DEVICEID + ";SharedAccessKey=" + VALID_SHARED_ACCESS_KEY + ";ModuleId=" +
                 VALID_MODULEID +";GatewayHostName=" + VALID_GATEWAYHOSTNAME + ";";
 
         //act
@@ -90,10 +92,26 @@ public class IotHubConnectionStringTest
         assertEquals(VALID_GATEWAYHOSTNAME, connectionString.getGatewayHostName());
     }
 
+    @Test
+    public void ConstructorSavesMqttGatewayHostName() throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey" +
+                ";DeviceId=" + VALID_DEVICEID + ";SharedAccessKey=" + VALID_SHARED_ACCESS_KEY +
+                ";MqttGatewayHostName=" + VALID_MQTTGATEWAYHOSTNAME + ";";
+
+        //act
+        IotHubConnectionString connectionString = new IotHubConnectionString(connString);
+
+        //assert
+        assertEquals(VALID_HOSTNAME, connectionString.getHostName());
+        assertEquals(VALID_MQTTGATEWAYHOSTNAME, connectionString.getMqttGatewayHostName());
+    }
+
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_041: [The constructor shall save the gateway host name as the value of 'GatewayHostName' in the connection string.]
     // Tests_SRS_IOTHUB_CONNECTIONSTRING_34_043: [The getGatewayHostName shall return the stored gateway host name.]
     @Test
-    public void ConstructorSavesAttributesCaseInsensitively() throws URISyntaxException
+    public void ConstructorSavesGatewayHostNameCaseInsensitively() throws URISyntaxException
     {
         //arrange
         final String connString = "HOSTNAME=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey;" +
@@ -107,6 +125,23 @@ public class IotHubConnectionStringTest
         assertEquals(VALID_MODULEID, connectionString.getModuleId());
         assertEquals(VALID_HOSTNAME, connectionString.getHostName());
         assertEquals(VALID_GATEWAYHOSTNAME, connectionString.getGatewayHostName());
+    }
+
+    @Test
+    public void ConstructorSavesMqttGatewayHostNameCaseInsensitively() throws URISyntaxException
+    {
+        //arrange
+        final String connString = "HOSTNAME=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey" +
+                ";DeVicEid=" + VALID_DEVICEID + ";SharedACCESSKey=" + VALID_SHARED_ACCESS_KEY + ";MoDuLeId=" +
+                VALID_MODULEID +";mQttGATeWayHOstnaMe=" + VALID_MQTTGATEWAYHOSTNAME + ";";
+
+        //act
+        IotHubConnectionString connectionString = new IotHubConnectionString(connString);
+
+        //assert
+        assertEquals(VALID_MODULEID, connectionString.getModuleId());
+        assertEquals(VALID_HOSTNAME, connectionString.getHostName());
+        assertEquals(VALID_MQTTGATEWAYHOSTNAME, connectionString.getMqttGatewayHostName());
     }
 
     /* Tests_SRS_IOTHUB_CONNECTIONSTRING_21_020: [The constructor shall save the IoT Hub hostname as the value of `hostName` in the connection string.] */
@@ -659,5 +694,18 @@ public class IotHubConnectionStringTest
 
         //assert
         assertFalse(isUsingX509);
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void IotHubConnectionStringWithGatewayHostNameAndMqttGatewayHostNameThrows()
+    {
+        // arrange
+        final String connString ="HostName=" + VALID_HOSTNAME + ";CredentialType=SharedAccessKey" +
+                ";DeviceId=" + VALID_DEVICEID + ";SharedAccessKey=" + VALID_SHARED_ACCESS_KEY + ";ModuleId=" +
+                VALID_MODULEID +";GatewayHostName=" + VALID_GATEWAYHOSTNAME + ";MqttGatewayHostName=" +
+                VALID_MQTTGATEWAYHOSTNAME + ";";
+
+        // act
+        new IotHubConnectionString(connString);
     }
 }

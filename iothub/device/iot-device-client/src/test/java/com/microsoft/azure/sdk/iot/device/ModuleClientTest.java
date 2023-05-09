@@ -383,6 +383,7 @@ public class ModuleClientTest
         String expectedApiVersion = "1.1.1";
         String expectedHostname = null;
         String expectedGatewayHostname = "someGatewayHostname";
+        String expectedMqttGatewayHostname = "someMqttGatewayHostname";
         String expectedDeviceId = "1234";
         String expectedModuleId = "5678";
         String expectedGenerationId = "gen1";
@@ -397,6 +398,7 @@ public class ModuleClientTest
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleGenerationIdVariableName").toString(), expectedGenerationId);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "MqttGatewayHostnameVariableName").toString(), expectedMqttGatewayHostname);
         new NonStrictExpectations()
         {
             {
@@ -421,6 +423,7 @@ public class ModuleClientTest
         String expectedApiVersion = "1.1.1";
         String expectedHostname = "someHostname";
         String expectedGatewayHostname = "someGatewayHostname";
+        String expectedMqttGatewayHostname = "someMqttGatewayHostname";
         String expectedDeviceId = null;
         String expectedModuleId = "5678";
         String expectedGenerationId = "gen1";
@@ -435,6 +438,7 @@ public class ModuleClientTest
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleGenerationIdVariableName").toString(), expectedGenerationId);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "MqttGatewayHostnameVariableName").toString(), expectedMqttGatewayHostname);
         new NonStrictExpectations()
         {
             {
@@ -459,6 +463,7 @@ public class ModuleClientTest
         String expectedApiVersion = "1.1.1";
         String expectedHostname = "someHostname";
         String expectedGatewayHostname = "someGatewayHostname";
+        String expectedMqttGatewayHostname = "someMqttGatewayHostname";
         String expectedDeviceId = "1234";
         String expectedModuleId = null;
         String expectedGenerationId = "gen1";
@@ -473,6 +478,7 @@ public class ModuleClientTest
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleGenerationIdVariableName").toString(), expectedGenerationId);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "MqttGatewayHostnameVariableName").toString(), expectedMqttGatewayHostname);
         new NonStrictExpectations()
         {
             {
@@ -497,6 +503,7 @@ public class ModuleClientTest
         String expectedApiVersion = "1.1.1";
         String expectedHostname = "someHostname";
         String expectedGatewayHostname = "someGatewayHostname";
+        String expectedMqttGatewayHostname = "someMqttGatewayHostname";
         String expectedDeviceId = "1234";
         String expectedModuleId = "5678";
         String expectedGenerationId = "gen1";
@@ -511,6 +518,7 @@ public class ModuleClientTest
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleGenerationIdVariableName").toString(), expectedGenerationId);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "MqttGatewayHostnameVariableName").toString(), expectedMqttGatewayHostname);
         new NonStrictExpectations()
         {
             {
@@ -533,6 +541,7 @@ public class ModuleClientTest
         String expectedApiVersion = "1.1.1";
         String expectedHostname = "someHostname";
         String expectedGatewayHostname = "someGatewayHostname";
+        String expectedMqttGatewayHostname = "someMqttGatewayHostname";
         String expectedDeviceId = "1234";
         String expectedModuleId = "5678";
         String expectedAuthScheme = "not sas token auth";
@@ -545,6 +554,7 @@ public class ModuleClientTest
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "MqttGatewayHostnameVariableName").toString(), expectedMqttGatewayHostname);
         new NonStrictExpectations()
         {
             {
@@ -572,6 +582,7 @@ public class ModuleClientTest
         final String expectedGenerationId = "gen1";
         final String expectedHostname = "someHostname";
         final String expectedGatewayHostname = "someGatewayHostname";
+        final String expectedMqttGatewayHostname = "someMqttGatewayHostname";
         final String expectedDeviceId = "1234";
         final String expectedModuleId = "5678";
         String expectedAuthScheme = Deencapsulation.getField(ModuleClient.class, "SasTokenAuthScheme");
@@ -586,6 +597,7 @@ public class ModuleClientTest
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleGenerationIdVariableName").toString(), expectedGenerationId);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "MqttGatewayHostnameVariableName").toString(), expectedMqttGatewayHostname);
 
         new Expectations()
         {
@@ -596,7 +608,7 @@ public class ModuleClientTest
                 new HttpHsmSignatureProvider(expectedIotEdgedUri, expectedApiVersion, mockedUnixDomainSocketChannel);
                 result = mockedHttpHsmSignatureProvider;
 
-                IotHubSasTokenHsmAuthenticationProvider.create(mockedHttpHsmSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedGenerationId, anyInt, anyInt, (SSLContext) any);
+                IotHubSasTokenHsmAuthenticationProvider.create(mockedHttpHsmSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, expectedGenerationId, anyInt, anyInt, (SSLContext) any);
                 result = mockedModuleAuthenticationWithHsm;
 
                 new HttpsHsmTrustBundleProvider();
@@ -627,6 +639,7 @@ public class ModuleClientTest
         String expectedApiVersion = "1.1.1";
         String expectedHostname = "someHostname";
         String expectedGatewayHostname = "someGatewayHostname";
+        String expectedMqttGatewayHostname = "someMqttGatewayHostname";
         String expectedDeviceId = "1234";
         String expectedModuleId = "5678";
         String expectedGenerationId = "gen1";
@@ -641,6 +654,7 @@ public class ModuleClientTest
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleGenerationIdVariableName").toString(), expectedGenerationId);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "MqttGatewayHostnameVariableName").toString(), expectedMqttGatewayHostname);
         new NonStrictExpectations()
         {
             {
@@ -665,6 +679,7 @@ public class ModuleClientTest
         String expectedApiVersion = "1.1.1";
         String expectedHostname = "someHostname";
         String expectedGatewayHostname = "someGatewayHostname";
+        String expectedMqttGatewayHostname = "someMqttGatewayHostname";
         String expectedDeviceId = "1234";
         String expectedModuleId = "5678";
         String expectedAuthScheme = Deencapsulation.getField(ModuleClient.class, "SasTokenAuthScheme");
@@ -677,6 +692,7 @@ public class ModuleClientTest
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "AuthSchemeVariableName").toString(), expectedAuthScheme);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "IotEdgedUriVariableName").toString(), expectedIotEdgedUri);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "GatewayHostnameVariableName").toString(), expectedGatewayHostname);
+        mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "MqttGatewayHostnameVariableName").toString(), expectedMqttGatewayHostname);
         mockedSystemVariables.put(Deencapsulation.getField(ModuleClient.class, "ModuleGenerationIdVariableName").toString(), null);
         new NonStrictExpectations()
         {

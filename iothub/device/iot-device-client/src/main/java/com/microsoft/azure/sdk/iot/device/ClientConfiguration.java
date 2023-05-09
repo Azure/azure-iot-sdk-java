@@ -88,7 +88,7 @@ public final class ClientConfiguration
 
     @Getter
     @Setter(AccessLevel.PACKAGE)
-    private boolean isConnectingToMqttGateway; //TODO populate this field, Bryce
+    private boolean isConnectingToMqttGateway = false;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -147,6 +147,12 @@ public final class ClientConfiguration
      */
     ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol) throws IllegalArgumentException
     {
+        String mqttGatewayHostName = iotHubConnectionString.getMqttGatewayHostName();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         this.protocol = protocol;
         configSasAuth(iotHubConnectionString);
     }
@@ -158,6 +164,7 @@ public final class ClientConfiguration
         this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
                 iotHubConnectionString.getHostName(),
                 iotHubConnectionString.getGatewayHostName(),
+                iotHubConnectionString.getMqttGatewayHostName(),
                 iotHubConnectionString.getDeviceId(),
                 iotHubConnectionString.getModuleId(),
                 iotHubConnectionString.getSharedAccessKey(),
@@ -171,6 +178,12 @@ public final class ClientConfiguration
         if (!(authenticationProvider instanceof IotHubSasTokenAuthenticationProvider))
         {
             throw new UnsupportedOperationException("This constructor only support sas token authentication currently");
+        }
+
+        String mqttGatewayHostName = authenticationProvider.getMqttGatewayHostname();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
         }
 
         this.protocol = protocol;
@@ -195,6 +208,12 @@ public final class ClientConfiguration
 
     ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
+        String mqttGatewayHostName = iotHubConnectionString.getMqttGatewayHostName();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         this.protocol = protocol;
 
         if (clientOptions != null && clientOptions.getSslContext() != null)
@@ -268,6 +287,12 @@ public final class ClientConfiguration
 
     ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext)
     {
+        String mqttGatewayHostName = iotHubConnectionString.getMqttGatewayHostName();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         this.protocol = protocol;
         configSsl(iotHubConnectionString, sslContext);
     }
@@ -280,6 +305,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubX509SoftwareAuthenticationProvider(
                     iotHubConnectionString.getHostName(),
                     iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getMqttGatewayHostName(),
                     iotHubConnectionString.getDeviceId(),
                     iotHubConnectionString.getModuleId(),
                     sslContext);
@@ -291,6 +317,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
                     iotHubConnectionString.getHostName(),
                     iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getMqttGatewayHostName(),
                     iotHubConnectionString.getDeviceId(),
                     iotHubConnectionString.getModuleId(),
                     iotHubConnectionString.getSharedAccessKey(),
@@ -311,6 +338,12 @@ public final class ClientConfiguration
     {
         commonConstructorSetup(connectionString);
 
+        String mqttGatewayHostName = connectionString.getMqttGatewayHostName();
+        if (mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         this.protocol = protocol;
 
         if (securityProvider == null)
@@ -323,6 +356,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubSasTokenHardwareAuthenticationProvider(
                     connectionString.getHostName(),
                     connectionString.getGatewayHostName(),
+                    connectionString.getMqttGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
                     securityProvider);
@@ -332,6 +366,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
                     connectionString.getHostName(),
                     connectionString.getGatewayHostName(),
+                    connectionString.getMqttGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
                     new String(((SecurityProviderSymmetricKey) securityProvider).getSymmetricKey(), StandardCharsets.UTF_8),
@@ -342,6 +377,7 @@ public final class ClientConfiguration
             this.authenticationProvider = new IotHubX509HardwareAuthenticationProvider(
                     connectionString.getHostName(),
                     connectionString.getGatewayHostName(),
+                    connectionString.getMqttGatewayHostName(),
                     connectionString.getDeviceId(),
                     connectionString.getModuleId(),
                     securityProvider);
@@ -472,6 +508,15 @@ public final class ClientConfiguration
     public String getGatewayHostname() 
     {
         return this.authenticationProvider.getGatewayHostname();
+    }
+
+    /**
+     * Getter for MqttGatewayHostName.
+     * @return the value of MqttGatewayHostName
+     */
+    public String getMqttGatewayHostName()
+    {
+        return this.authenticationProvider.getMqttGatewayHostname();
     }
 
     /**

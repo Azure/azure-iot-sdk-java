@@ -16,6 +16,7 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      *
      * @param hostname the IotHub host name
      * @param gatewayHostname The gateway hostname to use, or null if connecting to an IotHub
+     * @param mqttGatewayHostname The mqttGatewayHostname to use in E4K context, or null if connecting to an IotHub
      * @param deviceId the IotHub device id
      * @param moduleId the module id. May be null if not using a module
      * @param deviceKey the device key for the device. Must be null if the provided sharedAccessToken is not
@@ -23,9 +24,9 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * @param tokenValidSecs the number of seconds that the token will be valid for
      * @param timeBufferPercentage the percent of the sas token's life that will be exhausted before renewal is attempted
      */
-    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, int tokenValidSecs, int timeBufferPercentage)
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, int tokenValidSecs, int timeBufferPercentage)
     {
-        super(hostname, gatewayHostname, deviceId, moduleId, tokenValidSecs, timeBufferPercentage);
+        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId, tokenValidSecs, timeBufferPercentage);
         this.deviceKey = deviceKey;
         this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
@@ -34,14 +35,15 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * Constructor that takes a connection string containing a sas token or a device key and uses the default token valid seconds and timeBufferPercentage
      * @param hostname the IotHub host name
      * @param gatewayHostname The gateway hostname to use, or null if connecting to an IotHub
+     * @param mqttGatewayHostname The mqttGatewayHostname to use in E4K context, or null if connecting to an IotHub
      * @param deviceId the IotHub device id
      * @param moduleId the module id. May be null if not using a module
      * @param deviceKey the device key for the device. Must be null if the provided sharedAccessToken is not
      * @param sharedAccessToken the sas token string for accessing the device. Must be null if the provided deviceKey is not.
      */
-    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken)
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken)
     {
-        super(hostname, gatewayHostname, deviceId, moduleId);
+        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId);
         this.deviceKey = deviceKey;
         this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
@@ -50,15 +52,16 @@ public class IotHubSasTokenSoftwareAuthenticationProvider extends IotHubSasToken
      * Constructor that takes a connection string containing a sas token or a device key and uses the default token valid seconds and timeBufferPercentage
      * @param hostname the IotHub host name
      * @param gatewayHostname The gateway hostname to use, or null if connecting to an IotHub
+     * @param mqttGatewayHostname The mqttGatewayHostname to use in E4K context, or null if connecting to an IotHub
      * @param deviceId the IotHub device id
      * @param moduleId the module id. May be null if not using a module
      * @param deviceKey the device key for the device. Must be null if the provided sharedAccessToken is not
      * @param sharedAccessToken the sas token string for accessing the device. Must be null if the provided deviceKey is not.
      * @param sslContext the sslContext to use for SSL negotiation
      */
-    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, SSLContext sslContext)
+    public IotHubSasTokenSoftwareAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, String deviceKey, String sharedAccessToken, SSLContext sslContext)
     {
-        super(hostname, gatewayHostname, deviceId, moduleId, sslContext);
+        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId, sslContext);
         this.deviceKey = deviceKey;
         this.sasToken = new IotHubSasToken(hostname, deviceId, deviceKey, sharedAccessToken, moduleId, getExpiryTimeInSeconds());
     }
