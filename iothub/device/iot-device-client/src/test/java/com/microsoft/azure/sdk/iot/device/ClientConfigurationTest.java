@@ -1190,4 +1190,23 @@ public class ClientConfigurationTest
         //assert
         assertEquals(false, config.isConnectingToMqttGateway());
     }
+
+    @Test
+    public void ConstructorWithValidGatewayHostNameAndDefaultGatewayType()
+    {
+        //arrange - act
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = "testGatewayHostName";
+            }
+        };
+
+        ClientOptions options = ClientOptions.builder().build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
+
+        //assert
+        assertEquals(false, config.isConnectingToMqttGateway());
+    }
 }
