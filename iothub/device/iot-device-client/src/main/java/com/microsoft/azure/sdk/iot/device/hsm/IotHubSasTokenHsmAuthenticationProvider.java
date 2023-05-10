@@ -27,8 +27,8 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
      * @param signatureProvider the signature provider to be used when generating sas tokens
      * @param deviceId the id of the device the module belongs to
      * @param moduleId the id of the module to be authenticated for
-     * @param hostname the hostname of the iothub to be authenticated for. May be null if gatewayHostname is not
-     * @param gatewayHostname the gatewayHostname of the edge hub to be authenticated for. May be null if hostname is not
+     * @param hostname the hostname of the iothub to be authenticated for.
+     * @param gatewayHostname the gatewayHostname of the edge hub to be authenticated for. May be null
      * @param generationId the generation id
      * @param suggestedTimeToLiveSeconds the time for the generated sas tokens to live for
      * @param timeBufferPercentage the percent of the life a sas token will live before attempting to be renewed. (100 means don't renew until end of life)
@@ -77,8 +77,8 @@ public class IotHubSasTokenHsmAuthenticationProvider extends IotHubSasTokenWithR
      * @param signatureProvider the signature provider to be used when generating sas tokens
      * @param deviceId the id of the device the module belongs to
      * @param moduleId the id of the module to be authenticated for
-     * @param hostname the hostname of the iothub to be authenticated for. May be null if gatewayHostname is not
-     * @param gatewayHostname the gatewayHostname of the edge hub to be authenticated for. May be null if hostname is not
+     * @param hostname the hostname of the iothub to be authenticated for.
+     * @param gatewayHostname the gatewayHostname of the edge hub to be authenticated for. May be null
      * @param generationId the generation id
      * @param suggestedTimeToLiveSeconds the time for the generated sas tokens to live for
      * @param timeBufferPercentage the percent of the life a sas token will live before attempting to be renewed. (100 means don't renew until end of life)
