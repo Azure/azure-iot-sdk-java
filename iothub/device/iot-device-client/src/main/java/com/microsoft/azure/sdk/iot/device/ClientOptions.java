@@ -136,4 +136,12 @@ public final class ClientOptions
     @Getter
     @Builder.Default
     private final int receiveInterval = RECEIVE_PERIOD_MILLIS;
+
+    /**
+     * This option specifies the type of gateway to which the device/module client is connecting while
+     * specifying the property of GatewayHostName. By default, the value is EDGE.
+     */
+    @Getter
+    @Builder.Default
+    private final GatewayType gatewayType = GatewayType.EDGE;
 }

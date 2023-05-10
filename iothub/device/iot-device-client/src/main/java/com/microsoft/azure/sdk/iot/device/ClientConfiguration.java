@@ -86,6 +86,10 @@ public final class ClientConfiguration
     @Setter(AccessLevel.PACKAGE)
     private int sendInterval = DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
 
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private boolean isConnectingToMqttGateway = false;
+
     private IotHubAuthenticationProvider authenticationProvider;
 
     /**
@@ -191,6 +195,13 @@ public final class ClientConfiguration
 
     ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
+        String gatewayHostName = iotHubConnectionString.getGatewayHostName();
+        GatewayType gatewayType = clientOptions.getGatewayType();
+        if (gatewayHostName != null && !gatewayHostName.isEmpty() && gatewayType == GatewayType.E4K)
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         this.protocol = protocol;
 
         if (clientOptions != null && clientOptions.getSslContext() != null)
@@ -360,6 +371,14 @@ public final class ClientConfiguration
         // When setting the ClientOptions and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
         // we do not need to set the context in this constructor.
         this(connectionString, securityProvider, protocol);
+
+        String gatewayHostName = connectionString.getGatewayHostName();
+        GatewayType gatewayType = clientOptions.getGatewayType();
+        if (gatewayHostName != null && !gatewayHostName.isEmpty() && gatewayType == GatewayType.E4K)
+        {
+            this.isConnectingToMqttGateway = true;
+        }
+
         setClientOptionValues(clientOptions);
     }
 
