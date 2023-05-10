@@ -207,6 +207,11 @@ public final class ClientConfiguration
             {
                 throw new IllegalArgumentException("The value of [GatewayHostName] is NOT provided in the E4K mode.");
             }
+
+            if (protocol != MQTT && protocol != MQTT_WS)
+            {
+                throw new IllegalArgumentException("The transport protocol should be MQTT or MQTT_WS in the E4K mode.");
+            }
         }
 
         this.protocol = protocol;
