@@ -1114,4 +1114,80 @@ public class ClientConfigurationTest
         //assert
         assertEquals(mockedProxySettings, actualProxySettings);
     }
+
+    @Test
+    public void ConstructorWithValidGatewayHostNameAndE4KGatewayType()
+    {
+        //arrange - act
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = "testGatewayHostName";
+            }
+        };
+
+        ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.E4K).build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
+
+        //assert
+        assertEquals(true, config.isConnectingToMqttGateway());
+    }
+
+    @Test
+    public void ConstructorWithNullGatewayHostNameAndE4KGatewayType()
+    {
+        //arrange - act
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = null;
+            }
+        };
+
+        ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.E4K).build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
+
+        //assert
+        assertEquals(false, config.isConnectingToMqttGateway());
+    }
+
+    @Test
+    public void ConstructorWithValidGatewayHostNameAndEdgeGatewayType()
+    {
+        //arrange - act
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = "testGatewayHostName";
+            }
+        };
+
+        ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.EDGE).build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
+
+        //assert
+        assertEquals(false, config.isConnectingToMqttGateway());
+    }
+
+    @Test
+    public void ConstructorWithNullGatewayHostNameAndEdgeGatewayType()
+    {
+        //arrange - act
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = null;
+            }
+        };
+
+        ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.EDGE).build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
+
+        //assert
+        assertEquals(false, config.isConnectingToMqttGateway());
+    }
 }
