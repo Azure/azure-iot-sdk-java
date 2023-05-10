@@ -197,9 +197,16 @@ public final class ClientConfiguration
     {
         String gatewayHostName = iotHubConnectionString.getGatewayHostName();
         GatewayType gatewayType = clientOptions.getGatewayType();
-        if (gatewayHostName != null && !gatewayHostName.isEmpty() && gatewayType == GatewayType.E4K)
+        if (gatewayType == GatewayType.E4K)
         {
-            this.isConnectingToMqttGateway = true;
+            if (gatewayHostName != null && !gatewayHostName.isEmpty())
+            {
+                this.isConnectingToMqttGateway = true;
+            }
+            else
+            {
+                throw new IllegalArgumentException("The value of [GatewayHostName] is NOT provided in the E4K mode.");
+            }
         }
 
         this.protocol = protocol;
@@ -374,9 +381,16 @@ public final class ClientConfiguration
 
         String gatewayHostName = connectionString.getGatewayHostName();
         GatewayType gatewayType = clientOptions.getGatewayType();
-        if (gatewayHostName != null && !gatewayHostName.isEmpty() && gatewayType == GatewayType.E4K)
+        if (gatewayType == GatewayType.E4K)
         {
-            this.isConnectingToMqttGateway = true;
+            if (gatewayHostName != null && !gatewayHostName.isEmpty())
+            {
+                this.isConnectingToMqttGateway = true;
+            }
+            else
+            {
+                throw new IllegalArgumentException("The value of [GatewayHostName] is NOT provided in the E4K mode.");
+            }
         }
 
         setClientOptionValues(clientOptions);

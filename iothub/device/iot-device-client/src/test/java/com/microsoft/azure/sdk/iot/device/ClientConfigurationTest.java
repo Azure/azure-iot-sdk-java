@@ -1118,7 +1118,7 @@ public class ClientConfigurationTest
     @Test
     public void ConstructorWithValidGatewayHostNameAndE4KGatewayType()
     {
-        //arrange - act
+        //arrange
         new Expectations()
         {
             {
@@ -1127,6 +1127,7 @@ public class ClientConfigurationTest
             }
         };
 
+        //act
         ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.E4K).build();
         ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
 
@@ -1134,10 +1135,10 @@ public class ClientConfigurationTest
         assertEquals(true, config.isConnectingToMqttGateway());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void ConstructorWithNullGatewayHostNameAndE4KGatewayType()
     {
-        //arrange - act
+        //arrange
         new Expectations()
         {
             {
@@ -1146,17 +1147,15 @@ public class ClientConfigurationTest
             }
         };
 
+        //act
         ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.E4K).build();
         ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
-
-        //assert
-        assertEquals(false, config.isConnectingToMqttGateway());
     }
 
     @Test
     public void ConstructorWithValidGatewayHostNameAndEdgeGatewayType()
     {
-        //arrange - act
+        //arrange
         new Expectations()
         {
             {
@@ -1165,6 +1164,7 @@ public class ClientConfigurationTest
             }
         };
 
+        //act
         ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.EDGE).build();
         ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
 
@@ -1175,7 +1175,7 @@ public class ClientConfigurationTest
     @Test
     public void ConstructorWithNullGatewayHostNameAndEdgeGatewayType()
     {
-        //arrange - act
+        //arrange
         new Expectations()
         {
             {
@@ -1184,6 +1184,7 @@ public class ClientConfigurationTest
             }
         };
 
+        //act
         ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.EDGE).build();
         ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
 
@@ -1194,7 +1195,7 @@ public class ClientConfigurationTest
     @Test
     public void ConstructorWithValidGatewayHostNameAndDefaultGatewayType()
     {
-        //arrange - act
+        //arrange
         new Expectations()
         {
             {
@@ -1203,6 +1204,7 @@ public class ClientConfigurationTest
             }
         };
 
+        //act
         ClientOptions options = ClientOptions.builder().build();
         ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
 
