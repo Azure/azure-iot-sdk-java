@@ -199,14 +199,12 @@ public final class ClientConfiguration
         GatewayType gatewayType = clientOptions.getGatewayType();
         if (gatewayType == GatewayType.E4K)
         {
-            if (gatewayHostName != null && !gatewayHostName.isEmpty())
-            {
-                this.isConnectingToMqttGateway = true;
-            }
-            else
+            if (gatewayHostName == null || gatewayHostName.isEmpty())
             {
                 throw new IllegalArgumentException("The value of [GatewayHostName] is NOT provided in the E4K mode.");
             }
+
+            this.isConnectingToMqttGateway = true;
 
             if (protocol != MQTT && protocol != MQTT_WS)
             {
@@ -388,13 +386,16 @@ public final class ClientConfiguration
         GatewayType gatewayType = clientOptions.getGatewayType();
         if (gatewayType == GatewayType.E4K)
         {
-            if (gatewayHostName != null && !gatewayHostName.isEmpty())
-            {
-                this.isConnectingToMqttGateway = true;
-            }
-            else
+            if (gatewayHostName == null || gatewayHostName.isEmpty())
             {
                 throw new IllegalArgumentException("The value of [GatewayHostName] is NOT provided in the E4K mode.");
+            }
+
+            this.isConnectingToMqttGateway = true;
+
+            if (protocol != MQTT && protocol != MQTT_WS)
+            {
+                throw new IllegalArgumentException("The transport protocol should be MQTT or MQTT_WS in the E4K mode.");
             }
         }
 

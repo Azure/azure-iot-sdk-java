@@ -8,5 +8,18 @@ package com.microsoft.azure.sdk.iot.device;
  */
 public enum GatewayType
 {
-    EDGE, E4K
+    /**
+     * The device/module client is connecting to an IoT hub. This is the default value.
+     */
+    None,
+
+    /**
+     * The device/module client is connecting to an Edge hub in the default mode.
+     */
+    EDGE,
+
+    /**
+     * The device/module client is connecting to an Edge hub in the E4K mode.
+     */
+    E4K
 }

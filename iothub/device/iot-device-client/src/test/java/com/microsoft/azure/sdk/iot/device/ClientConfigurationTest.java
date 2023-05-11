@@ -1242,6 +1242,7 @@ public class ClientConfigurationTest
 
         //act
         ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.E4K).build();
+        // [protocol] would be E4K-unsupported protocols including HTTPS, AMQP, AMQP_WS.
         ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, protocol, options);
     }
 }
