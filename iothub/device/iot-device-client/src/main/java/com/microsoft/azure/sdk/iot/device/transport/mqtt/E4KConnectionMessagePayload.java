@@ -12,21 +12,35 @@ import lombok.Setter;
 @Builder
 public class E4KConnectionMessagePayload
 {
+    /**
+     * The connection state to report. For instance, after connecting to the MQTT broker, this SDK sends a message
+     * with {@link E4KConnectionState#Connected}. Before disconnecting, this SDK sends a message with
+     * {@link E4KConnectionState#Disconnected}.
+     */
     @Expose(deserialize = false)
     @Getter
     @Setter
     private E4KConnectionState connectionState;
 
+    /**
+     * The user agent string for this client.
+     */
     @Expose(deserialize = false)
     @Getter
     @Setter
     private String deviceClientType;
 
+    /**
+     * The version of MQTT that this client uses to connect to the MQTT broker.
+     */
     @Expose(deserialize = false)
     @Getter
     @Setter
-    private String mqttVersion = "3.1.1"; // this SDK currently only ever uses 3.1.1
+    private String mqttVersion;
 
+    /**
+     * The optional PnP model Id for this client.
+     */
     @Expose(deserialize = false)
     @Getter
     @Setter
