@@ -21,7 +21,7 @@ public class IotHubSasTokenProvidedAuthenticationProvider extends IotHubSasToken
     private char[] lastSasToken;
 
     public IotHubSasTokenProvidedAuthenticationProvider(String hostName, String deviceId, String moduleId, SasTokenProvider sasTokenProvider, SSLContext sslContext) {
-        super(hostName, null, null, deviceId, moduleId, sslContext);
+        super(hostName, null, deviceId, moduleId, sslContext);
 
         if (sasTokenProvider == null)
         {

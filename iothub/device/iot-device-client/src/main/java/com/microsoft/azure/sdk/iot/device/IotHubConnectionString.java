@@ -39,9 +39,6 @@ public class IotHubConnectionString
      * */
     private static final String GATEWAY_HOST_NAME_ATTRIBUTE = "GatewayHostName=";
 
-    /** Used for E4K. */
-    private static final String MQTT_GATEWAY_HOST_NAME_ATTRIBUTE = "MqttGatewayHostName=";
-
     /** Specify when using X.509 certificate to authenticate */
     private static final String X509_ENABLED_ATTRIBUTE = "x509=true";
 
@@ -59,7 +56,6 @@ public class IotHubConnectionString
     private String moduleId;
     private final boolean isUsingX509;
     private String gatewayHostName;
-    private String mqttGatewayHostName;
 
     /**
      * CONSTRUCTOR.
@@ -116,16 +112,6 @@ public class IotHubConnectionString
             {
                 this.gatewayHostName = attr.substring(GATEWAY_HOST_NAME_ATTRIBUTE.length());
             }
-            else if (attr.toLowerCase().startsWith(MQTT_GATEWAY_HOST_NAME_ATTRIBUTE.toLowerCase()))
-            {
-                this.mqttGatewayHostName = attr.substring(MQTT_GATEWAY_HOST_NAME_ATTRIBUTE.length());
-            }
-        }
-
-        if (gatewayHostName != null && !gatewayHostName.isEmpty()
-                && mqttGatewayHostName != null && !mqttGatewayHostName.isEmpty())
-        {
-            throw new IllegalArgumentException("[GatewayHostName] and [MqttGatewayHostName] should NOT be specified at the same time.");
         }
 
         this.isUsingX509 = connectionString.contains(X509_ENABLED_ATTRIBUTE);
@@ -192,8 +178,6 @@ public class IotHubConnectionString
     {
         return this.gatewayHostName;
     }
-
-    public String getMqttGatewayHostName() { return this.mqttGatewayHostName; }
 
     /**
      * Getter for the hubName.

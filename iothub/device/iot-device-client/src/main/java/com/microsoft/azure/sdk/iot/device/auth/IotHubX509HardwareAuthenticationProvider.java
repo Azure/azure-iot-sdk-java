@@ -16,9 +16,9 @@ public class IotHubX509HardwareAuthenticationProvider extends IotHubAuthenticati
 {
     private final SecurityProviderX509 securityProviderX509;
 
-    public IotHubX509HardwareAuthenticationProvider(String hostname, String gatewayHostname, String mqttGatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider)
+    public IotHubX509HardwareAuthenticationProvider(String hostname, String gatewayHostname, String deviceId, String moduleId, SecurityProvider securityProvider)
     {
-        super(hostname, gatewayHostname, mqttGatewayHostname, deviceId, moduleId);
+        super(hostname, gatewayHostname, deviceId, moduleId);
 
         if (!(securityProvider instanceof SecurityProviderX509))
         {

@@ -28,7 +28,6 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
 
     private static final String expectedHostname = "hostname";
     private static final String expectedGatewayHostname = "gatewayHostname";
-    private static final String expectedMqttGatewayHostname = "mqttGatewayHostname";
     private static final String expectedDeviceId = "device";
     private static final String expectedModuleId = "module";
     private static final int expectedTimeToLive = 56;
@@ -40,7 +39,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_001: [This function shall construct a sas token from the provided arguments and then return a IotHubSasTokenHsmAuthenticationProvider instance that uses that sas token.]
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_003: [If the gatewayHostname is not null or empty, this function shall construct the sas token using the gateway hostname instead of the hostname.]
     @Test
-    public void staticConstructorWithGatewayHostnameSuccess() throws IOException, TransportException, URISyntaxException
+    public void staticConstructorSuccess() throws IOException, TransportException, URISyntaxException
     {
         //arrange
         new MockUp<System>()
@@ -67,38 +66,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, null, "gen1", expectedTimeToLive, expectedBufferPercent);
-    }
-
-    @Test
-    public void staticConstructorWithMqttGatewayHostnameSuccess() throws IOException, TransportException, URISyntaxException
-    {
-        //arrange
-        new MockUp<System>()
-        {
-            @Mock long currentTimeMillis()
-            {
-                return 0;
-            }
-        };
-        new Expectations()
-        {
-            {
-                mockedSignatureProvider.sign("module", anyString, anyString);
-                result = expectedSignature;
-
-                IotHubSasToken.buildSharedAccessToken(anyString, expectedSignature, anyLong);
-                result = expectedSharedAccessToken;
-
-                Deencapsulation.newInstance(IotHubSasToken.class,
-                        new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
-                        expectedMqttGatewayHostname, expectedDeviceId, null, expectedSharedAccessToken, expectedModuleId, expectedTimeToLive);
-                result = mockedIotHubSasToken;
-            }
-        };
-
-        //act
-        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, null, expectedMqttGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
     }
 
     // Codes_SRS_MODULEAUTHENTICATIONWITHHSM_34_006: [If the gatewayHostname is present, this function shall construct the sas token using the gateway hostname instead of the hostname.]
@@ -130,38 +98,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, null, "gen1", expectedTimeToLive, expectedBufferPercent);
-    }
-
-    @Test
-    public void staticConstructorSuccessWithMqttGatewayHostname() throws IOException, TransportException, URISyntaxException
-    {
-        //arrange
-        new MockUp<System>()
-        {
-            @Mock long currentTimeMillis()
-            {
-                return 0;
-            }
-        };
-        new Expectations()
-        {
-            {
-                mockedSignatureProvider.sign("module", anyString, anyString);
-                result = expectedSignature;
-
-                IotHubSasToken.buildSharedAccessToken(anyString, expectedSignature, anyLong);
-                result = expectedSharedAccessToken;
-
-                Deencapsulation.newInstance(IotHubSasToken.class,
-                        new Class[] {String.class, String.class, String.class, String.class, String.class, long.class},
-                        expectedMqttGatewayHostname, expectedDeviceId, null, expectedSharedAccessToken, expectedModuleId, expectedTimeToLive);
-                result = mockedIotHubSasToken;
-            }
-        };
-
-        //act
-        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, null, expectedMqttGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
     }
 
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_004: [If the gatewayHostname is null or empty, this function shall construct the sas token using the hostname instead of the gateway hostname.]
@@ -194,7 +131,7 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
         };
 
         //act
-        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, null, null, "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, null, "gen1", expectedTimeToLive, expectedBufferPercent);
     }
 
     // Tests_SRS_MODULEAUTHENTICATIONWITHHSM_34_005: [This function shall create a new sas token and save it locally.]
@@ -226,10 +163,9 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
             }
         };
 
-        IotHubSasTokenHsmAuthenticationProvider auth = IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, "", "", "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider auth = IotHubSasTokenHsmAuthenticationProvider.create(mockedSignatureProvider, expectedDeviceId, expectedModuleId, expectedHostname, "", "gen1", expectedTimeToLive, expectedBufferPercent);
         Deencapsulation.setField(auth, "hostname", expectedHostname);
         Deencapsulation.setField(auth, "gatewayHostname", "");
-        Deencapsulation.setField(auth, "mqttGatewayHostname", "");
         Deencapsulation.setField(auth, "deviceId", expectedDeviceId);
         Deencapsulation.setField(auth, "moduleId", expectedModuleId);
         Deencapsulation.setField(auth, "signatureProvider", mockedSignatureProvider);
@@ -244,6 +180,6 @@ public class IotHubSasTokenHsmAuthenticationProviderTest
     public void staticConstructorThrowsForNullSignatureProvider() throws IOException, TransportException
     {
         //act
-        IotHubSasTokenHsmAuthenticationProvider.create(null, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, expectedMqttGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
+        IotHubSasTokenHsmAuthenticationProvider.create(null, expectedDeviceId, expectedModuleId, expectedHostname, expectedGatewayHostname, "gen1", expectedTimeToLive, expectedBufferPercent);
     }
 }
