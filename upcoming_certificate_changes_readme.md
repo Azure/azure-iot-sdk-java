@@ -12,7 +12,7 @@ For a more in depth explanation as to why the service is doing this, please see
 
 ## Java SDK Migration Steps
 
-Because this SDK currently reads its trusted certificates from source code rather than reading them from
+Because this SDK used to read its trusted certificates from source code rather than reading them from
 your physical device's certificate store, simply installing the DigiCert Global G2 CA root to your device's certificate 
 store isn't sufficient to handle this transition. There are two ways to ensure that your device using this SDK can 
 continue to connect to the service once this transition starts:
