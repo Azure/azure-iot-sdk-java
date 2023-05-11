@@ -33,4 +33,28 @@ public class E4KConnectionMessagePayloadTest
         String actualJson = new Gson().toJson(payload);
         assertEquals(expectedJson, actualJson);
     }
+
+    @Test
+    public void TestSerializationWithoutModelId()
+    {
+        String expectedDeviceClientType = "some device client type";
+        String expectedMqttVersion = "3.1.1";
+        E4KConnectionState expectedConnectionState = E4KConnectionState.Connected;
+
+        String expectedJson =
+            "{" +
+                "\"connectionState\":\"" + expectedConnectionState + "\"," +
+                "\"deviceClientType\":\"" + expectedDeviceClientType + "\"," +
+                "\"mqttVersion\":\"" + expectedMqttVersion + "\"" +
+            "}";
+
+        E4KConnectionMessagePayload payload = E4KConnectionMessagePayload.builder()
+            .deviceClientType(expectedDeviceClientType)
+            .connectionState(expectedConnectionState)
+            .mqttVersion(expectedMqttVersion)
+            .build();
+
+        String actualJson = new Gson().toJson(payload);
+        assertEquals(expectedJson, actualJson);
+    }
 }
