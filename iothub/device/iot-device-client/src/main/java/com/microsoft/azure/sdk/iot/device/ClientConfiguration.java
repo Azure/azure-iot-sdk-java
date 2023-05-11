@@ -667,14 +667,14 @@ public final class ClientConfiguration
         {
             if (gatewayHostName == null || gatewayHostName.isEmpty())
             {
-                throw new IllegalArgumentException("The value of [GatewayHostName] is NOT provided in the E4K mode.");
+                throw new IllegalArgumentException("The value of [GatewayHostName] is NOT provided while connecting to an E4K MQTT broker.");
             }
 
             this.isConnectingToMqttGateway = true;
 
             if (protocol != MQTT && protocol != MQTT_WS)
             {
-                throw new IllegalArgumentException("The transport protocol should be MQTT or MQTT_WS in the E4K mode.");
+                throw new IllegalArgumentException("The transport protocol should be MQTT or MQTT_WS while connecting to an E4K MQTT broker.");
             }
         }
     }
