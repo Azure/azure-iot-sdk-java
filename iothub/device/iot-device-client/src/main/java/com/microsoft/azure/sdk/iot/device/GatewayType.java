@@ -9,12 +9,12 @@ package com.microsoft.azure.sdk.iot.device;
 public enum GatewayType
 {
     /**
-     * The device/module client is connecting to an Edge hub in the default mode.
+     * The device/module client is connecting to Edgehub.
      */
     EDGE,
 
     /**
-     * The device/module client is connecting to an Edge hub in the E4K mode.
+     * The device/module client is connecting to an E4K MQTT broker.
      */
     E4K
 }
