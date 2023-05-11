@@ -1225,6 +1225,7 @@ public class ClientConfigurationTest
         ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
 
         //assert
+        assertEquals(GatewayType.EDGE, options.getGatewayType());
         assertEquals(false, config.isConnectingToMqttGateway());
     }
 
