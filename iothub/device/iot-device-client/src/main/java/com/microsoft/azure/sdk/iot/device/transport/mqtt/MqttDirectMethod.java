@@ -27,14 +27,14 @@ class MqttDirectMethod extends Mqtt
     private static final String BACKSLASH = "/";
     private static final String QUESTION = "?";
 
-    private static final String METHOD = "$iothub/methods/";
-    private static final String POST = METHOD + "POST";
-    private static final String RES = METHOD + "res";
-    private static final String REQ_ID = QUESTION + "$rid=";
+    private static final String METHOD = "$iothub/methods";
+    private static final String POST = "POST";
+    private static final String RES = "res";
+    private static final String REQ_ID = "$rid=";
 
-    //Placement for $iothub/methods/POST/{method name}/?$rid={request id}
-    private static final int METHOD_TOKEN = 3;
-    private static final int REQID_TOKEN = 4;
+    //Placement for $iothub/methods/{clientId}/POST/{methodName}/?$rid={request id}
+    private static final int METHOD_TOKEN = 4;
+    private static final int REQID_TOKEN = 5;
 
     public MqttDirectMethod(
         String deviceId,
@@ -44,8 +44,11 @@ class MqttDirectMethod extends Mqtt
     {
         super(null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
-        this.subscribeTopic = POST + BACKSLASH + POUND;
-        this.responseTopic = RES;
+        // Subscribe to "$iothub/methods/{clientId}/POST/#"
+        this.subscribeTopic = METHOD + BACKSLASH + deviceId + BACKSLASH + POST + BACKSLASH + POUND;
+
+        // Create the topic to response - "$iothub/methods/{clientId}/res"
+        this.responseTopic = METHOD + BACKSLASH + deviceId + BACKSLASH + RES;
     }
 
     public void start()
@@ -99,9 +102,12 @@ class MqttDirectMethod extends Mqtt
                     throw new IllegalArgumentException("Request id cannot be null or empty");
                 }
 
-                String topic = this.responseTopic + BACKSLASH +
+                // Respond to "$iothub/methods/{clientId}/res/{status}/?$rid={request-id}"
+                String topic = this.responseTopic +
+                        BACKSLASH +
                         message.getStatus() +
                         BACKSLASH +
+                        QUESTION +
                         REQ_ID +
                         message.getRequestId();
 
@@ -135,12 +141,14 @@ class MqttDirectMethod extends Mqtt
 
                     if (topic.length() > METHOD.length() && topic.startsWith(METHOD))
                     {
-                        if (topic.length() > POST.length() && topic.startsWith(POST))
+                        String[] parts = topic.split(BACKSLASH);
+                        // The topic is expected to start with "$iothub/methods/{clientId}/POST/"
+                        if (parts.length > 4 && parts[3].equals(POST))
                         {
                             //remove this message from the queue as this is the correct handler
                             this.receivedMessages.poll();
 
-                            // Case for $iothub/methods/POST/{method name}/?$rid={request id}
+                            // Case for $iothub/methods/{clientId}/POST/{method name}/?$rid={request id}
                             TopicParser topicParser = new TopicParser(topic);
 
                             if (data != null && data.length > 0)
