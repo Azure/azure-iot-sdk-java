@@ -24,11 +24,17 @@ class MqttMessaging extends Mqtt
     private final String publishTopic;
     private final boolean isEdgeHub;
 
+    // Topics
+    private static final String EVENTS_TOPIC = "%s/messages/events/";
+    private static final String DEVICEBOUND_TOPIC = "%s/messages/devicebound/#";
+    private static final String INPUTS_TOPIC = "%s/inputs/#";
+
     public MqttMessaging(
         String deviceId,
         MqttMessageListener messageListener,
         String moduleId,
         boolean isEdgeHub,
+        boolean isConnectingToMqttGateway,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
         Queue<Pair<String, MqttMessage>> receivedMessages)
@@ -40,17 +46,33 @@ class MqttMessaging extends Mqtt
             throw new IllegalArgumentException("Device id cannot be null or empty");
         }
 
-        if (moduleId == null || moduleId.isEmpty())
+        String clientId = (moduleId == null || moduleId.isEmpty()) ?
+                "devices/" + deviceId :
+                "devices/" + deviceId + "/modules/" + moduleId;
+
+        if (!isConnectingToMqttGateway)
         {
-            this.publishTopic = "devices/" + deviceId + "/messages/events/";
-            this.eventsSubscribeTopic = "devices/" + deviceId + "/messages/devicebound/#";
-            this.inputsSubscribeTopic = null;
+            // devices/{clientId}/messages/events/
+            this.publishTopic = String.format(EVENTS_TOPIC, clientId);
+
+            // devices/{clientId}/messages/devicebound/#
+            this.eventsSubscribeTopic = String.format(DEVICEBOUND_TOPIC, clientId);
+
+            this.inputsSubscribeTopic = (moduleId == null || moduleId.isEmpty()) ?
+                    null :
+                    String.format(INPUTS_TOPIC, clientId); // devices/{clientId}/inputs/#
         }
         else
         {
-            this.publishTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
-            this.eventsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
-            this.inputsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/#";
+            // $iothub/devices/{clientId}/messages/events/
+            this.publishTopic = "$iothub/" + String.format(EVENTS_TOPIC, clientId);
+
+            // $iothub/devices/{clientId}/messages/devicebound/#
+            this.eventsSubscribeTopic = "$iothub/" + String.format(DEVICEBOUND_TOPIC, clientId);
+
+            this.inputsSubscribeTopic = (moduleId == null || moduleId.isEmpty()) ?
+                    null :
+                    "$iothub/" + String.format(INPUTS_TOPIC, clientId); // $iothub/devices/{clientId}/inputs/#
         }
 
         this.moduleId = moduleId;

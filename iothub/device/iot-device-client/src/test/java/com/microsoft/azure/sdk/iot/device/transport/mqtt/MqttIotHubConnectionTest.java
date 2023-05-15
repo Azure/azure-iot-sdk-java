@@ -697,7 +697,7 @@ public class MqttIotHubConnectionTest
         new Verifications()
         {
             {
-                new MqttMessaging(anyString, null, anyString, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttMessaging(anyString, null, anyString, anyBoolean, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 times = 1;
             }
         };
@@ -1129,7 +1129,7 @@ public class MqttIotHubConnectionTest
             {
                 new MqttAsyncClient(anyString, anyString, (MemoryPersistence) any);
                 result = mockedMqttConnection;
-                new MqttMessaging(anyString, null, anyString, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttMessaging(anyString, null, anyString, anyBoolean, anyBoolean, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceMessaging;
                 new MqttTwin(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceTwin;

@@ -242,6 +242,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this,
             moduleId,
             this.config.getGatewayHostname() != null && !this.config.getGatewayHostname().isEmpty(),
+            this.config.isConnectingToMqttGateway(),
             connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
