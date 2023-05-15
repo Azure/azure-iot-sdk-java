@@ -75,11 +75,11 @@ public class MqttMessagingTest
         MqttMessaging testMqttMessaging = new MqttMessaging(expectedDeviceId, null, expectedModuleId, false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         String actualPublishTopic = Deencapsulation.getField(testMqttMessaging, "publishTopic");
-        assertEquals("$iothub/devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/messages/events/", actualPublishTopic);
+        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/messages/events/", actualPublishTopic);
         String actualInputsSubscribeTopic = Deencapsulation.getField(testMqttMessaging, "inputsSubscribeTopic");
-        assertEquals("$iothub/devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/inputs/#", actualInputsSubscribeTopic);
+        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/inputs/#", actualInputsSubscribeTopic);
         String actualEventsSubscribeTopic = Deencapsulation.getField(testMqttMessaging, "eventsSubscribeTopic");
-        assertEquals("$iothub/devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/messages/devicebound/#", actualEventsSubscribeTopic);
+        assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/messages/devicebound/#", actualEventsSubscribeTopic);
     }
 
     /*
@@ -342,7 +342,7 @@ public class MqttMessagingTest
 
         MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         final String publishTopicWithCustomProperties = String.format(
-                "$iothub/devices/%s/messages/events/%s=%s&%s=%s", CLIENT_ID, propertyName1, propertyValue1, propertyName2, propertyValue2);
+                "devices/%s/messages/events/%s=%s&%s=%s", CLIENT_ID, propertyName1, propertyValue1, propertyName2, propertyValue2);
 
         // act
         testMqttMessaging.send(mockedMessage);
@@ -364,7 +364,7 @@ public class MqttMessagingTest
         final byte[] messageBody = {0x61, 0x62, 0x63};
         final MessageProperty[] messageProperties = new MessageProperty[]{};
         final String messageId = "test-message-id";
-        final String publishTopicWithMessageId = String.format("$iothub/devices/%s/messages/events/$.mid=%s", CLIENT_ID, messageId);
+        final String publishTopicWithMessageId = String.format("devices/%s/messages/events/$.mid=%s", CLIENT_ID, messageId);
         new NonStrictExpectations()
         {
             {
@@ -400,7 +400,7 @@ public class MqttMessagingTest
         final byte[] messageBody = {0x61, 0x62, 0x63};
         final MessageProperty[] messageProperties = new MessageProperty[]{};
         final String correlationId = "test-correlation-id";
-        final String publishTopicWithCorrelationId = String.format("$iothub/devices/%s/messages/events/$.cid=%s", CLIENT_ID, correlationId);
+        final String publishTopicWithCorrelationId = String.format("devices/%s/messages/events/$.cid=%s", CLIENT_ID, correlationId);
         new NonStrictExpectations()
         {
             {
@@ -435,7 +435,7 @@ public class MqttMessagingTest
         final byte[] messageBody = {0x61, 0x62, 0x63};
         final MessageProperty[] messageProperties = new MessageProperty[]{};
         final String componentName = "test-component-name";
-        final String publishTopicWithCorrelationId = String.format("$iothub/devices/%s/messages/events/$.sub=%s", CLIENT_ID, componentName);
+        final String publishTopicWithCorrelationId = String.format("devices/%s/messages/events/$.sub=%s", CLIENT_ID, componentName);
         new NonStrictExpectations()
         {
             {
@@ -471,7 +471,7 @@ public class MqttMessagingTest
         final byte[] messageBody = {0x61, 0x62, 0x63};
         final MessageProperty[] messageProperties = new MessageProperty[]{};
         final String userId = "test-user-id";
-        final String publishTopicWithUserId = String.format("$iothub/devices/%s/messages/events/$.uid=%s", CLIENT_ID, userId);
+        final String publishTopicWithUserId = String.format("devices/%s/messages/events/$.uid=%s", CLIENT_ID, userId);
         new NonStrictExpectations()
         {
             {
@@ -507,7 +507,7 @@ public class MqttMessagingTest
         final byte[] messageBody = {0x61, 0x62, 0x63};
         final MessageProperty[] messageProperties = new MessageProperty[]{};
         final String to = "test-to";
-        final String publishTopicWithTo = String.format("$iothub/devices/%s/messages/events/$.to=%s", CLIENT_ID, to);
+        final String publishTopicWithTo = String.format("devices/%s/messages/events/$.to=%s", CLIENT_ID, to);
         new NonStrictExpectations()
         {
             {
@@ -596,7 +596,7 @@ public class MqttMessagingTest
 
         MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         final String publishTopicWithAllSystemAndCustomProperties = String.format(
-                "$iothub/devices/%s/messages/events/$.mid=%s&$.cid=%s&$.uid=%s&$.to=%s&$.on=%s&$.ce=%s&$.ct=%s&$.ctime=%s&%s=%s&%s=%s", CLIENT_ID, messageId, correlationId, userId, to, outputName, contentEncoding, contentTypeEncoded, creationTimeUtcEncoded, propertyName1, propertyValue1, propertyName2, propertyValue2);
+                "devices/%s/messages/events/$.mid=%s&$.cid=%s&$.uid=%s&$.to=%s&$.on=%s&$.ce=%s&$.ct=%s&$.ctime=%s&%s=%s&%s=%s", CLIENT_ID, messageId, correlationId, userId, to, outputName, contentEncoding, contentTypeEncoded, creationTimeUtcEncoded, propertyName1, propertyValue1, propertyName2, propertyValue2);
 
         // act
         testMqttMessaging.send(mockedMessage);
@@ -617,8 +617,8 @@ public class MqttMessagingTest
         //arrange
         String deviceId = "1234";
         String moduleId = "5678";
-        final String inputsSubsriptionChannel = "$iothub/devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
-        final String eventsSubsriptionChannel = "$iothub/devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
+        final String inputsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
+        final String eventsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
         final MqttMessaging testMqttMessaging = new MqttMessaging( deviceId, null, moduleId, true, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
@@ -644,8 +644,8 @@ public class MqttMessagingTest
         //arrange
         String deviceId = "1234";
         String moduleId = "5678";
-        final String inputsSubsriptionChannel = "$iothub/devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
-        final String eventsSubsriptionChannel = "$iothub/devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
+        final String inputsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
+        final String eventsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
         final MqttMessaging testMqttMessaging = new MqttMessaging( deviceId, null, moduleId, false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
