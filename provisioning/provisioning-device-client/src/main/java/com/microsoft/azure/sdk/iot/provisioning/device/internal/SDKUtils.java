@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SDKUtils
 {
-    private static final String SERVICE_API_VERSION = "2019-03-31";
+    private static final String SERVICE_API_VERSION = "2023-05-01-preview";
     public static final String PROVISIONING_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.dps.dps-device-client/";
     public static final String PROVISIONING_DEVICE_CLIENT_VERSION = getPackageVersion();
 

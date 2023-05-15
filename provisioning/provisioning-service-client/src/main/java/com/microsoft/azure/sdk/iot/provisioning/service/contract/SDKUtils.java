@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SDKUtils
 {
-    private static final String SERVICE_API_VERSION = "2019-03-31";
+    private static final String SERVICE_API_VERSION = "2023-05-01-preview";
     private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client/";
     private static final String PROVISIONING_SERVICE_CLIENT_VERSION = getPackageVersion();
 
