@@ -82,6 +82,22 @@ public class MqttMessagingTest
         assertEquals("devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/messages/devicebound/#", actualEventsSubscribeTopic);
     }
 
+    @Test
+    public void constructorBuildsRoutesWithModuleIdIfPresentIfE4k(@Mocked final Mqtt mockMqtt) throws TransportException
+    {
+        //arrange
+        final String expectedModuleId = "someModule";
+        final String expectedDeviceId = "someDevice";
+        MqttMessaging testMqttMessaging = new MqttMessaging(expectedDeviceId, null, expectedModuleId, false, true, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+
+        String actualPublishTopic = Deencapsulation.getField(testMqttMessaging, "publishTopic");
+        assertEquals("$iothub/devices/" + expectedDeviceId + "/modules/" + expectedModuleId +"/messages/events/", actualPublishTopic);
+        String actualInputsSubscribeTopic = Deencapsulation.getField(testMqttMessaging, "inputsSubscribeTopic");
+        assertEquals("$iothub/devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/inputs/#", actualInputsSubscribeTopic);
+        String actualEventsSubscribeTopic = Deencapsulation.getField(testMqttMessaging, "eventsSubscribeTopic");
+        assertEquals("$iothub/devices/" + expectedDeviceId + "/modules/" + expectedModuleId + "/messages/devicebound/#", actualEventsSubscribeTopic);
+    }
+
     /*
      **Tests_SRS_MqttMessaging_25_001: [The constructor shall throw IllegalArgumentException if any of the parameters are null or empty .]
      */
@@ -343,6 +359,45 @@ public class MqttMessagingTest
         MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         final String publishTopicWithCustomProperties = String.format(
                 "devices/%s/messages/events/%s=%s&%s=%s", CLIENT_ID, propertyName1, propertyValue1, propertyName2, propertyValue2);
+
+        // act
+        testMqttMessaging.send(mockedMessage);
+
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockMqtt, "publish", publishTopicWithCustomProperties, mockedMessage);
+                times = 1;
+            }
+        };
+    }
+
+    @Test
+    public void sendShallIncludeAllCustomPropertiesInPublishTopicIfE4k(@Mocked final Mqtt mockMqtt) throws TransportException
+    {
+        final byte[] messageBody = {0x61, 0x62, 0x63};
+        final String propertyName1 = "key1";
+        final String propertyValue1 = "value1";
+        final String propertyName2 = "key2";
+        final String propertyValue2 = "value2";
+        final MessageProperty[] messageProperties = new MessageProperty[]
+                {
+                        new MessageProperty(propertyName1, propertyValue1),
+                        new MessageProperty(propertyName2, propertyValue2)
+                };
+        new NonStrictExpectations()
+        {
+            {
+                mockedMessage.getBytes();
+                result = messageBody;
+                mockedMessage.getProperties();
+                result = messageProperties;
+            }
+        };
+
+        MqttMessaging testMqttMessaging = new MqttMessaging( CLIENT_ID, null, "", false, true, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        final String publishTopicWithCustomProperties = String.format(
+                "$iothub/devices/%s/messages/events/%s=%s&%s=%s", CLIENT_ID, propertyName1, propertyValue1, propertyName2, propertyValue2);
 
         // act
         testMqttMessaging.send(mockedMessage);
@@ -620,6 +675,32 @@ public class MqttMessagingTest
         final String inputsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
         final String eventsSubsriptionChannel = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
         final MqttMessaging testMqttMessaging = new MqttMessaging( deviceId, null, moduleId, true, false, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+
+        //act
+        testMqttMessaging.start();
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(mockMqtt, "subscribe", inputsSubsriptionChannel);
+                times = 1;
+
+                Deencapsulation.invoke(mockMqtt, "subscribe", eventsSubsriptionChannel);
+                times = 0;
+            }
+        };
+    }
+
+    @Test
+    public void startSubscribesForInputEventsIfEdgehubIfE4k(@Mocked final Mqtt mockMqtt) throws TransportException
+    {
+        //arrange
+        String deviceId = "1234";
+        String moduleId = "5678";
+        final String inputsSubsriptionChannel = "$iothub/devices/" + deviceId + "/modules/" + moduleId + "/inputs/#";
+        final String eventsSubsriptionChannel = "$iothub/devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
+        final MqttMessaging testMqttMessaging = new MqttMessaging( deviceId, null, moduleId, true, true, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //act
         testMqttMessaging.start();
