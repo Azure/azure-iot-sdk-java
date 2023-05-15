@@ -24,16 +24,6 @@ class MqttMessaging extends Mqtt
     private final String publishTopic;
     private final boolean isEdgeHub;
 
-    private static final String BACKSLASH = "/";
-    private static final String POUND = "#";
-
-    private static final String DEVICES = "$iothub/devices";
-    private static final String MODULES = "modules";
-    private static final String MESSAGES = "messages";
-    private static final String EVENTS = MESSAGES + BACKSLASH + "events";
-    private static final String DEVICEBOUND = MESSAGES + BACKSLASH + "devicebound";
-    private static final String INPUTS = "inputs";
-
     public MqttMessaging(
         String deviceId,
         MqttMessageListener messageListener,
@@ -50,31 +40,18 @@ class MqttMessaging extends Mqtt
             throw new IllegalArgumentException("Device id cannot be null or empty");
         }
 
-        String clientId = (moduleId == null || moduleId.isEmpty()) ?
-                deviceId :
-                deviceId + BACKSLASH + MODULES + BACKSLASH + moduleId;
-
-        // Publish to "$iothub/devices/{clientId}/messages/events/"
-        this.publishTopic = DEVICES +
-                BACKSLASH +
-                clientId +
-                BACKSLASH +
-                EVENTS +
-                BACKSLASH;
-
-        // Subscribe to "$iothub/devices/{clientId}/messages/devicebound/#"
-        this.eventsSubscribeTopic = DEVICES +
-                BACKSLASH +
-                clientId +
-                BACKSLASH +
-                DEVICEBOUND +
-                BACKSLASH +
-                POUND;
-
-        // Subscribe to null or "$iothub/devices/{clientId}/inputs/#"
-        this.inputsSubscribeTopic = (moduleId == null || moduleId.isEmpty()) ?
-                null :
-                DEVICES + BACKSLASH + clientId + BACKSLASH + INPUTS + BACKSLASH + POUND;
+        if (moduleId == null || moduleId.isEmpty())
+        {
+            this.publishTopic = "devices/" + deviceId + "/messages/events/";
+            this.eventsSubscribeTopic = "devices/" + deviceId + "/messages/devicebound/#";
+            this.inputsSubscribeTopic = null;
+        }
+        else
+        {
+            this.publishTopic = "devices/" + deviceId + "/modules/" + moduleId +"/messages/events/";
+            this.eventsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId + "/messages/devicebound/#";
+            this.inputsSubscribeTopic = "devices/" + deviceId + "/modules/" + moduleId +"/inputs/#";
+        }
 
         this.moduleId = moduleId;
         this.isEdgeHub = isEdgeHub;
@@ -144,7 +121,7 @@ class MqttMessaging extends Mqtt
 
         if (this.moduleId != null && !this.moduleId.isEmpty())
         {
-            stringBuilder.append(BACKSLASH);
+            stringBuilder.append("/");
         }
 
         String messagePublishTopic = stringBuilder.toString();
