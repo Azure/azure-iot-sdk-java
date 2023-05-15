@@ -9,6 +9,7 @@ import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.AdditionalData;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
+//import com.microsoft.azure.sdk.iot.provisioning.service;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX509Cert;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
@@ -38,32 +39,25 @@ import java.util.Scanner;
 @SuppressWarnings("CommentedOutCode") // Ignored in samples as we use these comments to show other options.
 public class ProvisioningCertificateIssuanceSample
 {
-    private static final String idScope = "[Your ID scope here]";
-    private static final String globalEndpoint = "[Your Provisioning Service Global Endpoint here]";
+    private static final String idScope = "";
+    private static final String globalEndpoint = "";
 
     // For the sake of security, you shouldn't save keys into String variables as that places them in heap memory. For the sake
     // of simplicity within this sample, though, we will save it as a string. Typically this key would be loaded as byte[] so that
     // it can be removed from stack memory.
-    private static final String SYMMETRIC_KEY = "[Enter your Symmetric Key here]";
+    private static final String SYMMETRIC_KEY = "";
 
     // The registration Id to provision the device to. When creating an individual enrollment prior to running this sample, you choose this value.
-    private static final String REGISTRATION_ID = "[Enter your Registration ID here]";
+    private static final String REGISTRATION_ID = "";
 
-    // TODO -- where to actually create this directory?
-    // TODO -- is this path specficied correctly?
     private static final String DPS_CLIENT_CERTIFICATE_FOLDER = ".\\DpsClientCertificates";
 
-    private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
+    //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.HTTPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.AMQPS_WS;
-    //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT;
+    private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT;
     //private static final ProvisioningDeviceClientTransportProtocol PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL = ProvisioningDeviceClientTransportProtocol.MQTT_WS;
     private static final int MAX_TIME_TO_WAIT_FOR_REGISTRATION = 10000; // in milli seconds
-
-    // TODO -- needed?
-/*    private static final String leafPublicPem = "<Your Public Leaf Certificate Here>";
-    private static final String leafPrivateKeyPem = "<Your Leaf Key Here>";*/
-    //private static final Collection<String> signerCertificatePemList = new LinkedList<>();
 
     static class ProvisioningStatus
     {
@@ -120,27 +114,11 @@ public class ProvisioningCertificateIssuanceSample
                 throw new IOException();
             }
 
-            // For group enrollment uncomment this line
-            // TODO -- needed?
-            //signerCertificatePemList.add("<Your Signer/intermediate Certificate Here>");
-
-            // TODO -- figure out how this works for below
-/*            X509Certificate leafPublicCert = parsePublicKeyCertificate(leafPublicPem);
-            Key leafPrivateKey = parsePrivateKey(leafPrivateKeyPem);
-            Collection<X509Certificate> signerCertificates = new LinkedList<>();
-            for (String signerCertificatePem : signerCertificatePemList)
-            {
-                signerCertificates.add(parsePublicKeyCertificate(signerCertificatePem));
-            }
-
-            SecurityProvider securityProviderX509 = new SecurityProviderX509Cert(leafPublicCert, leafPrivateKey, signerCertificates);
-            */
-
             provisioningDeviceClient = ProvisioningDeviceClient.create(globalEndpoint, idScope, PROVISIONING_DEVICE_CLIENT_TRANSPORT_PROTOCOL,
                                                                        securityProviderSymmetricKey);
 
             GenerateCertificateSigningRequestFiles(securityProviderSymmetricKey.getRegistrationId(), csrDirectory);
-            String csrFile = String.format("%s\\%s.csr", csrDirectory.getAbsolutePath(), securityProviderSymmetricKey.getRegistrationId());
+            String csrFile = String.format("%s\\%s.csr", csrDirectory.getAbsolutePath().toString(), securityProviderSymmetricKey.getRegistrationId());
 
             // Read certificate signing request
             Scanner sc = new Scanner(new File(csrFile));
@@ -191,7 +169,8 @@ public class ProvisioningCertificateIssuanceSample
             System.out.println("Creatign an X509 certifiate from the issued client certificate...");
             GeneratePfxFromPublicCertificateAndPrivateKey(securityProviderSymmetricKey.getRegistrationId(), csrDirectory);
             X509Certificate clientCertificate = CreateX509CertificateFromPfxFile(securityProviderSymmetricKey.getRegistrationId(), csrDirectory);
-            SecurityProviderX509Cert auth = new SecurityProviderX509Cert(clientCertificate);
+            System.out.println("COMPLETED CSR GENERATION!");
+            //SecurityProviderX509Cert auth = new SecurityProviderX509Cert(clientCertificate); // TODO
 
             if (provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getProvisioningDeviceClientStatus() == ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
             {
@@ -203,7 +182,8 @@ public class ProvisioningCertificateIssuanceSample
                 String deviceId = provisioningStatus.provisioningDeviceClientRegistrationInfoClient.getDeviceId();
                 try
                 {
-                    deviceClient = new DeviceClient(iotHubUri, deviceId, auth, IotHubClientProtocol.MQTT);
+                    // TODO -- replace with generated x509 security provider
+                    deviceClient = new DeviceClient(iotHubUri, deviceId, securityProviderSymmetricKey, IotHubClientProtocol.MQTT);
                     deviceClient.open(false);
                     Message messageToSendFromDeviceToHub =  new Message("Whatever message you would like to send");
 
@@ -258,22 +238,31 @@ public class ProvisioningCertificateIssuanceSample
         try
         {
             Process keyGenProcess = Runtime.getRuntime().exec(keyGen);
+            keyGenProcess.waitFor();
         }
         catch (IOException ex)
         {
             System.out.println("An exception was thrown while running an openssl command: " + ex.getMessage());
+        }
+        catch (InterruptedException ex)
+        {
+            System.out.println("The openssl command was interuppted.");
         }
 
         System.out.println(String.format("Generating CSR for certificate with subject %s", subject));
-        String csrGen = String.format("req -new -subj /CN=%s -key \"%s\" -out \"%s\"", keyfile, csrFile);
-
+        String csrGen = String.format("openssl req -new -subj /CN=%s -key \"%s\" -out \"%s\"", subject, keyfile, csrFile);
         try
         {
             Process csrGenProcess = Runtime.getRuntime().exec(csrGen);
+            csrGenProcess.waitFor();
         }
         catch (IOException ex)
         {
             System.out.println("An exception was thrown while running an openssl command: " + ex.getMessage());
+        }
+        catch (InterruptedException ex)
+        {
+            System.out.println("The openssl command was interuppted.");
         }
     }
 
@@ -306,7 +295,6 @@ public class ProvisioningCertificateIssuanceSample
     }
 
 
-    // TODO -- needed?
     private static Key parsePrivateKey(String privateKeyString) throws IOException
     {
         Security.addProvider(new BouncyCastleProvider());
@@ -315,7 +303,6 @@ public class ProvisioningCertificateIssuanceSample
         return getPrivateKey(possiblePrivateKey);
     }
 
-    // TODO -- needed?
     private static X509Certificate parsePublicKeyCertificate(String publicKeyCertificateString) throws IOException, CertificateException
     {
         Security.addProvider(new BouncyCastleProvider());
@@ -325,7 +312,6 @@ public class ProvisioningCertificateIssuanceSample
         return (X509Certificate) certFactory.generateCertificate(new ByteArrayInputStream(possiblePublicKeyCertificate.getContent()));
     }
 
-    // TODO -- needed?
     private static Key getPrivateKey(Object possiblePrivateKey) throws IOException
     {
         if (possiblePrivateKey instanceof PEMKeyPair)
