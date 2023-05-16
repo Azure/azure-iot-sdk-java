@@ -43,6 +43,8 @@ public class MqttDirectMethodTest
 
     private ConcurrentLinkedQueue<Pair<String, MqttMessage>> testreceivedMessages;
 
+    private String deviceId = "testDevice";
+
     @Before
     public void baseConstructorExpectation()
     {
@@ -62,7 +64,28 @@ public class MqttDirectMethodTest
         String actualResTopic = "$iothub/methods/res";
 
         //act
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
+
+        //assert
+        String testSubscribeTopic = Deencapsulation.getField(testMethod, "subscribeTopic");
+        String testResTopic = Deencapsulation.getField(testMethod, "responseTopic");
+
+        assertNotNull(testSubscribeTopic);
+        assertNotNull(testResTopic);
+        assertEquals(testSubscribeTopic, actualSubscribeTopic);
+        assertEquals(testResTopic, actualResTopic);
+
+    }
+
+    @Test
+    public void constructorSucceedsIfE4k(@Mocked final Mqtt mockMqtt) throws TransportException
+    {
+        //arrange
+        String actualSubscribeTopic = String.format("$iothub/methods/%s/POST/#", deviceId);
+        String actualResTopic = String.format("$iothub/methods/%s/res", deviceId);
+
+        //act
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), true);
 
         //assert
         String testSubscribeTopic = Deencapsulation.getField(testMethod, "subscribeTopic");
@@ -82,7 +105,7 @@ public class MqttDirectMethodTest
     public void startSucceedsCalls(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
-        final MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        final MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
 
         //act
         testMethod.start();
@@ -102,7 +125,7 @@ public class MqttDirectMethodTest
     public void startSucceedsDoesNotCallsSubscribeIfStarted(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
-        final MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        final MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
         testMethod.start();
         //act
         testMethod.start();
@@ -128,7 +151,31 @@ public class MqttDirectMethodTest
         byte[] actualPayload = "TestMessage".getBytes(StandardCharsets.UTF_8);
         IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
-        final MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        final MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
+        testMethod.start();
+
+        //act
+        testMethod.send(testMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(testMethod, "subscribe", actualSubscribeTopic);
+                maxTimes = 1;
+            }
+        };
+    }
+
+    @Test
+    public void sendSucceedsCallsSubscribeIfE4k(@Mocked final Mqtt mockMqtt) throws IOException, TransportException
+    {
+        //arrange
+        final String actualSubscribeTopic = String.format("$iothub/methods/%s/POST/#", deviceId);
+        byte[] actualPayload = "TestMessage".getBytes(StandardCharsets.UTF_8);
+        IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
+        testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
+        final MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), true);
         testMethod.start();
 
         //act
@@ -155,7 +202,31 @@ public class MqttDirectMethodTest
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
         testMessage.setRequestId("ReqId");
         testMessage.setStatus("testStatus");
-        final MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        final MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
+        testMethod.start();
+
+        //act
+        testMethod.send(testMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                Deencapsulation.invoke(testMethod, "publish", new Class[] {String.class, Message.class}, anyString, any);
+                maxTimes = 1;
+            }
+        };
+    }
+
+    @Test
+    public void sendSucceedsCallsPublishIfE4k(@Mocked final Mqtt mockMqtt) throws IOException, TransportException
+    {
+        final byte[] actualPayload = "TestMessage".getBytes(StandardCharsets.UTF_8);
+        final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
+        testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
+        testMessage.setRequestId("ReqId");
+        testMessage.setStatus("testStatus");
+        final MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), true);
         testMethod.start();
 
         //act
@@ -177,7 +248,7 @@ public class MqttDirectMethodTest
         final byte[] actualPayload = "TestMessage".getBytes(StandardCharsets.UTF_8);
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_UNKNOWN);
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
         testMethod.start();
 
         //act
@@ -190,7 +261,7 @@ public class MqttDirectMethodTest
     {
         final byte[] actualPayload = "TestMessage".getBytes(StandardCharsets.UTF_8);
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
 
         //act
         testMethod.send(testMessage);
@@ -200,7 +271,7 @@ public class MqttDirectMethodTest
     @Test (expected = IllegalArgumentException.class)
     public void sendThrowsOnMessageNull() throws TransportException
     {
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
         testMethod.start();
         //act
         testMethod.send(null);
@@ -215,7 +286,7 @@ public class MqttDirectMethodTest
         final byte[] actualPayload = "TestMessage".getBytes(StandardCharsets.UTF_8);
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setMessageType(MessageType.DEVICE_TWIN);
-        final MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        final MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
 
         testMethod.start();
 
@@ -242,7 +313,7 @@ public class MqttDirectMethodTest
         final IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setMessageType(MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SEND_RESPONSE);
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
         testMethod.start();
 
         //act
@@ -263,7 +334,31 @@ public class MqttDirectMethodTest
         byte[] actualPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
         MqttMessage message = new MqttMessage(actualPayload);
         testreceivedMessages.add(new MutablePair<>(topic, message));
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
+        Deencapsulation.setField(testMethod, "receivedMessages", testreceivedMessages);
+        testMethod.start();
+
+        //act
+        Message testMessage = testMethod.receive();
+        IotHubTransportMessage testDMMessage = (IotHubTransportMessage) testMessage;
+
+        //assert
+        assertNotNull(testMessage);
+        assertEquals(testMessage.getMessageType(), MessageType.DEVICE_METHODS);
+        assertEquals(testDMMessage.getRequestId(), String.valueOf(10));
+        assertEquals("testMethod", testDMMessage.getMethodName());
+        assertEquals(testDMMessage.getDeviceOperationType(), DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
+    }
+
+    @Test
+    public void receiveSucceedsIfE4k() throws TransportException
+    {
+        //arrange
+        String topic = String.format("$iothub/methods/%s/POST/testMethod/?$rid=10", deviceId);
+        byte[] actualPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
+        MqttMessage message = new MqttMessage(actualPayload);
+        testreceivedMessages.add(new MutablePair<>(topic, message));
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), true);
         Deencapsulation.setField(testMethod, "receivedMessages", testreceivedMessages);
         testMethod.start();
 
@@ -285,7 +380,7 @@ public class MqttDirectMethodTest
     {
         //arrange
         Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
         testMethod.start();
 
         //act
@@ -306,7 +401,26 @@ public class MqttDirectMethodTest
         MqttMessage message = new MqttMessage(actualPayload);
         Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
         testreceivedMessages.add(new MutablePair<>(topic, message));
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
+        testMethod.start();
+
+        //act
+        Message actualMessage = testMethod.receive();
+
+        //assert
+        assertNull(actualMessage);
+    }
+
+    @Test
+    public void receiveReturnsNullMessageIfTopicWasNotPostIfE4k() throws TransportException
+    {
+        //arrange
+        String topic = String.format("$iothub/methods/%s/Not_POST/testMethod/?$rid=10", deviceId);
+        byte[] actualPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
+        MqttMessage message = new MqttMessage(actualPayload);
+        Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
+        testreceivedMessages.add(new MutablePair<>(topic, message));
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), true);
         testMethod.start();
 
         //act
@@ -324,7 +438,32 @@ public class MqttDirectMethodTest
         byte[] actualPayload = "".getBytes(StandardCharsets.UTF_8);
         MqttMessage message = new MqttMessage(actualPayload);
         testreceivedMessages.add(new MutablePair<>(topic, message));
-        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), false);
+        Deencapsulation.setField(testMethod, "receivedMessages", testreceivedMessages);
+        testMethod.start();
+
+        //act
+        Message testMessage = testMethod.receive();
+        IotHubTransportMessage testDMMessage = (IotHubTransportMessage) testMessage;
+
+        //assert
+        assertNotNull(testMessage);
+        assertEquals(0, testMessage.getBytes().length);
+        assertEquals(testMessage.getMessageType(), MessageType.DEVICE_METHODS);
+        assertEquals(testDMMessage.getRequestId(), String.valueOf(10));
+        assertEquals("testMethod", testDMMessage.getMethodName());
+        assertEquals(testDMMessage.getDeviceOperationType(), DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
+    }
+
+    @Test
+    public void receiveReturnsEmptyPayLoadIfNullPayloadParsedIfE4k() throws TransportException
+    {
+        //arrange
+        String topic = String.format("$iothub/methods/%s/POST/testMethod/?$rid=10", deviceId);
+        byte[] actualPayload = "".getBytes(StandardCharsets.UTF_8);
+        MqttMessage message = new MqttMessage(actualPayload);
+        testreceivedMessages.add(new MutablePair<>(topic, message));
+        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>(), true);
         Deencapsulation.setField(testMethod, "receivedMessages", testreceivedMessages);
         testMethod.start();
 

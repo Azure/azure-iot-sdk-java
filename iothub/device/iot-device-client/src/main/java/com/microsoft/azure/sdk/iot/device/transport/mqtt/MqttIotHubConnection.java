@@ -250,7 +250,8 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             deviceId,
             connectOptions,
             unacknowledgedSentMessages,
-            receivedMessages);
+            receivedMessages,
+            this.config.isConnectingToMqttGateway());
 
         this.deviceTwin = new MqttTwin(
             deviceId,

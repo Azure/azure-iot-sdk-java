@@ -1133,7 +1133,7 @@ public class MqttIotHubConnectionTest
                 result = mockDeviceMessaging;
                 new MqttTwin(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
                 result = mockDeviceTwin;
-                new MqttDirectMethod(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any);
+                new MqttDirectMethod(anyString, (MqttConnectOptions) any, (Map) any, (Queue) any, anyBoolean);
                 result = mockDeviceMethod;
                 mockDeviceMessaging.start();
                 result = null;

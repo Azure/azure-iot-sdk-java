@@ -21,31 +21,44 @@ class MqttDirectMethod extends Mqtt
 {
     private final String subscribeTopic;
     private final String responseTopic;
+    private final boolean isConnectingToMqttGateway;
+    private final String deviceId;
+
     private boolean isStarted = false;
 
-    private static final String POUND = "#";
-    private static final String BACKSLASH = "/";
-    private static final String QUESTION = "?";
-
-    private static final String METHOD = "$iothub/methods/";
-    private static final String POST = METHOD + "POST";
-    private static final String RES = METHOD + "res";
-    private static final String REQ_ID = QUESTION + "$rid=";
-
-    //Placement for $iothub/methods/POST/{method name}/?$rid={request id}
-    private static final int METHOD_TOKEN = 3;
-    private static final int REQID_TOKEN = 4;
+    private static final String POST_HUB = "$iothub/methods/POST";
+    private static final String POST_E4K = "$iothub/methods/%s/POST";
+    private static final String RES_HUB = "$iothub/methods/res";
+    private static final String RES_TOPIC = "$iothub/methods/%s/res";
 
     public MqttDirectMethod(
         String deviceId,
         MqttConnectOptions connectOptions,
         Map<Integer, Message> unacknowledgedSentMessages,
-        Queue<Pair<String, MqttMessage>> receivedMessages)
+        Queue<Pair<String, MqttMessage>> receivedMessages,
+        boolean isConnectingToMqttGateway)
     {
         super(null, deviceId, connectOptions, unacknowledgedSentMessages, receivedMessages);
 
-        this.subscribeTopic = POST + BACKSLASH + POUND;
-        this.responseTopic = RES;
+        this.isConnectingToMqttGateway = isConnectingToMqttGateway;
+        this.deviceId = deviceId;
+
+        if (!isConnectingToMqttGateway)
+        {
+            // $iothub/methods/POST/#
+            this.subscribeTopic = POST_HUB + "/#";
+
+            // $iothub/methods/res
+            this.responseTopic = RES_HUB;
+        }
+        else
+        {
+            // $iothub/methods/{clientId}/POST/#
+            this.subscribeTopic = String.format(POST_E4K, deviceId) + "/#";
+
+            // $iothub/methods/{clientId}/res
+            this.responseTopic = String.format(RES_TOPIC, deviceId);
+        }
     }
 
     public void start()
@@ -99,11 +112,10 @@ class MqttDirectMethod extends Mqtt
                     throw new IllegalArgumentException("Request id cannot be null or empty");
                 }
 
-                String topic = this.responseTopic + BACKSLASH +
-                        message.getStatus() +
-                        BACKSLASH +
-                        REQ_ID +
-                        message.getRequestId();
+                String format = "%s/%s/?$rid=%s";
+                // "$iothub/methods/res/{status}?$rid={request Id}" if connecting to an IoT hub or Edge hub,
+                // while "$iothub/methods/{clientId}/res/{status}?$rid={request Id}" if connecting to E4k.
+                String topic = String.format(format, this.responseTopic, message.getStatus(), message.getRequestId());
 
                 this.publish(topic, message);
                 break;
@@ -133,42 +145,43 @@ class MqttDirectMethod extends Mqtt
                     MqttMessage mqttMessage = messagePair.getValue();
                     byte[] data = mqttMessage.getPayload();
 
-                    if (topic.length() > METHOD.length() && topic.startsWith(METHOD))
+                    if (isReceivingFromCorrectTopic(topic))
                     {
-                        if (topic.length() > POST.length() && topic.startsWith(POST))
+                        //remove this message from the queue as this is the correct handler
+                        this.receivedMessages.poll();
+
+                        //parse the topic string to get information (method name, request Id, etc.) further
+                        TopicParser topicParser = new TopicParser(topic);
+
+                        if (data != null && data.length > 0)
                         {
-                            //remove this message from the queue as this is the correct handler
-                            this.receivedMessages.poll();
+                            message = new IotHubTransportMessage(data, MessageType.DEVICE_METHODS);
+                        }
+                        else
+                        {
+                            message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
+                        }
 
-                            // Case for $iothub/methods/POST/{method name}/?$rid={request id}
-                            TopicParser topicParser = new TopicParser(topic);
+                        message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
+                        message.setQualityOfService(mqttMessage.getQos());
 
-                            if (data != null && data.length > 0)
-                            {
-                                message = new IotHubTransportMessage(data, MessageType.DEVICE_METHODS);
-                            }
-                            else
-                            {
-                                message = new IotHubTransportMessage(new byte[0], MessageType.DEVICE_METHODS);
-                            }
+                        String methodName = this.isConnectingToMqttGateway ?
+                                topicParser.getMethodName(4) :
+                                topicParser.getMethodName(3);
+                        message.setMethodName(methodName);
 
-                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_UNKNOWN);
-                            message.setQualityOfService(mqttMessage.getQos());
+                        String reqId = this.isConnectingToMqttGateway ?
+                                topicParser.getRequestId(5) :
+                                topicParser.getRequestId(4);
+                        if (reqId != null)
+                        {
+                            message.setRequestId(reqId);
 
-                            String methodName = topicParser.getMethodName(METHOD_TOKEN);
-                            message.setMethodName(methodName);
-
-                            String reqId = topicParser.getRequestId(REQID_TOKEN);
-                            if (reqId != null)
-                            {
-                                message.setRequestId(reqId);
-
-                                message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
-                            }
-                            else
-                            {
-                                log.warn("Request ID cannot be null");
-                            }
+                            message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_METHOD_RECEIVE_REQUEST);
+                        }
+                        else
+                        {
+                            log.warn("Request ID cannot be null");
                         }
                     }
                 }
@@ -176,5 +189,16 @@ class MqttDirectMethod extends Mqtt
 
             return message;
         }
+    }
+
+    private boolean isReceivingFromCorrectTopic(String topic)
+    {
+        if (!this.isConnectingToMqttGateway)
+        {
+            return topic.length() > POST_HUB.length() && topic.startsWith(POST_HUB);
+        }
+
+        String e4kReceivingTopic = String.format(POST_E4K, this.deviceId);
+        return topic.length() > e4kReceivingTopic.length() && topic.startsWith(e4kReceivingTopic);
     }
 }
