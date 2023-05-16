@@ -43,8 +43,6 @@ public class MqttDirectMethodTest
 
     private ConcurrentLinkedQueue<Pair<String, MqttMessage>> testreceivedMessages;
 
-    private String deviceId = "testDevice";
-
     @Before
     public void baseConstructorExpectation()
     {
@@ -60,11 +58,11 @@ public class MqttDirectMethodTest
     public void constructorSucceeds(@Mocked final Mqtt mockMqtt) throws TransportException
     {
         //arrange
-        String actualSubscribeTopic = "$iothub/methods/" + deviceId + "/POST/#";
-        String actualResTopic = "$iothub/methods/" + deviceId + "/res";
+        String actualSubscribeTopic = "$iothub/methods/POST/#";
+        String actualResTopic = "$iothub/methods/res";
 
         //act
-        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
 
         //assert
         String testSubscribeTopic = Deencapsulation.getField(testMethod, "subscribeTopic");
@@ -120,17 +118,17 @@ public class MqttDirectMethodTest
     }
 
     /*
-    Tests_SRS_MqttDeviceMethod_25_020: [**send method shall subscribe to topic from spec ($iothub/methods/{clientId}/POST/#) if the operation is of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST.**]**
+    Tests_SRS_MqttDeviceMethod_25_020: [**send method shall subscribe to topic from spec ($iothub/methods/POST/#) if the operation is of type DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST.**]**
      */
     @Test
     public void sendSucceedsCallsSubscribe(@Mocked final Mqtt mockMqtt) throws IOException, TransportException
     {
         //arrange
-        final String actualSubscribeTopic = "$iothub/methods/" + deviceId + "/POST/#";
+        final String actualSubscribeTopic = "$iothub/methods/POST/#";
         byte[] actualPayload = "TestMessage".getBytes(StandardCharsets.UTF_8);
         IotHubTransportMessage testMessage = new IotHubTransportMessage(actualPayload, MessageType.DEVICE_METHODS);
         testMessage.setDeviceOperationType(DEVICE_OPERATION_METHOD_SUBSCRIBE_REQUEST);
-        final MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        final MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testMethod.start();
 
         //act
@@ -147,7 +145,7 @@ public class MqttDirectMethodTest
     }
 
     /*
-    Tests_SRS_MqttDeviceMethod_25_022: [**send method shall build the publish topic of the format mentioned in spec ($iothub/methods/{clientId}/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
+    Tests_SRS_MqttDeviceMethod_25_022: [**send method shall build the publish topic of the format mentioned in spec ($iothub/methods/res/{status}/?$rid={request id}) and publish if the operation is of type DEVICE_OPERATION_METHOD_SEND_RESPONSE.**]**
      */
     @Test
     public void sendSucceedsCallsPublish(@Mocked final Mqtt mockMqtt) throws IOException, TransportException
@@ -261,11 +259,11 @@ public class MqttDirectMethodTest
     public void receiveSucceeds() throws TransportException
     {
         //arrange
-        String topic = "$iothub/methods/" + deviceId + "/POST/testMethod/?$rid=10";
+        String topic = "$iothub/methods/POST/testMethod/?$rid=10";
         byte[] actualPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
         MqttMessage message = new MqttMessage(actualPayload);
         testreceivedMessages.add(new MutablePair<>(topic, message));
-        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         Deencapsulation.setField(testMethod, "receivedMessages", testreceivedMessages);
         testMethod.start();
 
@@ -298,17 +296,17 @@ public class MqttDirectMethodTest
     }
 
 
-    //Tests_SRS_MqttDeviceMethod_34_027: [This method shall parse message to look for Post topic ($iothub/methods/{clientId}/POST/) and return null other wise.]
+    //Tests_SRS_MqttDeviceMethod_34_027: [This method shall parse message to look for Post topic ($iothub/methods/POST/) and return null other wise.]
     @Test
     public void receiveReturnsNullMessageIfTopicWasNotPost() throws TransportException
     {
         //arrange
-        String topic = "$iothub/methods/" + deviceId + "/Not_POST/testMethod/?$rid=10";
+        String topic = "$iothub/methods/Not_POST/testMethod/?$rid=10";
         byte[] actualPayload = "TestPayload".getBytes(StandardCharsets.UTF_8);
         MqttMessage message = new MqttMessage(actualPayload);
         Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
         testreceivedMessages.add(new MutablePair<>(topic, message));
-        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         testMethod.start();
 
         //act
@@ -322,11 +320,11 @@ public class MqttDirectMethodTest
     public void receiveReturnsEmptyPayLoadIfNullPayloadParsed() throws TransportException
     {
         //arrange
-        String topic = "$iothub/methods/" + deviceId + "/POST/testMethod/?$rid=10";
+        String topic = "$iothub/methods/POST/testMethod/?$rid=10";
         byte[] actualPayload = "".getBytes(StandardCharsets.UTF_8);
         MqttMessage message = new MqttMessage(actualPayload);
         testreceivedMessages.add(new MutablePair<>(topic, message));
-        MqttDirectMethod testMethod = new MqttDirectMethod(deviceId, mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
+        MqttDirectMethod testMethod = new MqttDirectMethod("", mockConnectOptions, new HashMap<Integer, Message>(), new ConcurrentLinkedQueue<>());
         Deencapsulation.setField(testMethod, "receivedMessages", testreceivedMessages);
         testMethod.start();
 
