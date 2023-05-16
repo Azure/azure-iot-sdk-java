@@ -29,7 +29,7 @@ class MqttDirectMethod extends Mqtt
     private static final String POST_HUB = "$iothub/methods/POST";
     private static final String POST_E4K = "$iothub/methods/%s/POST";
     private static final String RES_HUB = "$iothub/methods/res";
-    private static final String RES_TOPIC = "$iothub/methods/%s/res";
+    private static final String RES_E4K = "$iothub/methods/%s/res";
 
     public MqttDirectMethod(
         String deviceId,
@@ -57,7 +57,7 @@ class MqttDirectMethod extends Mqtt
             this.subscribeTopic = String.format(POST_E4K, deviceId) + "/#";
 
             // $iothub/methods/{clientId}/res
-            this.responseTopic = String.format(RES_TOPIC, deviceId);
+            this.responseTopic = String.format(RES_E4K, deviceId);
         }
     }
 
