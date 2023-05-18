@@ -14,13 +14,16 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
+import java.util.*;
 
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
@@ -30,6 +33,7 @@ import static org.junit.Assert.*;
  * Lines: 91%
  * (Untested lines and method are the unused default constructor)
  */
+@RunWith(Parameterized.class)
 public class ClientConfigurationTest
 {
     @Mocked
@@ -68,6 +72,18 @@ public class ClientConfigurationTest
     private static final String expectedDeviceId = "deviceId";
     private static final String expectedModuleId = "moduleId";
     private static final String expectedHostname = "hostname";
+
+    @Parameterized.Parameter()
+    public IotHubClientProtocol protocol;
+
+    @Parameterized.Parameters(name = "{index}: ClientConfigurationTest: protocol={0}")
+    public static Collection<Object[]> data() {
+        return (List) new ArrayList(Arrays.asList(new Object[][]{
+                {HTTPS},
+                {AMQPS},
+                {AMQPS_WS},
+        }));
+    }
 
     // Tests_SRS_DEVICECLIENTCONFIG_11_002: [The function shall return the IoT Hub hostname given in the constructor.]
     @Test
@@ -1113,5 +1129,121 @@ public class ClientConfigurationTest
 
         //assert
         assertEquals(mockedProxySettings, actualProxySettings);
+    }
+
+    @Test
+    public void ConstructorWithValidGatewayHostNameAndE4KGatewayType()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = "testGatewayHostName";
+            }
+        };
+
+        //act
+        ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.E4K).build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, MQTT, options);
+
+        //assert
+        assertEquals(true, config.isConnectingToMqttGateway());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void ConstructorWithNullGatewayHostNameAndE4KGatewayType()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = null;
+            }
+        };
+
+        //act
+        ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.E4K).build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
+    }
+
+    @Test
+    public void ConstructorWithValidGatewayHostNameAndEdgeGatewayType()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = "testGatewayHostName";
+            }
+        };
+
+        //act
+        ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.EDGE).build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
+
+        //assert
+        assertEquals(false, config.isConnectingToMqttGateway());
+    }
+
+    @Test
+    public void ConstructorWithNullGatewayHostNameAndEdgeGatewayType()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = null;
+            }
+        };
+
+        //act
+        ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.EDGE).build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
+
+        //assert
+        assertEquals(false, config.isConnectingToMqttGateway());
+    }
+
+    @Test
+    public void ConstructorWithValidGatewayHostNameAndDefaultGatewayType()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = "testGatewayHostName";
+            }
+        };
+
+        //act
+        ClientOptions options = ClientOptions.builder().build();
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, IotHubClientProtocol.MQTT, options);
+
+        //assert
+        assertEquals(GatewayType.EDGE, options.getGatewayType());
+        assertEquals(false, config.isConnectingToMqttGateway());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void ConstructorWithValidGatewayHostNameAndE4KGatewayTypeAndUnsupportedProtocol()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockIotHubConnectionString.getGatewayHostName();
+                result = "testGatewayHostName";
+            }
+        };
+
+        //act
+        ClientOptions options = ClientOptions.builder().gatewayType(GatewayType.E4K).build();
+        // [protocol] would be E4K-unsupported protocols including HTTPS, AMQP, AMQP_WS.
+        ClientConfiguration config = new ClientConfiguration(mockIotHubConnectionString, protocol, options);
     }
 }

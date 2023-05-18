@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
  * Methods: 100%
  * Lines: 97%
  */
-public class IotHubConnectionStringTest 
+public class IotHubConnectionStringTest
 {
     private static final String VALID_HUBNAME = "iothub";
     private static final String VALID_HOSTNAME = VALID_HUBNAME + ".device.com";
