@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 
 import javax.net.SocketFactory;
 
-class Socks5SocketFactory extends SocketFactory
+public class Socks5SocketFactory extends SocketFactory
 {
     private final InetAddress mProxyHost;
     private final int mProxyPort;
