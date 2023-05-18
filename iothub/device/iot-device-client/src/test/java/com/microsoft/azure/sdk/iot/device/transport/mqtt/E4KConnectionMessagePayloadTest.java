@@ -13,7 +13,7 @@ public class E4KConnectionMessagePayloadTest
     public void TestSerialization()
     {
         String expectedDeviceClientType = "some device client type";
-        String expectedMqttVersion = "3.1.1";
+        String expectedMqttVersion = "5.0.0";
         String expectedModelId = "someModelId";
         E4KConnectionState expectedConnectionState = E4KConnectionState.Connected;
 
@@ -40,7 +40,7 @@ public class E4KConnectionMessagePayloadTest
     public void TestSerializationWithoutModelId()
     {
         String expectedDeviceClientType = "some device client type";
-        String expectedMqttVersion = "3.1.1";
+        String expectedMqttVersion = "5.0.0";
         E4KConnectionState expectedConnectionState = E4KConnectionState.Connected;
 
         String expectedJson =
