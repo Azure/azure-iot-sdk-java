@@ -172,14 +172,14 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
             connectOptions.setKeepAliveInterval(config.getKeepAliveInterval());
             connectOptions.setCleanStart(SET_CLEAN_SESSION);
 
-            E4KConnectionMessagePayload disconnectPayload = E4KConnectionMessagePayload.builder()
+            E4KConnectionMessagePayload willMessagePayload = E4KConnectionMessagePayload.builder()
                 .connectionState(E4KConnectionState.Disconnected)
                 .modelId(this.config.getModelId())
                 .mqttVersion(MQTT_VERSION_STRING)
                 .deviceClientType(this.config.getProductInfo().getUserAgentString())
                 .build();
-            byte[] serializedPayload = GSON.toJson(disconnectPayload).getBytes(StandardCharsets.UTF_8);
-            connectOptions.setWill(e4kConnectionChangeTopic, new MqttMessage(serializedPayload, QOS, true, new MqttProperties()));
+            byte[] serializedWillPayload = GSON.toJson(willMessagePayload).getBytes(StandardCharsets.UTF_8);
+            connectOptions.setWill(e4kConnectionChangeTopic, new MqttMessage(serializedWillPayload, QOS, true, new MqttProperties()));
 
             if (this.config.getAuthenticationType() == ClientConfiguration.AuthType.SAS_TOKEN)
             {
@@ -236,17 +236,17 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
                     .mqttVersion(MQTT_VERSION_STRING)
                     .deviceClientType(this.config.getProductInfo().getUserAgentString())
                     .build();
-                byte[] serializedPayload = GSON.toJson(connectPayload).getBytes(StandardCharsets.UTF_8);
-                org.eclipse.paho.client.mqttv3.IMqttDeliveryToken token = this.mqttAsyncClient.publish(
+                byte[] serializedConnectPayload = GSON.toJson(connectPayload).getBytes(StandardCharsets.UTF_8);
+                IMqttToken publishToken = this.mqttAsyncClient.publish(
                     e4kConnectionChangeTopic,
-                    serializedPayload,
+                    serializedConnectPayload,
                     QOS,
                     true);
 
                 // If the message fails to be sent/acknowledged in this time span, an MqttException will be thrown here
-                token.waitForCompletion(E4K_CONNECTION_OPEN_MESSAGE_TIMEOUT_MILLISECONDS);
+                publishToken.waitForCompletion(E4K_CONNECTION_OPEN_MESSAGE_TIMEOUT_MILLISECONDS);
             }
-            catch (org.eclipse.paho.client.mqttv3.MqttException e)
+            catch (MqttException e)
             {
                 try
                 {
@@ -254,7 +254,7 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
                     // tear down the connection and make the user retry the entire "open" operation
                     this.mqttAsyncClient.close();
                 }
-                catch (org.eclipse.paho.client.mqttv3.MqttException ex)
+                catch (MqttException ex)
                 {
                     log.warn("Encountered an error while closing the MQTT connection", ex);
                 }
@@ -298,7 +298,7 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
                     .deviceClientType(this.config.getProductInfo().getUserAgentString())
                     .build();
                 byte[] serializedPayload = GSON.toJson(disconnectPayload).getBytes(StandardCharsets.UTF_8);
-                org.eclipse.paho.client.mqttv3.IMqttDeliveryToken token = this.mqttAsyncClient.publish(
+                IMqttToken token = this.mqttAsyncClient.publish(
                     e4kConnectionChangeTopic,
                     serializedPayload,
                     QOS,
@@ -307,7 +307,7 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
                 // If the message fails to be sent/acknowledged in this time span, an MqttException will be thrown here
                 token.waitForCompletion(E4K_CONNECTION_CLOSE_MESSAGE_TIMEOUT_MILLISECONDS);
             }
-            catch (org.eclipse.paho.client.mqttv3.MqttException e)
+            catch (MqttException e)
             {
                 // This is a bit of an odd case, but it seems likely that this catch block on executes if the connection
                 // was ungracefully dropped while sending this message. In that case, the "will" message will be read
