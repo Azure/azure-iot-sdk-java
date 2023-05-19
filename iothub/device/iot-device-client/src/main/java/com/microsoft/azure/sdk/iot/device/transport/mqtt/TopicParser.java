@@ -3,7 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
-class TopicParser
+public class TopicParser
 {
     private final String[] topicTokens;
 
@@ -23,7 +23,7 @@ class TopicParser
     }
 
     @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexReqID".
-    String getRequestId(int tokenIndexReqID)
+    public String getRequestId(int tokenIndexReqID)
     {
         String reqId = null;
 
@@ -52,7 +52,7 @@ class TopicParser
     }
 
     @SuppressWarnings("SameParameterValue") // Method is designed to be generic, with any acceptable value for "tokenIndexMethod"
-    String getMethodName(int tokenIndexMethod)
+    public String getMethodName(int tokenIndexMethod)
     {
         String methodName;
 
