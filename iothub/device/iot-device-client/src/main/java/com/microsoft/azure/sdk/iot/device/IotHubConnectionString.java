@@ -20,17 +20,26 @@ public class IotHubConnectionString
 {
     /** The hostName attribute name in a connection string. */
     private static final String HOSTNAME_ATTRIBUTE = "HostName=";
+
     /** The device ID attribute name in a connection string. */
     private static final String DEVICE_ID_ATTRIBUTE = "DeviceId=";
+
     /** The shared access key attribute name in a connection string. */
     private static final String SHARED_ACCESS_KEY_ATTRIBUTE = "SharedAccessKey=";
+
     /** The shared access signature attribute name in a connection string. */
     private static final String SHARED_ACCESS_TOKEN_ATTRIBUTE = "SharedAccessSignature=";
 
+    /** The module ID attribute name in a connection string. */
     private static final String MODULE_ID_ATTRIBUTE = "ModuleId=";
 
+    /**
+     * IP address or internet name of the host machine working as a device or protocol gateway.
+     * Used when communicating with Azure Edge devices.
+     * */
     private static final String GATEWAY_HOST_NAME_ATTRIBUTE = "GatewayHostName=";
 
+    /** Specify when using X.509 certificate to authenticate */
     private static final String X509_ENABLED_ATTRIBUTE = "x509=true";
 
     /**
@@ -150,7 +159,6 @@ public class IotHubConnectionString
         this.sharedAccessToken = sharedAccessToken;
 
         this.gatewayHostName = gatewayHostName;
-
         if (this.gatewayHostName != null && !this.gatewayHostName.isEmpty())
         {
             this.hostName = gatewayHostName;

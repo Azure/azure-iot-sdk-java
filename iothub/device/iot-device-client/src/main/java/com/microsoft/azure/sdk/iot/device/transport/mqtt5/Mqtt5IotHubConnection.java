@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport.mqtt5;
 
+import com.google.gson.Gson;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
@@ -54,6 +55,15 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
     private IotHubListener listener;
 
     private MqttAsyncClient mqttAsyncClient;
+
+    private final String e4kConnectionChangeTopic;
+
+    private static final int QOS = 1;
+    private static final int E4K_CONNECTION_CLOSE_MESSAGE_TIMEOUT_MILLISECONDS = 15 * 1000; // 15 seconds
+    private static final int E4K_CONNECTION_OPEN_MESSAGE_TIMEOUT_MILLISECONDS = 15 * 1000; // 15 seconds
+    private static final String MQTT_VERSION_STRING = "5.0.0"; //TODO should this just be 5.0? Or just 5?
+
+    private static final Gson GSON = new Gson();
 
     private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
 
@@ -115,6 +125,8 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
             clientId += "/" + this.config.getModuleId();
         }
 
+        this.e4kConnectionChangeTopic = "$iothub/clients/" + clientId + "/connection";
+
         try
         {
             this.mqttAsyncClient = new MqttAsyncClient(serverUri, clientId, new MemoryPersistence());
@@ -124,8 +136,8 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
             throw PahoExceptionTranslator.convertToMqttException(e, "Failed to create mqtt client");
         }
 
-        mqttAsyncClient.setManualAcks(true);
-        mqttAsyncClient.setCallback(this);
+        this.mqttAsyncClient.setManualAcks(true);
+        this.mqttAsyncClient.setCallback(this);
     }
 
     /**
@@ -159,6 +171,15 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
             MqttConnectionOptions connectOptions = new MqttConnectionOptions();
             connectOptions.setKeepAliveInterval(config.getKeepAliveInterval());
             connectOptions.setCleanStart(SET_CLEAN_SESSION);
+
+            E4KConnectionMessagePayload willMessagePayload = E4KConnectionMessagePayload.builder()
+                .connectionState(E4KConnectionState.Disconnected)
+                .modelId(this.config.getModelId())
+                .mqttVersion(MQTT_VERSION_STRING)
+                .deviceClientType(this.config.getProductInfo().getUserAgentString())
+                .build();
+            byte[] serializedWillPayload = GSON.toJson(willMessagePayload).getBytes(StandardCharsets.UTF_8);
+            connectOptions.setWill(e4kConnectionChangeTopic, new MqttMessage(serializedWillPayload, QOS, true, new MqttProperties()));
 
             if (this.config.getAuthenticationType() == ClientConfiguration.AuthType.SAS_TOKEN)
             {
@@ -206,7 +227,45 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
             IMqttToken token = this.mqttAsyncClient.connect(connectOptions);
             token.waitForCompletion(); // TODO timeout value?
 
-            //TODO send CONNECT message to MQTT broker so E4K knows this client has connected
+            try
+            {
+                log.debug("Sending the \"Opened a connection\" message to the MQTT broker");
+                E4KConnectionMessagePayload connectPayload = E4KConnectionMessagePayload.builder()
+                    .connectionState(E4KConnectionState.Connected)
+                    .modelId(this.config.getModelId())
+                    .mqttVersion(MQTT_VERSION_STRING)
+                    .deviceClientType(this.config.getProductInfo().getUserAgentString())
+                    .build();
+                byte[] serializedConnectPayload = GSON.toJson(connectPayload).getBytes(StandardCharsets.UTF_8);
+                IMqttToken publishToken = this.mqttAsyncClient.publish(
+                    e4kConnectionChangeTopic,
+                    serializedConnectPayload,
+                    QOS,
+                    true);
+
+                // If the message fails to be sent/acknowledged in this time span, an MqttException will be thrown here
+                publishToken.waitForCompletion(E4K_CONNECTION_OPEN_MESSAGE_TIMEOUT_MILLISECONDS);
+            }
+            catch (MqttException e)
+            {
+                try
+                {
+                    // To avoid the case where the SDK has a connection open to the MQTT broker but E4K isn't aware,
+                    // tear down the connection and make the user retry the entire "open" operation
+                    this.mqttAsyncClient.close();
+                }
+                catch (MqttException ex)
+                {
+                    log.warn("Encountered an error while closing the MQTT connection", ex);
+                }
+
+                TransportException transportException = new TransportException(
+                    "Successfully opened the MQTT connection but failed to send the " +
+                        "\"Connection established\" message to the MQTT gateway. Closing the connection...");
+
+                transportException.setRetryable(true);
+                throw transportException;
+            }
 
             this.state = IotHubConnectionStatus.CONNECTED;
 
@@ -229,7 +288,33 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
                 return;
             }
 
-            //TODO send DISCONNECT message to MQTT broker so E4K knows this client is disconnecting
+            try
+            {
+                log.debug("Sending the \"Closing a connection\" message to the MQTT broker");
+                E4KConnectionMessagePayload disconnectPayload = E4KConnectionMessagePayload.builder()
+                    .connectionState(E4KConnectionState.Disconnected)
+                    .modelId(this.config.getModelId())
+                    .mqttVersion(MQTT_VERSION_STRING)
+                    .deviceClientType(this.config.getProductInfo().getUserAgentString())
+                    .build();
+                byte[] serializedPayload = GSON.toJson(disconnectPayload).getBytes(StandardCharsets.UTF_8);
+                IMqttToken token = this.mqttAsyncClient.publish(
+                    e4kConnectionChangeTopic,
+                    serializedPayload,
+                    QOS,
+                    true);
+
+                // If the message fails to be sent/acknowledged in this time span, an MqttException will be thrown here
+                token.waitForCompletion(E4K_CONNECTION_CLOSE_MESSAGE_TIMEOUT_MILLISECONDS);
+            }
+            catch (MqttException e)
+            {
+                // This is a bit of an odd case, but it seems likely that this catch block on executes if the connection
+                // was ungracefully dropped while sending this message. In that case, the "will" message will be read
+                // by the MQTT broker so we don't need to re-send this message or throw an exception to the user.
+                log.warn("Failed to send the \"Connection will be closed gracefully\" message to the MQTT gateway. " +
+                    "Still closing the connection anyways", e);
+            }
 
             log.debug("Closing MQTT connection");
             IMqttToken token = this.mqttAsyncClient.disconnect();
