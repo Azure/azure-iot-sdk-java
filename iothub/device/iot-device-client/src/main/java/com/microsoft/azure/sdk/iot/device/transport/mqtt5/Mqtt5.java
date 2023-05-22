@@ -9,7 +9,6 @@ import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.TopicParser;
-import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -292,7 +291,7 @@ public class Mqtt5
         catch (MqttException e)
         {
             log.warn("Message could not be published to MQTT topic {} ({})", publishTopic, message, e);
-            throw PahoExceptionTranslator.convertToMqttException(e, "Unable to publish message on topic : " + publishTopic);
+            throw Mqtt5ExceptionTranslator.convertToMqttException(e, "Unable to publish message on topic : " + publishTopic);
         }
         catch (InterruptedException e)
         {
@@ -337,7 +336,7 @@ public class Mqtt5
             {
                 log.warn("Encountered exception while sending MQTT SUBSCRIBE packet for topic {}", topic, e);
 
-                throw PahoExceptionTranslator.convertToMqttException(e, "Unable to subscribe to topic :" + topic);
+                throw Mqtt5ExceptionTranslator.convertToMqttException(e, "Unable to subscribe to topic :" + topic);
             }
         }
     }
@@ -587,7 +586,7 @@ public class Mqtt5
         }
         catch (MqttException e)
         {
-            throw PahoExceptionTranslator.convertToMqttException(e, "Error sending message ack");
+            throw Mqtt5ExceptionTranslator.convertToMqttException(e, "Error sending message ack");
         }
     }
 
