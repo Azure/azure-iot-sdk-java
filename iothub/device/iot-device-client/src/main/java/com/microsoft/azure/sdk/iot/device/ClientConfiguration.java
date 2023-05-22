@@ -33,9 +33,6 @@ import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 @Slf4j
 public final class ClientConfiguration
 {
-    private static final int DEFAULT_HTTPS_READ_TIMEOUT_MILLIS = 240000;
-    private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
-
     public static final int DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS = 230;
     public static final int DEFAULT_SEND_INTERVAL_IN_SECONDS = 10;
 
@@ -43,6 +40,9 @@ public final class ClientConfiguration
     public static final int DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS = 60;
 
     public static final int DEFAULT_SEND_INTERVAL_IN_MILLISECONDS = 10;
+
+    private static final int DEFAULT_HTTPS_READ_TIMEOUT_MILLIS = 240000;
+    private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS = 0; //no connect timeout
 
     /** The default value for messageLockTimeoutSecs. */
     private static final int DEFAULT_MESSAGE_LOCK_TIMEOUT_SECS = 180;
@@ -85,6 +85,10 @@ public final class ClientConfiguration
     @Getter
     @Setter(AccessLevel.PACKAGE)
     private int sendInterval = DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
+
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private boolean isConnectingToMqttGateway = false;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -147,21 +151,6 @@ public final class ClientConfiguration
         configSasAuth(iotHubConnectionString);
     }
 
-    private void configSasAuth(IotHubConnectionString iotHubConnectionString) {
-        commonConstructorSetup(iotHubConnectionString);
-        assertConnectionStringIsNotX509(iotHubConnectionString);
-
-        this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
-                iotHubConnectionString.getHostName(),
-                iotHubConnectionString.getGatewayHostName(),
-                iotHubConnectionString.getDeviceId(),
-                iotHubConnectionString.getModuleId(),
-                iotHubConnectionString.getSharedAccessKey(),
-                iotHubConnectionString.getSharedAccessToken());
-
-        log.debug("Device configured to use software based SAS authentication provider");
-    }
-
     ClientConfiguration(IotHubAuthenticationProvider authenticationProvider, IotHubClientProtocol protocol) throws IllegalArgumentException
     {
         if (!(authenticationProvider instanceof IotHubSasTokenAuthenticationProvider))
@@ -191,6 +180,8 @@ public final class ClientConfiguration
 
     ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions clientOptions)
     {
+        configConnectingToMqttGatewayFlag(iotHubConnectionString, protocol, clientOptions);
+
         this.protocol = protocol;
 
         if (clientOptions != null && clientOptions.getSslContext() != null)
@@ -205,96 +196,12 @@ public final class ClientConfiguration
         setClientOptionValues(clientOptions);
     }
 
-    private void setClientOptionValues(ClientOptions clientOptions)
-    {
-        this.modelId = clientOptions != null && clientOptions.getModelId() != null ? clientOptions.getModelId() : null;
-        this.keepAliveInterval = clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
-        this.httpsReadTimeout = clientOptions != null && clientOptions.getHttpsReadTimeout() != 0 ? clientOptions.getHttpsReadTimeout() : DEFAULT_HTTPS_READ_TIMEOUT_MILLIS;
-        this.httpsConnectTimeout = clientOptions != null && clientOptions.getHttpsConnectTimeout() != 0 ? clientOptions.getHttpsConnectTimeout() : DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
-        this.amqpOpenAuthenticationSessionTimeout = clientOptions != null && clientOptions.getAmqpAuthenticationSessionTimeout() != 0 ? clientOptions.getAmqpAuthenticationSessionTimeout() : DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
-        this.amqpOpenDeviceSessionsTimeout = clientOptions != null && clientOptions.getAmqpDeviceSessionTimeout() != 0 ? clientOptions.getAmqpDeviceSessionTimeout() : DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
-        this.proxySettings = clientOptions != null && clientOptions.getProxySettings() != null ? clientOptions.getProxySettings() : null;
-        this.sendInterval = clientOptions != null && clientOptions.getSendInterval() != 0 ? clientOptions.getSendInterval() : DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
 
-        if (proxySettings != null)
-        {
-            IotHubClientProtocol protocol = this.getProtocol();
-
-            if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS)
-            {
-                throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
-            }
-        }
-
-        if (this.getSasTokenAuthentication() != null && clientOptions != null)
-        {
-            if (clientOptions.getSasTokenExpiryTime() <= 0)
-            {
-                throw new IllegalArgumentException("ClientOption sasTokenExpiryTime must be greater than 0");
-            }
-
-            this.getSasTokenAuthentication().setTokenValidSecs(clientOptions.getSasTokenExpiryTime());
-        }
-
-        if (this.keepAliveInterval <= 0)
-        {
-            throw new IllegalArgumentException("ClientOption keepAliveInterval must be greater than 0");
-        }
-
-        if (this.httpsReadTimeout < 0)
-        {
-            throw new IllegalArgumentException("ClientOption httpsReadTimeout must be greater than or equal to 0");
-        }
-
-        if (this.httpsConnectTimeout < 0)
-        {
-            throw new IllegalArgumentException("ClientOption httpsConnectTimeout must be greater than or equal to 0");
-        }
-
-        if (this.amqpOpenAuthenticationSessionTimeout <= 0)
-        {
-            throw new IllegalArgumentException("ClientOption amqpAuthenticationSessionTimeout must be greater than 0");
-        }
-
-        if (this.amqpOpenDeviceSessionsTimeout <= 0)
-        {
-            throw new IllegalArgumentException("ClientOption amqpDeviceSessionTimeout must be greater than 0");
-        }
-    }
 
     ClientConfiguration(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, SSLContext sslContext)
     {
         this.protocol = protocol;
         configSsl(iotHubConnectionString, sslContext);
-    }
-
-    private void configSsl(IotHubConnectionString iotHubConnectionString, SSLContext sslContext) {
-        commonConstructorSetup(iotHubConnectionString);
-
-        if (iotHubConnectionString.isUsingX509())
-        {
-            this.authenticationProvider = new IotHubX509SoftwareAuthenticationProvider(
-                    iotHubConnectionString.getHostName(),
-                    iotHubConnectionString.getGatewayHostName(),
-                    iotHubConnectionString.getDeviceId(),
-                    iotHubConnectionString.getModuleId(),
-                    sslContext);
-
-            log.debug("Device configured to use software based x509 authentication provider with custom SSLContext");
-        }
-        else
-        {
-            this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
-                    iotHubConnectionString.getHostName(),
-                    iotHubConnectionString.getGatewayHostName(),
-                    iotHubConnectionString.getDeviceId(),
-                    iotHubConnectionString.getModuleId(),
-                    iotHubConnectionString.getSharedAccessKey(),
-                    iotHubConnectionString.getSharedAccessToken(),
-                    sslContext);
-
-            log.debug("Device configured to use software based SAS authentication provider with custom SSLContext");
-        }
     }
 
     /**
@@ -360,26 +267,10 @@ public final class ClientConfiguration
         // When setting the ClientOptions and a SecurityProvider, the SecurityProvider is responsible for setting the sslContext
         // we do not need to set the context in this constructor.
         this(connectionString, securityProvider, protocol);
+
+        configConnectingToMqttGatewayFlag(connectionString, protocol, clientOptions);
+
         setClientOptionValues(clientOptions);
-    }
-
-    private void commonConstructorSetup(IotHubConnectionString iotHubConnectionString)
-    {
-        if (iotHubConnectionString == null)
-        {
-            throw new IllegalArgumentException("connection string cannot be null");
-        }
-
-        this.productInfo = new ProductInfo();
-        this.useWebsocket = false;
-    }
-
-    private void assertConnectionStringIsNotX509(IotHubConnectionString iotHubConnectionString)
-    {
-        if (iotHubConnectionString.isUsingX509())
-        {
-            throw new IllegalArgumentException("Cannot use this constructor for x509 connection strings. Use constructor that takes public key certificate and private key or takes an SSLContext instance instead");
-        }
     }
 
     /**
@@ -645,6 +536,147 @@ public final class ClientConfiguration
         }
 
         this.operationTimeout = timeout;
+    }
+
+    private void configSsl(IotHubConnectionString iotHubConnectionString, SSLContext sslContext) {
+        commonConstructorSetup(iotHubConnectionString);
+
+        if (iotHubConnectionString.isUsingX509())
+        {
+            this.authenticationProvider = new IotHubX509SoftwareAuthenticationProvider(
+                    iotHubConnectionString.getHostName(),
+                    iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getDeviceId(),
+                    iotHubConnectionString.getModuleId(),
+                    sslContext);
+
+            log.debug("Device configured to use software based x509 authentication provider with custom SSLContext");
+        }
+        else
+        {
+            this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
+                    iotHubConnectionString.getHostName(),
+                    iotHubConnectionString.getGatewayHostName(),
+                    iotHubConnectionString.getDeviceId(),
+                    iotHubConnectionString.getModuleId(),
+                    iotHubConnectionString.getSharedAccessKey(),
+                    iotHubConnectionString.getSharedAccessToken(),
+                    sslContext);
+
+            log.debug("Device configured to use software based SAS authentication provider with custom SSLContext");
+        }
+    }
+
+    private void setClientOptionValues(ClientOptions clientOptions)
+    {
+        this.modelId = clientOptions != null && clientOptions.getModelId() != null ? clientOptions.getModelId() : null;
+        this.keepAliveInterval = clientOptions != null && clientOptions.getKeepAliveInterval() != 0 ? clientOptions.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+        this.httpsReadTimeout = clientOptions != null && clientOptions.getHttpsReadTimeout() != 0 ? clientOptions.getHttpsReadTimeout() : DEFAULT_HTTPS_READ_TIMEOUT_MILLIS;
+        this.httpsConnectTimeout = clientOptions != null && clientOptions.getHttpsConnectTimeout() != 0 ? clientOptions.getHttpsConnectTimeout() : DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLIS;
+        this.amqpOpenAuthenticationSessionTimeout = clientOptions != null && clientOptions.getAmqpAuthenticationSessionTimeout() != 0 ? clientOptions.getAmqpAuthenticationSessionTimeout() : DEFAULT_AMQP_OPEN_AUTHENTICATION_SESSION_TIMEOUT_IN_SECONDS;
+        this.amqpOpenDeviceSessionsTimeout = clientOptions != null && clientOptions.getAmqpDeviceSessionTimeout() != 0 ? clientOptions.getAmqpDeviceSessionTimeout() : DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
+        this.proxySettings = clientOptions != null && clientOptions.getProxySettings() != null ? clientOptions.getProxySettings() : null;
+        this.sendInterval = clientOptions != null && clientOptions.getSendInterval() != 0 ? clientOptions.getSendInterval() : DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
+
+        if (proxySettings != null)
+        {
+            IotHubClientProtocol protocol = this.getProtocol();
+
+            if (protocol != HTTPS && protocol != AMQPS_WS && protocol != MQTT_WS)
+            {
+                throw new IllegalArgumentException("Use of proxies is unsupported unless using HTTPS, MQTT_WS or AMQPS_WS");
+            }
+        }
+
+        if (this.getSasTokenAuthentication() != null && clientOptions != null)
+        {
+            if (clientOptions.getSasTokenExpiryTime() <= 0)
+            {
+                throw new IllegalArgumentException("ClientOption sasTokenExpiryTime must be greater than 0");
+            }
+
+            this.getSasTokenAuthentication().setTokenValidSecs(clientOptions.getSasTokenExpiryTime());
+        }
+
+        if (this.keepAliveInterval <= 0)
+        {
+            throw new IllegalArgumentException("ClientOption keepAliveInterval must be greater than 0");
+        }
+
+        if (this.httpsReadTimeout < 0)
+        {
+            throw new IllegalArgumentException("ClientOption httpsReadTimeout must be greater than or equal to 0");
+        }
+
+        if (this.httpsConnectTimeout < 0)
+        {
+            throw new IllegalArgumentException("ClientOption httpsConnectTimeout must be greater than or equal to 0");
+        }
+
+        if (this.amqpOpenAuthenticationSessionTimeout <= 0)
+        {
+            throw new IllegalArgumentException("ClientOption amqpAuthenticationSessionTimeout must be greater than 0");
+        }
+
+        if (this.amqpOpenDeviceSessionsTimeout <= 0)
+        {
+            throw new IllegalArgumentException("ClientOption amqpDeviceSessionTimeout must be greater than 0");
+        }
+    }
+
+    private void configSasAuth(IotHubConnectionString iotHubConnectionString)
+    {
+        commonConstructorSetup(iotHubConnectionString);
+        assertConnectionStringIsNotX509(iotHubConnectionString);
+
+        this.authenticationProvider = new IotHubSasTokenSoftwareAuthenticationProvider(
+                iotHubConnectionString.getHostName(),
+                iotHubConnectionString.getGatewayHostName(),
+                iotHubConnectionString.getDeviceId(),
+                iotHubConnectionString.getModuleId(),
+                iotHubConnectionString.getSharedAccessKey(),
+                iotHubConnectionString.getSharedAccessToken());
+
+        log.debug("Device configured to use software based SAS authentication provider");
+    }
+
+    private void commonConstructorSetup(IotHubConnectionString iotHubConnectionString)
+    {
+        if (iotHubConnectionString == null)
+        {
+            throw new IllegalArgumentException("connection string cannot be null");
+        }
+
+        this.productInfo = new ProductInfo();
+        this.useWebsocket = false;
+    }
+
+    private void assertConnectionStringIsNotX509(IotHubConnectionString iotHubConnectionString)
+    {
+        if (iotHubConnectionString.isUsingX509())
+        {
+            throw new IllegalArgumentException("Cannot use this constructor for x509 connection strings. Use constructor that takes public key certificate and private key or takes an SSLContext instance instead");
+        }
+    }
+
+    private void configConnectingToMqttGatewayFlag(IotHubConnectionString iotHubConnectionString, IotHubClientProtocol protocol, ClientOptions options)
+    {
+        String gatewayHostName = iotHubConnectionString.getGatewayHostName();
+        GatewayType gatewayType = options.getGatewayType();
+        if (gatewayType == GatewayType.E4K)
+        {
+            if (gatewayHostName == null || gatewayHostName.isEmpty())
+            {
+                throw new IllegalArgumentException("The value of [GatewayHostName] is NOT provided while connecting to an E4K MQTT broker.");
+            }
+
+            this.isConnectingToMqttGateway = true;
+
+            if (protocol != MQTT && protocol != MQTT_WS)
+            {
+                throw new IllegalArgumentException("The transport protocol should be MQTT or MQTT_WS while connecting to an E4K MQTT broker.");
+            }
+        }
     }
 
     @SuppressWarnings("unused")

@@ -15,6 +15,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthorizedException;
+import com.microsoft.azure.sdk.iot.device.transport.mqtt5.Mqtt5IotHubConnection;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -1314,7 +1315,14 @@ public class IotHubTransport implements IotHubListener
                     break;
                 case MQTT:
                 case MQTT_WS:
-                    this.iotHubTransportConnection = new MqttIotHubConnection(this.getDefaultConfig());
+                    if (this.getDefaultConfig().isConnectingToMqttGateway())
+                    {
+                        this.iotHubTransportConnection = new Mqtt5IotHubConnection(this.getDefaultConfig());
+                    }
+                    else
+                    {
+                        this.iotHubTransportConnection = new MqttIotHubConnection(this.getDefaultConfig());
+                    }
                     break;
                 case AMQPS:
                 case AMQPS_WS:
