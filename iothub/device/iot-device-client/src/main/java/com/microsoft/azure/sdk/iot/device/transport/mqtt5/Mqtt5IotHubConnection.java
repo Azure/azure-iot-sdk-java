@@ -232,12 +232,12 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
                 connectOptions.setSocketFactory(sslContext.getSocketFactory());
             }
 
-            log.debug("Opening MQTT connection...");
-            IMqttToken token = this.mqttAsyncClient.connect(connectOptions);
-            token.waitForCompletion(); // TODO timeout value?
-
             try
             {
+                log.debug("Opening MQTT connection...");
+                IMqttToken token = this.mqttAsyncClient.connect(connectOptions);
+                token.waitForCompletion(); // TODO timeout value?
+
                 log.debug("Sending the \"Opened a connection\" message to the MQTT broker");
                 E4KConnectionMessagePayload connectPayload = E4KConnectionMessagePayload.builder()
                     .connectionState(E4KConnectionState.Connected)
@@ -329,8 +329,16 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
             }
 
             log.debug("Closing MQTT connection");
-            IMqttToken token = this.mqttAsyncClient.disconnect();
-            token.waitForCompletion(); // TODO timeout value?
+            IMqttToken token;
+            try
+            {
+                token = this.mqttAsyncClient.disconnect();
+                token.waitForCompletion(); // TODO timeout value?
+            }
+            catch (MqttException e)
+            {
+                log.warn("Failed to disconnect the client from the MQTT server." ,e);
+            }
 
             this.mqtt5Client.stop();
 
