@@ -8,6 +8,7 @@ import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.*;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.paho.mqttv5.client.*;
 import org.eclipse.paho.mqttv5.client.persist.MemoryPersistence;
 import org.eclipse.paho.mqttv5.common.MqttException;
@@ -21,6 +22,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
 import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
@@ -49,6 +51,8 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
     private IotHubListener listener;
 
     private MqttAsyncClient mqttAsyncClient;
+
+    private final Mqtt5 mqtt5Client;
 
     private final String e4kConnectionChangeTopic;
 
@@ -120,6 +124,17 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
         }
 
         this.e4kConnectionChangeTopic = "$iothub/clients/" + clientId + "/connection";
+
+        Map<Integer, Message> unacknowledgedSentMessages = new ConcurrentHashMap<>();
+        Queue<Pair<String, MqttMessage>> receivedMessages = new ConcurrentLinkedQueue<>();
+
+        this.mqtt5Client = new Mqtt5(
+            this.config.getDeviceId(),
+            this.config.getModuleId(),
+            this.config.getGatewayHostname() != null && !this.config.getGatewayHostname().isEmpty(),
+            this.config.isConnectingToMqttGateway(),
+            unacknowledgedSentMessages,
+            receivedMessages);
 
         try
         {
@@ -261,6 +276,9 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
                 throw transportException;
             }
 
+            this.mqtt5Client.setMqttAsyncClient(this.mqttAsyncClient);
+            this.mqtt5Client.start();
+
             this.state = IotHubConnectionStatus.CONNECTED;
 
             log.debug("MQTT connection opened successfully");
@@ -314,6 +332,8 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
             IMqttToken token = this.mqttAsyncClient.disconnect();
             token.waitForCompletion(); // TODO timeout value?
 
+            this.mqtt5Client.stop();
+
             this.state = IotHubConnectionStatus.DISCONNECTED;
             log.debug("Successfully closed MQTT connection");
         }
@@ -342,19 +362,35 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
     @Override
     public IotHubStatusCode sendMessage(Message message) throws TransportException
     {
+        if (message == null || message.getBytes() == null ||
+                ((message.getMessageType() != DEVICE_TWIN
+                        && message.getMessageType() != DEVICE_METHODS)
+                        && message.getBytes().length == 0))
+        {
+            return IotHubStatusCode.BAD_FORMAT;
+        }
+
+        if (this.state == IotHubConnectionStatus.DISCONNECTED)
+        {
+            throw new IllegalStateException("Cannot send event using a closed MQTT connection");
+        }
+
         IotHubStatusCode result = IotHubStatusCode.OK;
 
         if (message.getMessageType() == DEVICE_METHODS)
         {
-            // TODO
+            log.trace("Sending MQTT device method message ({})", message);
+            this.mqtt5Client.sendDirectMethodMessage((IotHubTransportMessage) message);
         }
         else if (message.getMessageType() == DEVICE_TWIN)
         {
-            // TODO
+            log.trace("Sending MQTT device twin message ({})", message);
+            this.mqtt5Client.sendTwinMessage((IotHubTransportMessage) message);
         }
         else
         {
-            // TODO
+            log.trace("Sending MQTT device telemetry message ({})", message);
+            this.mqtt5Client.sendTelemetryMessage(message);
         }
 
         return result;
@@ -395,18 +431,7 @@ public class Mqtt5IotHubConnection implements IotHubTransportConnection, MqttCal
         }
 
         log.trace("Sending MQTT ACK for a received message ({})", message);
-        if (message.getMessageType() == DEVICE_METHODS)
-        {
-            // TODO
-        }
-        else if (message.getMessageType() == DEVICE_TWIN)
-        {
-            // TODO
-        }
-        else
-        {
-            // TODO
-        }
+        this.mqtt5Client.sendMessageAcknowledgement(messageId);
 
         log.trace("MQTT ACK was sent for a received message so it has been removed from the messages to acknowledge list ({})", message);
         this.receivedMessagesToAcknowledge.remove(message);

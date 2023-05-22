@@ -590,6 +590,13 @@ public class Mqtt5
         }
     }
 
+    void setMqttAsyncClient(MqttAsyncClient mqttAsyncClient)
+    {
+        // should never be set to null
+        // mqttAsyncClients are single use, so this setter is used when the Mqtt5IotHubConnection layer needs to open a new connection
+        this.mqttAsyncClient = mqttAsyncClient;
+    }
+
     /**
      * Sends the provided telemetry message over the mqtt connection
      *
