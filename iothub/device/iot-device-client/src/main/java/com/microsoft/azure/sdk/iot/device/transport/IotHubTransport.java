@@ -123,6 +123,10 @@ public class IotHubTransport implements IotHubListener
     // Used to store the number of milliseconds since epoch that this packet was created for a correlationId
     private final Map<String, Long> correlationStartTimeMillis = new ConcurrentHashMap<>();
 
+    // A job that runs periodically to remove any stale correlation callbacks
+    private Thread correlationCallbackCleanupThread = new Thread(() -> checkForOldMessages());
+    private static final int CORRELATION_CALLBACK_CLEANUP_PERIOD_MILLISECONDS = 60 * 60 * 1000;
+
     /**
      * Constructor for an IotHubTransport object with default values
      *
@@ -506,6 +510,8 @@ public class IotHubTransport implements IotHubListener
             openConnection();
         }
 
+        correlationCallbackCleanupThread.start();
+
         log.debug("Client connection opened successfully");
     }
 
@@ -551,6 +557,8 @@ public class IotHubTransport implements IotHubListener
             }
             finally
             {
+                correlationCallbackCleanupThread.interrupt();
+
                 this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
 
                 // Notify send thread to finish up so it doesn't survive this close
@@ -731,7 +739,6 @@ public class IotHubTransport implements IotHubListener
     public void sendMessages()
     {
         checkForExpiredMessages();
-        new Thread(() -> checkForOldMessages()).start();
 
         if (this.connectionStatus == IotHubConnectionStatus.DISCONNECTED
                 || this.connectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING)
@@ -844,21 +851,34 @@ public class IotHubTransport implements IotHubListener
     // the size of map will grow endlessly which results in OutOfMemory eventually.
     private void checkForOldMessages()
     {
-        List<String> correlationIdsToRemove = new ArrayList<>();
-
-        for (String correlationId : correlationCallbacks.keySet())
+        try
         {
-            if (System.currentTimeMillis() - correlationStartTimeMillis.get(correlationId) >= DEFAULT_CORRELATION_ID_LIVE_TIME)
+            while (true)
             {
-                correlationIdsToRemove.add(correlationId);
-                correlationCallbackContexts.remove(correlationId);
-                correlationStartTimeMillis.remove(correlationId);
+                Thread.sleep(CORRELATION_CALLBACK_CLEANUP_PERIOD_MILLISECONDS);
+
+                List<String> correlationIdsToRemove = new ArrayList<>();
+
+                for (String correlationId : correlationCallbacks.keySet())
+                {
+                    if (System.currentTimeMillis() - correlationStartTimeMillis.get(correlationId) >= DEFAULT_CORRELATION_ID_LIVE_TIME)
+                    {
+                        correlationIdsToRemove.add(correlationId);
+                        correlationCallbackContexts.remove(correlationId);
+                        correlationStartTimeMillis.remove(correlationId);
+                    }
+                }
+
+                for (String correlationId : correlationIdsToRemove)
+                {
+                    correlationCallbacks.remove(correlationId);
+                }
             }
         }
-
-        for (String correlationId : correlationIdsToRemove)
+        catch (InterruptedException e)
         {
-            correlationCallbacks.remove(correlationId);
+            // The exception can be ignored since this thread is interrupted when the client is closing.
+            // Once interrupted, simply end this thread.
         }
     }
 
@@ -1208,7 +1228,7 @@ public class IotHubTransport implements IotHubListener
                         // message has been acknowledged. Otherwise, the size of map will grow endlessly which results in OutOfMemory eventually.
                         new Thread(() ->
                         {
-                            correlationCallbacks.remove(correlationId);
+                            correlationCallbacks.remove(correlationId);                             //TODO wat
                             correlationCallbackContexts.remove(correlationId);
                             correlationStartTimeMillis.remove(correlationId);
                         }).start();
