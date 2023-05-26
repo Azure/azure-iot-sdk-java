@@ -124,7 +124,7 @@ public class IotHubTransport implements IotHubListener
     private final Map<String, Long> correlationStartTimeMillis = new ConcurrentHashMap<>();
 
     // A job that runs periodically to remove any stale correlation callbacks
-    private Thread correlationCallbackCleanupThread = new Thread(() -> checkForOldMessages());
+    private final Thread correlationCallbackCleanupThread = new Thread(() -> checkForOldMessages());
     private static final int CORRELATION_CALLBACK_CLEANUP_PERIOD_MILLISECONDS = 60 * 60 * 1000;
     private final Object correlationCallbackOperationLock = new Object();
 
@@ -516,8 +516,6 @@ public class IotHubTransport implements IotHubListener
             openConnection();
         }
 
-        correlationCallbackCleanupThread.start();
-
         log.debug("Client connection opened successfully");
     }
 
@@ -563,8 +561,6 @@ public class IotHubTransport implements IotHubListener
             }
             finally
             {
-                correlationCallbackCleanupThread.interrupt();
-
                 this.updateStatus(IotHubConnectionStatus.DISCONNECTED, reason, cause);
 
                 // Notify send thread to finish up so it doesn't survive this close
@@ -862,6 +858,7 @@ public class IotHubTransport implements IotHubListener
     {
         try
         {
+            Thread.currentThread().setName("azure-iot-sdk-IotHubCleanupTask");
             while (true)
             {
                 Thread.sleep(CORRELATION_CALLBACK_CLEANUP_PERIOD_MILLISECONDS);
@@ -1699,6 +1696,15 @@ public class IotHubTransport implements IotHubListener
             {
                 this.multiplexingStateCallback.onStatusChanged(connectionStatusChangeContext);
             }
+
+            if (newConnectionStatus == IotHubConnectionStatus.CONNECTED)
+            {
+                correlationCallbackCleanupThread.start();
+            }
+            else if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED)
+            {
+                correlationCallbackCleanupThread.interrupt();
+            }
         }
     }
 
@@ -1741,6 +1747,15 @@ public class IotHubTransport implements IotHubListener
 
             log.debug("Invoking connection status callbacks with new status details");
             invokeConnectionStatusChangeCallback(newConnectionStatus, previousStatus, reason, throwable, deviceId);
+        }
+
+        if (newConnectionStatus == IotHubConnectionStatus.CONNECTED)
+        {
+            correlationCallbackCleanupThread.start();
+        }
+        else if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED)
+        {
+            correlationCallbackCleanupThread.interrupt();
         }
     }
 
