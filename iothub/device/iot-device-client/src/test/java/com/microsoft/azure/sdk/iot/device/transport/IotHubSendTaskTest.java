@@ -35,7 +35,7 @@ public class IotHubSendTaskTest
             }
         };
 
-        IotHubSendTask sendTask = new IotHubSendTask(mockTransport);
+        IotHubSendTask sendTask = new IotHubSendTask(mockTransport, true, null, null);
         sendTask.run();
 
         new Verifications()
@@ -64,7 +64,7 @@ public class IotHubSendTaskTest
             }
         };
 
-        IotHubSendTask sendTask = new IotHubSendTask(mockTransport);
+        IotHubSendTask sendTask = new IotHubSendTask(mockTransport, true, null, null);
         sendTask.run();
 
         new Verifications()
@@ -87,7 +87,7 @@ public class IotHubSendTaskTest
             }
         };
 
-        IotHubSendTask sendTask = new IotHubSendTask(mockTransport);
+        IotHubSendTask sendTask = new IotHubSendTask(mockTransport, true, null, null);
         sendTask.run();
     }
 
@@ -103,7 +103,7 @@ public class IotHubSendTaskTest
             }
         };
 
-        IotHubSendTask sendTask = new IotHubSendTask(mockTransport);
+        IotHubSendTask sendTask = new IotHubSendTask(mockTransport, true, null, null);
         sendTask.run();
     }
 }

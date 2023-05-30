@@ -101,6 +101,9 @@ public class MultiplexingClient
         int sendMessagesPerThread = options != null ? options.getMaxMessagesSentPerSendInterval() : DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD;
         int keepAliveInterval = options != null ? options.getKeepAliveInterval() : DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
         int sendInterval = (int) (options != null ? options.getSendInterval() : DEFAULT_SEND_INTERVAL_IN_MILLISECONDS);
+        String threadNamePrefix = options != null ? options.getThreadNamePrefix() : null;
+        String threadNamePostfix = options != null ? options.getThreadNamePostfix() : null;
+        boolean useIdentifiableThreadNames = options == null || options.isUsingIdentifiableThreadNames();
 
         if (sendPeriod < 0)
         {
@@ -127,7 +130,7 @@ public class MultiplexingClient
 
         // Optional settings from MultiplexingClientOptions
         SSLContext sslContext = options != null ? options.getSslContext() : null;
-        this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, keepAliveInterval, sendInterval);
+        this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, keepAliveInterval, sendInterval, useIdentifiableThreadNames, threadNamePrefix, threadNamePostfix);
         this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(sendMessagesPerThread);
         this.deviceIO.setSendPeriodInMilliseconds(sendPeriod);
         this.deviceIO.setReceivePeriodInMilliseconds(receivePeriod);

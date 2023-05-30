@@ -16,6 +16,9 @@ public final class IotHubSendTask implements Runnable
 {
     private static final String THREAD_NAME = "azure-iot-sdk-IotHubSendTask";
     private final IotHubTransport transport;
+    private final String threadNamePrefix;
+    private final String threadNamePostfix;
+    private final boolean useIdentifiableThreadNames;
 
     // This lock is used to communicate state between this thread and the IoTHubTransport layer. This thread will
     // wait until a message or callback is queued in that layer before continuing. This means that if the transport layer
@@ -25,7 +28,7 @@ public final class IotHubSendTask implements Runnable
     // so that this thread can handle it.
     private final Semaphore sendThreadSemaphore;
 
-    public IotHubSendTask(IotHubTransport transport)
+    public IotHubSendTask(IotHubTransport transport, boolean useIdentifiableThreadNames, String threadNamePrefix, String threadNamePostfix)
     {
         if (transport == null)
         {
@@ -34,13 +37,35 @@ public final class IotHubSendTask implements Runnable
 
         this.transport = transport;
         this.sendThreadSemaphore = this.transport.getSendThreadSemaphore();
+        this.useIdentifiableThreadNames = useIdentifiableThreadNames;
+        this.threadNamePrefix = threadNamePrefix;
+        this.threadNamePostfix = threadNamePostfix;
     }
 
     public void run()
     {
-        String deviceClientId = this.transport.getDeviceClientUniqueIdentifier();
-        String connectionId = transport.getTransportConnectionId();
-        String threadName = deviceClientId + "-" + "Cxn" + connectionId + "-" + THREAD_NAME;
+        String threadName = "";
+        if (this.useIdentifiableThreadNames)
+        {
+            String deviceClientId = this.transport.getDeviceClientUniqueIdentifier();
+            String connectionId = transport.getTransportConnectionId();
+            threadName += deviceClientId + "-" + "Cxn" + connectionId + "-" + THREAD_NAME;
+        }
+        else
+        {
+            if (this.threadNamePrefix != null && !this.threadNamePrefix.isEmpty())
+            {
+                threadName += this.threadNamePrefix;
+            }
+
+            threadName += THREAD_NAME;
+
+            if (this.threadNamePostfix != null && !this.threadNamePostfix.isEmpty())
+            {
+                threadName += this.threadNamePostfix;
+            }
+        }
+
         Thread.currentThread().setName(threadName);
 
         try

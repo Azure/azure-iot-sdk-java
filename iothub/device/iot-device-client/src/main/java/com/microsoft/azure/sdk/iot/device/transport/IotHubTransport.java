@@ -113,6 +113,10 @@ public class IotHubTransport implements IotHubListener
     private SSLContext sslContext;
     private final boolean isMultiplexing;
 
+    private final String threadNamePrefix;
+    private final String threadNamePostfix;
+    private final boolean useIdentifiableThreadNames;
+
     // Flag set when close() starts. Acts as a signal to any running reconnection logic to not try again.
     private boolean isClosing;
 
@@ -150,6 +154,9 @@ public class IotHubTransport implements IotHubListener
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
         this.keepAliveInterval = defaultConfig.getKeepAliveInterval();
         this.sendInterval = defaultConfig.getSendInterval();
+        this.useIdentifiableThreadNames = defaultConfig.isUsingIdentifiableThreadNames();
+        this.threadNamePrefix = defaultConfig.getThreadNamePrefix();
+        this.threadNamePostfix = defaultConfig.getThreadNamePostfix();
     }
 
     public IotHubTransport(
@@ -159,7 +166,10 @@ public class IotHubTransport implements IotHubListener
             ProxySettings proxySettings,
             IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback,
             int keepAliveInterval,
-            int sendInterval) throws IllegalArgumentException
+            int sendInterval,
+            boolean useIdentifiableThreadNames,
+            String threadNamePrefix,
+            String threadNamePostfix) throws IllegalArgumentException
     {
         this.protocol = protocol;
         this.hostName = hostName;
@@ -170,6 +180,9 @@ public class IotHubTransport implements IotHubListener
         this.isMultiplexing = true;
         this.keepAliveInterval = keepAliveInterval;
         this.sendInterval = sendInterval;
+        this.useIdentifiableThreadNames = useIdentifiableThreadNames;
+        this.threadNamePrefix = threadNamePrefix;
+        this.threadNamePostfix = threadNamePostfix;
     }
 
     public Semaphore getSendThreadSemaphore()
@@ -1329,7 +1342,10 @@ public class IotHubTransport implements IotHubListener
                                 this.sslContext,
                                 this.proxySettings,
                                 this.keepAliveInterval,
-                                this.sendInterval);
+                                this.sendInterval,
+                                this.useIdentifiableThreadNames,
+                                this.threadNamePrefix,
+                                this.threadNamePostfix);
 
                         for (ClientConfiguration config : this.deviceClientConfigs.values())
                         {

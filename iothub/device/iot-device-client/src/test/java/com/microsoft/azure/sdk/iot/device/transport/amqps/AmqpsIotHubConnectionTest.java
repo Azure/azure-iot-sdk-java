@@ -526,7 +526,7 @@ public class AmqpsIotHubConnectionTest {
         new NonStrictExpectations()
         {
             {
-                new ReactorRunner((Reactor) any, (IotHubListener) any, anyString, anyString, anyString, (ReactorRunnerStateCallback) any);
+                new ReactorRunner((Reactor) any, (IotHubListener) any, anyString, anyString, (ReactorRunnerStateCallback) any);
                 result = new IOException();
             }
         };
@@ -572,7 +572,7 @@ public class AmqpsIotHubConnectionTest {
         new Verifications()
         {
             {
-                new ReactorRunner((Reactor) any, (IotHubListener) any, anyString, anyString, anyString, (ReactorRunnerStateCallback) any);
+                new ReactorRunner((Reactor) any, (IotHubListener) any, anyString, anyString, (ReactorRunnerStateCallback) any);
                 times = 1;
             }
         };
