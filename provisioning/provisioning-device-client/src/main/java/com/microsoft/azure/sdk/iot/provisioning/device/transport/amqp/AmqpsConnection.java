@@ -541,20 +541,20 @@ public class AmqpsConnection extends ErrorLoggingBaseHandlerWithCleanup
     {
         private final static String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
         private final AmqpReactor amqpReactor;
-        private final String threadPostFix;
+        private final String threadSuffix;
         private final String threadPreFix;
 
-        ReactorRunner(AmqpReactor reactor, String threadPrefix, String threadPostFix)
+        ReactorRunner(AmqpReactor reactor, String threadPrefix, String threadSuffix)
         {
             this.amqpReactor = reactor;
-            this.threadPostFix = threadPostFix;
+            this.threadSuffix = threadSuffix;
             this.threadPreFix = threadPrefix;
         }
 
         @Override
         public Object call()
         {
-            String threadName = threadPreFix + "-" + THREAD_NAME + "-" + this.threadPostFix;
+            String threadName = threadPreFix + "-" + THREAD_NAME + "-" + this.threadSuffix;
             Thread.currentThread().setName(threadName);
             log.trace("Amqp reactor thread {} has started", threadName);
 

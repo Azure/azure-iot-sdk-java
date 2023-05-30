@@ -16,7 +16,7 @@ public final class IotHubReconnectTask implements Runnable
     private static final String THREAD_NAME = "azure-iot-sdk-IotHubReconnectTask";
     private final IotHubTransport transport;
     private final String threadNamePrefix;
-    private final String threadNamePostfix;
+    private final String threadNameSuffix;
     private final boolean useIdentifiableThreadNames;
 
     // This lock is used to communicate state between this thread and the IoTHubTransport layer. This thread will
@@ -24,7 +24,7 @@ public final class IotHubReconnectTask implements Runnable
     // has no connectivity problems, then this thread will do nothing and cost nothing.
     private final Semaphore reconnectThreadSemaphore;
 
-    public IotHubReconnectTask(IotHubTransport transport, boolean useIdentifiableThreadNames, String threadNamePrefix, String threadNamePostfix)
+    public IotHubReconnectTask(IotHubTransport transport, boolean useIdentifiableThreadNames, String threadNamePrefix, String threadNameSuffix)
     {
         if (transport == null)
         {
@@ -35,7 +35,7 @@ public final class IotHubReconnectTask implements Runnable
         this.reconnectThreadSemaphore = this.transport.getReconnectThreadSemaphore();
         this.useIdentifiableThreadNames = useIdentifiableThreadNames;
         this.threadNamePrefix = threadNamePrefix;
-        this.threadNamePostfix = threadNamePostfix;
+        this.threadNameSuffix = threadNameSuffix;
     }
 
     public void run()
@@ -56,9 +56,9 @@ public final class IotHubReconnectTask implements Runnable
 
             threadName += THREAD_NAME;
 
-            if (this.threadNamePostfix != null && !this.threadNamePostfix.isEmpty())
+            if (this.threadNameSuffix != null && !this.threadNameSuffix.isEmpty())
             {
-                threadName += this.threadNamePostfix;
+                threadName += this.threadNameSuffix;
             }
         }
 

@@ -78,22 +78,22 @@ public final class MultiplexingClientOptions
     private final String threadNamePrefix = null;
 
     /**
-     * The postfix that will be applied to the names of all threads created by this client. If
+     * The suffix that will be applied to the names of all threads created by this client. If
      * {@link #useIdentifiableThreadNames} is set to true, then this value is ignored and this client will create the
-     * postfix for you.
+     * suffix for you.
      */
     @Getter
     @Builder.Default
-    private final String threadNamePostfix = null;
+    private final String threadNameSuffix = null;
 
     /**
      * If true, all threads created by this client will use names that are unique. This is useful in applications that manage
      * multiple device/module clients and want to be able to correlate logs to a particular client. In addition,
-     * the {@link #threadNamePrefix} and {@link #threadNamePostfix} values will be ignored.
+     * the {@link #threadNamePrefix} and {@link #threadNameSuffix} values will be ignored.
      *
      * If false, all threads created by this client will use simple names that describe the thread's purpose, but are
      * indistinguishable from the same threads created by a different client instance. However, users may still alter
-     * these thread names by providing values for the {@link #threadNamePrefix} and {@link #threadNamePostfix}.
+     * these thread names by providing values for the {@link #threadNamePrefix} and {@link #threadNameSuffix}.
      */
     @Builder.Default
     private final boolean useIdentifiableThreadNames = true;

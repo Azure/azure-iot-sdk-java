@@ -110,7 +110,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
     private final Map<IotHubTransportMessage, IotHubMessageResult> queuedAcknowledgements = new ConcurrentHashMap<>();
 
     private final String threadNamePrefix;
-    private final String threadNamePostfix;
+    private final String threadNameSuffix;
     private final boolean useIdentifiableThreadNames;
 
     public AmqpsIotHubConnection(ClientConfiguration config, String transportUniqueIdentifier)
@@ -148,13 +148,13 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.sendInterval = clientConfiguration.getSendInterval();
         this.useIdentifiableThreadNames = clientConfiguration.isUsingIdentifiableThreadNames();
         this.threadNamePrefix = clientConfiguration.getThreadNamePrefix();
-        this.threadNamePostfix = clientConfiguration.getThreadNamePostfix();
+        this.threadNameSuffix = clientConfiguration.getThreadNameSuffix();
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
     }
 
-    public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings, int keepAliveInterval, int sendInterval, boolean useIdentifiableThreadNames, String threadNamePrefix, String threadNamePostfix)
+    public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings, int keepAliveInterval, int sendInterval, boolean useIdentifiableThreadNames, String threadNamePrefix, String threadNameSuffix)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.clientConfigurations = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -182,7 +182,7 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         this.sendInterval = sendInterval;
         this.useIdentifiableThreadNames = useIdentifiableThreadNames;
         this.threadNamePrefix = threadNamePrefix;
-        this.threadNamePostfix = threadNamePostfix;
+        this.threadNameSuffix = threadNameSuffix;
     }
 
     public void registerMultiplexedDevice(ClientConfiguration config)
@@ -1277,9 +1277,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
                 threadName += ReactorRunner.THREAD_NAME;
 
-                if (this.threadNamePostfix != null && !this.threadNamePostfix.isEmpty())
+                if (this.threadNameSuffix != null && !this.threadNameSuffix.isEmpty())
                 {
-                    threadName += this.threadNamePostfix;
+                    threadName += this.threadNameSuffix;
                 }
             }
         }
@@ -1298,9 +1298,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
                 threadName += ReactorRunner.THREAD_NAME;
 
-                if (this.threadNamePostfix != null && !this.threadNamePostfix.isEmpty())
+                if (this.threadNameSuffix != null && !this.threadNameSuffix.isEmpty())
                 {
-                    threadName += this.threadNamePostfix;
+                    threadName += this.threadNameSuffix;
                 }
             }
         }

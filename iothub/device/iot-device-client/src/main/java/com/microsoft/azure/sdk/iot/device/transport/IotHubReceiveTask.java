@@ -18,7 +18,7 @@ public final class IotHubReceiveTask implements Runnable
     private static final String THREAD_NAME = "azure-iot-sdk-IotHubReceiveTask";
     private final IotHubTransport transport;
     private final String threadNamePrefix;
-    private final String threadNamePostfix;
+    private final String threadNameSuffix;
     private final boolean useIdentifiableThreadNames;
 
     // This lock is used to communicate state between this thread and the IoTHubTransport layer. This thread will
@@ -28,7 +28,7 @@ public final class IotHubReceiveTask implements Runnable
     // layer's responsibility to notify this thread when a message has been received so that this thread can handle it.
     private final Semaphore receiveThreadSemaphore;
 
-    public IotHubReceiveTask(IotHubTransport transport, boolean useIdentifiableThreadNames, String threadNamePrefix, String threadNamePostfix)
+    public IotHubReceiveTask(IotHubTransport transport, boolean useIdentifiableThreadNames, String threadNamePrefix, String threadNameSuffix)
     {
         if (transport == null)
         {
@@ -39,7 +39,7 @@ public final class IotHubReceiveTask implements Runnable
         this.receiveThreadSemaphore = this.transport.getReceiveThreadSemaphore();
         this.useIdentifiableThreadNames = useIdentifiableThreadNames;
         this.threadNamePrefix = threadNamePrefix;
-        this.threadNamePostfix = threadNamePostfix;
+        this.threadNameSuffix = threadNameSuffix;
     }
 
     public void run()
@@ -60,9 +60,9 @@ public final class IotHubReceiveTask implements Runnable
 
             threadName += THREAD_NAME;
 
-            if (this.threadNamePostfix != null && !this.threadNamePostfix.isEmpty())
+            if (this.threadNameSuffix != null && !this.threadNameSuffix.isEmpty())
             {
-                threadName += this.threadNamePostfix;
+                threadName += this.threadNameSuffix;
             }
         }
 

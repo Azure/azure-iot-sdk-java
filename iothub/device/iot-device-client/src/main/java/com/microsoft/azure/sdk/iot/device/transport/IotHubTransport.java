@@ -114,7 +114,7 @@ public class IotHubTransport implements IotHubListener
     private final boolean isMultiplexing;
 
     private final String threadNamePrefix;
-    private final String threadNamePostfix;
+    private final String threadNameSuffix;
     private final boolean useIdentifiableThreadNames;
 
     // Flag set when close() starts. Acts as a signal to any running reconnection logic to not try again.
@@ -156,7 +156,7 @@ public class IotHubTransport implements IotHubListener
         this.sendInterval = defaultConfig.getSendInterval();
         this.useIdentifiableThreadNames = defaultConfig.isUsingIdentifiableThreadNames();
         this.threadNamePrefix = defaultConfig.getThreadNamePrefix();
-        this.threadNamePostfix = defaultConfig.getThreadNamePostfix();
+        this.threadNameSuffix = defaultConfig.getThreadNameSuffix();
     }
 
     public IotHubTransport(
@@ -169,7 +169,7 @@ public class IotHubTransport implements IotHubListener
             int sendInterval,
             boolean useIdentifiableThreadNames,
             String threadNamePrefix,
-            String threadNamePostfix) throws IllegalArgumentException
+            String threadNameSuffix) throws IllegalArgumentException
     {
         this.protocol = protocol;
         this.hostName = hostName;
@@ -182,7 +182,7 @@ public class IotHubTransport implements IotHubListener
         this.sendInterval = sendInterval;
         this.useIdentifiableThreadNames = useIdentifiableThreadNames;
         this.threadNamePrefix = threadNamePrefix;
-        this.threadNamePostfix = threadNamePostfix;
+        this.threadNameSuffix = threadNameSuffix;
     }
 
     public Semaphore getSendThreadSemaphore()
@@ -1345,7 +1345,7 @@ public class IotHubTransport implements IotHubListener
                                 this.sendInterval,
                                 this.useIdentifiableThreadNames,
                                 this.threadNamePrefix,
-                                this.threadNamePostfix);
+                                this.threadNameSuffix);
 
                         for (ClientConfiguration config : this.deviceClientConfigs.values())
                         {

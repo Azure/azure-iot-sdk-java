@@ -84,7 +84,7 @@ public final class ClientConfiguration
     private int sendInterval = DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
 
     @Getter
-    private String threadNamePostfix = null;
+    private String threadNameSuffix = null;
 
     @Getter
     private String threadNamePrefix = null;
@@ -221,7 +221,7 @@ public final class ClientConfiguration
         this.proxySettings = clientOptions != null && clientOptions.getProxySettings() != null ? clientOptions.getProxySettings() : null;
         this.sendInterval = clientOptions != null && clientOptions.getSendInterval() != 0 ? clientOptions.getSendInterval() : DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
         this.threadNamePrefix = clientOptions != null ? clientOptions.getThreadNamePrefix() : null;
-        this.threadNamePostfix = clientOptions != null ? clientOptions.getThreadNamePostfix() : null;
+        this.threadNameSuffix = clientOptions != null ? clientOptions.getThreadNameSuffix() : null;
         this.useIdentifiableThreadNames = clientOptions == null || clientOptions.isUsingIdentifiableThreadNames();
 
         if (proxySettings != null)
