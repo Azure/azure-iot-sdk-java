@@ -8,7 +8,8 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import com.microsoft.azure.sdk.iot.device.*;
-import com.microsoft.azure.sdk.iot.device.exceptions.*;
+import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.exceptions.MultiplexingClientRegistrationException;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.AmqpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.amqps.exceptions.AmqpUnauthorizedAccessException;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
@@ -1699,7 +1700,14 @@ public class IotHubTransport implements IotHubListener
 
             if (newConnectionStatus == IotHubConnectionStatus.CONNECTED)
             {
-                correlationCallbackCleanupThread.start();
+                try
+                {
+                    correlationCallbackCleanupThread.start();
+                }
+                catch (IllegalThreadStateException e)
+                {
+                    // Thread has already started. No need to report this exception
+                }
             }
             else if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED)
             {
@@ -1751,7 +1759,14 @@ public class IotHubTransport implements IotHubListener
 
         if (newConnectionStatus == IotHubConnectionStatus.CONNECTED)
         {
-            correlationCallbackCleanupThread.start();
+            try
+            {
+                correlationCallbackCleanupThread.start();
+            }
+            catch (IllegalThreadStateException e)
+            {
+                // Thread has already started. No need to report this exception
+            }
         }
         else if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED)
         {
