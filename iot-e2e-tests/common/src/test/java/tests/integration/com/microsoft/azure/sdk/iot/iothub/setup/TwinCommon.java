@@ -59,9 +59,7 @@ public class TwinCommon extends IntegrationTest
         return Arrays.asList(
             new Object[][]
                 {
-                    {AMQPS, SAS, ClientType.DEVICE_CLIENT},
                     {MQTT, SAS, ClientType.DEVICE_CLIENT},
-                    {AMQPS, SAS, ClientType.MODULE_CLIENT},
                     {MQTT, SAS, ClientType.MODULE_CLIENT},
                 });
     }

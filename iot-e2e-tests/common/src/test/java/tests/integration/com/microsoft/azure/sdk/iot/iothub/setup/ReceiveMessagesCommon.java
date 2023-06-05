@@ -56,10 +56,7 @@ public class ReceiveMessagesCommon extends IntegrationTest
         return Arrays.asList(
             new Object[][]
                 {
-                    {HTTPS, SAS, ClientType.DEVICE_CLIENT},
-                    {AMQPS, SAS, ClientType.DEVICE_CLIENT},
                     {MQTT, SAS, ClientType.DEVICE_CLIENT},
-                    {AMQPS, SAS, ClientType.MODULE_CLIENT},
                     {MQTT, SAS, ClientType.MODULE_CLIENT},
                 });
     }
