@@ -67,4 +67,40 @@ public final class MultiplexingClientOptions
     @Getter
     @Builder.Default
     public final int keepAliveInterval = DEFAULT_KEEP_ALIVE_INTERVAL_IN_SECONDS;
+
+    /**
+     * The prefix that will be applied to the names of all threads created by this client. If
+     * {@link #useIdentifiableThreadNames} is set to true, then this value is ignored and this client will create the
+     * prefix for you.
+     */
+    @Getter
+    @Builder.Default
+    private final String threadNamePrefix = null;
+
+    /**
+     * The suffix that will be applied to the names of all threads created by this client. If
+     * {@link #useIdentifiableThreadNames} is set to true, then this value is ignored and this client will create the
+     * suffix for you.
+     */
+    @Getter
+    @Builder.Default
+    private final String threadNameSuffix = null;
+
+    /**
+     * If true, all threads created by this client will use names that are unique. This is useful in applications that manage
+     * multiple device/module clients and want to be able to correlate logs to a particular client. In addition,
+     * the {@link #threadNamePrefix} and {@link #threadNameSuffix} values will be ignored.
+     *
+     * If false, all threads created by this client will use simple names that describe the thread's purpose, but are
+     * indistinguishable from the same threads created by a different client instance. However, users may still alter
+     * these thread names by providing values for the {@link #threadNamePrefix} and {@link #threadNameSuffix}.
+     */
+    @Builder.Default
+    private final boolean useIdentifiableThreadNames = true;
+
+    public boolean isUsingIdentifiableThreadNames()
+    {
+        // Using a manually written method here to override the name that Lombok would have given it
+        return this.useIdentifiableThreadNames;
+    }
 }

@@ -40,7 +40,7 @@ public class IotHubReceiveTaskTest
                 result = IotHubClientProtocol.AMQPS;
             }
         };
-        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport);
+        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport, true, null, null);
 
         // act
         receiveTask.run();
@@ -64,7 +64,7 @@ public class IotHubReceiveTaskTest
             }
         };
 
-        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport);
+        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport, true, null, null);
 
         // act
         receiveTask.run();
@@ -90,7 +90,7 @@ public class IotHubReceiveTaskTest
             }
         };
 
-        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport);
+        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport, true, null, null);
         receiveTask.run();
     }
 
@@ -106,7 +106,7 @@ public class IotHubReceiveTaskTest
             }
         };
 
-        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport);
+        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport, true, null, null);
         receiveTask.run();
     }
 }

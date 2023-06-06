@@ -109,6 +109,10 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
     private final Map<IotHubTransportMessage, IotHubMessageResult> queuedAcknowledgements = new ConcurrentHashMap<>();
 
+    private final String threadNamePrefix;
+    private final String threadNameSuffix;
+    private final boolean useIdentifiableThreadNames;
+
     public AmqpsIotHubConnection(ClientConfiguration config, String transportUniqueIdentifier)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
@@ -142,12 +146,15 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.keepAliveInterval = config.getKeepAliveInterval();
         this.sendInterval = clientConfiguration.getSendInterval();
+        this.useIdentifiableThreadNames = clientConfiguration.isUsingIdentifiableThreadNames();
+        this.threadNamePrefix = clientConfiguration.getThreadNamePrefix();
+        this.threadNameSuffix = clientConfiguration.getThreadNameSuffix();
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
         log.trace("AmqpsIotHubConnection object is created successfully and will use port {}", this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
     }
 
-    public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings, int keepAliveInterval, int sendInterval)
+    public AmqpsIotHubConnection(String hostName, String transportUniqueIdentifier, boolean isWebsocketConnection, SSLContext sslContext, ProxySettings proxySettings, int keepAliveInterval, int sendInterval, boolean useIdentifiableThreadNames, String threadNamePrefix, String threadNameSuffix)
     {
         // This allows us to create thread safe sets despite there being no such type default in Java 7 or 8
         this.clientConfigurations = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -173,6 +180,9 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
 
         this.keepAliveInterval = keepAliveInterval;
         this.sendInterval = sendInterval;
+        this.useIdentifiableThreadNames = useIdentifiableThreadNames;
+        this.threadNamePrefix = threadNamePrefix;
+        this.threadNameSuffix = threadNameSuffix;
     }
 
     public void registerMultiplexedDevice(ClientConfiguration config)
@@ -1249,14 +1259,57 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
         String runnerUniqueIdentifier = this.isMultiplexing
                 ? "Multiplexed-" + this.transportUniqueIdentifier
                 : this.clientConfiguration.getDeviceClientUniqueIdentifier();
-
         String reactorRunnerPrefix = this.hostName + "-" + runnerUniqueIdentifier + "-" + "Cnx" + this.connectionId;
+
+        String threadName = "";
+        if (this.isMultiplexing)
+        {
+            if (this.useIdentifiableThreadNames)
+            {
+                threadName += reactorRunnerPrefix + "-" + ReactorRunner.THREAD_NAME + "-ConnectionOwner";
+            }
+            else
+            {
+                if (this.threadNamePrefix != null && !this.threadNamePrefix.isEmpty())
+                {
+                    threadName += this.threadNamePrefix;
+                }
+
+                threadName += ReactorRunner.THREAD_NAME;
+
+                if (this.threadNameSuffix != null && !this.threadNameSuffix.isEmpty())
+                {
+                    threadName += this.threadNameSuffix;
+                }
+            }
+        }
+        else
+        {
+            if (this.useIdentifiableThreadNames)
+            {
+                threadName += reactorRunnerPrefix + "-" + ReactorRunner.THREAD_NAME + "-ConnectionOwner";
+            }
+            else
+            {
+                if (this.threadNamePrefix != null && !this.threadNamePrefix.isEmpty())
+                {
+                    threadName += this.threadNamePrefix;
+                }
+
+                threadName += ReactorRunner.THREAD_NAME;
+
+                if (this.threadNameSuffix != null && !this.threadNameSuffix.isEmpty())
+                {
+                    threadName += this.threadNameSuffix;
+                }
+            }
+        }
+
         ReactorRunner reactorRunner = new ReactorRunner(
             this.reactor,
             this.listener,
             this.connectionId,
-            reactorRunnerPrefix,
-            "ConnectionOwner",
+            threadName,
             this);
 
         executorService.submit(reactorRunner);

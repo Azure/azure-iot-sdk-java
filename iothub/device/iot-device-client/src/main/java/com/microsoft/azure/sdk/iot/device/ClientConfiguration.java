@@ -11,10 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -85,6 +82,14 @@ public final class ClientConfiguration
     @Getter
     @Setter(AccessLevel.PACKAGE)
     private int sendInterval = DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
+
+    @Getter
+    private String threadNameSuffix = null;
+
+    @Getter
+    private String threadNamePrefix = null;
+
+    private boolean useIdentifiableThreadNames = true;
 
     private IotHubAuthenticationProvider authenticationProvider;
 
@@ -215,6 +220,9 @@ public final class ClientConfiguration
         this.amqpOpenDeviceSessionsTimeout = clientOptions != null && clientOptions.getAmqpDeviceSessionTimeout() != 0 ? clientOptions.getAmqpDeviceSessionTimeout() : DEFAULT_AMQP_OPEN_DEVICE_SESSIONS_TIMEOUT_IN_SECONDS;
         this.proxySettings = clientOptions != null && clientOptions.getProxySettings() != null ? clientOptions.getProxySettings() : null;
         this.sendInterval = clientOptions != null && clientOptions.getSendInterval() != 0 ? clientOptions.getSendInterval() : DEFAULT_SEND_INTERVAL_IN_MILLISECONDS;
+        this.threadNamePrefix = clientOptions != null ? clientOptions.getThreadNamePrefix() : null;
+        this.threadNameSuffix = clientOptions != null ? clientOptions.getThreadNameSuffix() : null;
+        this.useIdentifiableThreadNames = clientOptions == null || clientOptions.isUsingIdentifiableThreadNames();
 
         if (proxySettings != null)
         {
@@ -630,6 +638,12 @@ public final class ClientConfiguration
         {
             return AuthType.X509_CERTIFICATE;
         }
+    }
+
+    public boolean isUsingIdentifiableThreadNames()
+    {
+        // Using a manually written method here to override the name that Lombok would have given it
+        return this.useIdentifiableThreadNames;
     }
 
     /**

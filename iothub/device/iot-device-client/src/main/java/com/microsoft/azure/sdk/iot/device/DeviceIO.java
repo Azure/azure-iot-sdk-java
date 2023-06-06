@@ -65,9 +65,9 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
 
         this.state = IotHubConnectionStatus.DISCONNECTED;
 
-        this.sendTask = new IotHubSendTask(this.transport);
-        this.receiveTask = new IotHubReceiveTask(this.transport);
-        this.reconnectTask = new IotHubReconnectTask(this.transport);
+        this.sendTask = new IotHubSendTask(this.transport, config.isUsingIdentifiableThreadNames(), config.getThreadNamePrefix(), config.getThreadNameSuffix());
+        this.receiveTask = new IotHubReceiveTask(this.transport, config.isUsingIdentifiableThreadNames(), config.getThreadNamePrefix(), config.getThreadNameSuffix());
+        this.reconnectTask = new IotHubReconnectTask(this.transport, config.isUsingIdentifiableThreadNames(), config.getThreadNamePrefix(), config.getThreadNameSuffix());
     }
 
     DeviceIO(
@@ -76,13 +76,16 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
         SSLContext sslContext,
         ProxySettings proxySettings,
         int keepAliveInterval,
-        int sendInterval)
+        int sendInterval,
+        boolean useIdentifiableThreadNames,
+        String threadNamePrefix,
+        String threadNameSuffix)
     {
         this.state = IotHubConnectionStatus.DISCONNECTED;
-        this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this, keepAliveInterval, sendInterval);
-        this.sendTask = new IotHubSendTask(this.transport);
-        this.receiveTask = new IotHubReceiveTask(this.transport);
-        this.reconnectTask = new IotHubReconnectTask(this.transport);
+        this.transport = new IotHubTransport(hostName, protocol, sslContext, proxySettings, this, keepAliveInterval, sendInterval, useIdentifiableThreadNames, threadNamePrefix, threadNameSuffix);
+        this.sendTask = new IotHubSendTask(this.transport, useIdentifiableThreadNames, threadNamePrefix, threadNameSuffix);
+        this.receiveTask = new IotHubReceiveTask(this.transport, useIdentifiableThreadNames, threadNamePrefix, threadNameSuffix);
+        this.reconnectTask = new IotHubReconnectTask(this.transport, useIdentifiableThreadNames, threadNamePrefix, threadNameSuffix);
     }
 
     /**

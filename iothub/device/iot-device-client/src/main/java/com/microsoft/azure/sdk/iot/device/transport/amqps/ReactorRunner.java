@@ -12,28 +12,25 @@ import java.util.concurrent.Callable;
 
 public class ReactorRunner implements Callable<Object>
 {
-    private static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
+    static final String THREAD_NAME = "azure-iot-sdk-ReactorRunner";
     private final Reactor reactor;
     private final IotHubListener listener;
     private final String connectionId;
+    private final String threadName;
     private final ReactorRunnerStateCallback reactorRunnerStateCallback;
-    private final String threadPostfix;
-    private final String threadPrefix;
 
     ReactorRunner(
             Reactor reactor,
             IotHubListener listener,
             String connectionId,
-            String threadPrefix,
-            String threadPostfix,
+            String threadName,
             ReactorRunnerStateCallback reactorRunnerStateCallback)
     {
         this.listener = listener;
         this.reactor = reactor;
         this.connectionId = connectionId;
+        this.threadName = threadName;
         this.reactorRunnerStateCallback = reactorRunnerStateCallback;
-        this.threadPrefix = threadPrefix;
-        this.threadPostfix = threadPostfix;
     }
 
     @Override
@@ -41,8 +38,7 @@ public class ReactorRunner implements Callable<Object>
     {
         try
         {
-            String threadName = this.threadPrefix + "-" + THREAD_NAME + "-" + this.threadPostfix;
-            Thread.currentThread().setName(threadName);
+            Thread.currentThread().setName(this.threadName);
             this.reactor.setTimeout(10);
             this.reactor.start();
 
