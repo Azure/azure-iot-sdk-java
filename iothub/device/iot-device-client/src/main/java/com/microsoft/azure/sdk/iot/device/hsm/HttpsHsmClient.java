@@ -251,17 +251,23 @@ public class HttpsHsmClient
 
             if (httpsRequest.getBody() != null)
             {
-                //append http request body to the request bytes
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                outputStream.write(requestBytes);
-                outputStream.write(httpsRequest.getBody());
+                // closes the output stream when it exits this block
+                try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream())
+                {
+                    //append http request body to the request bytes
+                    outputStream.write(requestBytes);
+                    outputStream.write(httpsRequest.getBody());
 
-                log.trace("Writing {} bytes to unix domain socket", outputStream.size());
-                unixDomainSocketChannel.write(outputStream.toByteArray());
+                    byte[] output = outputStream.toByteArray();
+                    log.trace("Writing {} bytes to unix domain socket", output.length);
+                    log.trace("{}", output);
+                    unixDomainSocketChannel.write(output);
+                }
             }
             else
             {
                 log.trace("Writing {} bytes to unix domain socket", requestBytes.length);
+                log.trace("{}", new String(requestBytes, StandardCharsets.UTF_8));
                 unixDomainSocketChannel.write(requestBytes);
             }
 
