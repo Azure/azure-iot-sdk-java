@@ -260,7 +260,7 @@ public class HttpsHsmClient
 
                     byte[] output = outputStream.toByteArray();
                     log.trace("Writing {} bytes to unix domain socket", output.length);
-                    log.trace("{}", output);
+                    log.trace("{}", new String(output, StandardCharsets.UTF_8));
                     unixDomainSocketChannel.write(output);
                 }
             }
