@@ -180,7 +180,8 @@ public class ProvisioningDeviceClient
                 registrationExceptionReference.set(e);
                 registrationLatch.countDown();
             },
-            null);
+            null,
+            additionalData);
 
         // Wait until registration finishes or for a max amount of time
         boolean timedOut = !registrationLatch.await(timeout, TimeUnit.SECONDS);
