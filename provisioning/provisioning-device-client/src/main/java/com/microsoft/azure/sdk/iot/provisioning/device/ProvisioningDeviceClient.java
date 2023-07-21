@@ -114,7 +114,10 @@ public class ProvisioningDeviceClient
             throw new IllegalArgumentException("registration callback cannot be null");
         }
 
-        this.provisioningDeviceClientConfig.setPayload(additionalData.getProvisioningPayload());
+        if (additionalData != null)
+        {
+            this.provisioningDeviceClientConfig.setPayload(additionalData.getProvisioningPayload());
+        }
 
         this.provisioningDeviceClientConfig.setRegistrationCallback(provisioningDeviceClientRegistrationCallback, context);
 
