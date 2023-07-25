@@ -191,7 +191,7 @@
 
         <iot-device-client-version>2.2.0</iot-device-client-version>
         <iot-service-client-version>2.1.6</iot-service-client-version>  <!--e2e tests only-->
-        <provisioning-device-client-version>2.1.0</provisioning-device-client-version>
+        <provisioning-device-client-version>2.1.1</provisioning-device-client-version>
         <provisioning-service-client-version>2.0.2</provisioning-service-client-version>
         <security-provider-version>2.0.1</security-provider-version>
         <tpm-provider-emulator-version>2.0.1</tpm-provider-emulator-version>
