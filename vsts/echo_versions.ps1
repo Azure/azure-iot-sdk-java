@@ -6,5 +6,9 @@ elseif (($env:JAVA_VERSION).equals("11"))
 {
     $env:JAVA_HOME=$env:JAVA_HOME_11_X64
 }
+elseif (($env:JAVA_VERSION).equals("17"))
+{
+    $env:JAVA_HOME=$env:JAVA_HOME_17_X64
+}
 
 mvn -v
