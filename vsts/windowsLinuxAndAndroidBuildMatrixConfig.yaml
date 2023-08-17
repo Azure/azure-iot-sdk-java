@@ -13,16 +13,16 @@ trigger:
       - provisioning/provisioning-samples/*
 
 variables:
-  # Run JDK 8 + 11 in parallel if it is a pull request, but in serial otherwise
+  # Run JDK tests in parallel if it is a pull request, but in serial otherwise
   ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
-    maxParallel: 2
+    maxParallel: 3
   ${{ else }}:
     maxParallel: 1
 
 jobs:
   ### Windows ###
   - job: Windows
-    timeoutInMinutes: 180
+    timeoutInMinutes: 240
     strategy:
       maxParallel: $[variables.maxParallel]
       matrix:
@@ -30,6 +30,8 @@ jobs:
           JAVA_VERSION: 11
         JDK 8: # only run Java 8 in nightly or CI builds.
           JAVA_VERSION: 8
+        JDK 17: # only run Java 17 in nightly or CI builds.
+          JAVA_VERSION: 17
     pool:
       vmImage: windows-latest
     displayName: Windows
@@ -116,7 +118,7 @@ jobs:
 
   ### Linux ###
   - job: Linux
-    timeoutInMinutes: 180
+    timeoutInMinutes: 240
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
       vmImage: 'ubuntu-22.04'
@@ -128,6 +130,8 @@ jobs:
           JAVA_VERSION: 11
         JDK 8: # only run Java 8 in nightly or CI builds.
           JAVA_VERSION: 8
+        JDK 17: # only run Java 17 in nightly or CI builds.
+          JAVA_VERSION: 17
     steps:
       - task: CmdLine@2
         displayName: 'Print Linux version'
