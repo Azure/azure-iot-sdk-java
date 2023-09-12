@@ -91,6 +91,8 @@ public final class ClientConfiguration
 
     private boolean useIdentifiableThreadNames = true;
 
+    private boolean logRoutineDisconnectsAsErrors = true;
+
     private IotHubAuthenticationProvider authenticationProvider;
 
     /**
@@ -223,6 +225,7 @@ public final class ClientConfiguration
         this.threadNamePrefix = clientOptions != null ? clientOptions.getThreadNamePrefix() : null;
         this.threadNameSuffix = clientOptions != null ? clientOptions.getThreadNameSuffix() : null;
         this.useIdentifiableThreadNames = clientOptions == null || clientOptions.isUsingIdentifiableThreadNames();
+        this.logRoutineDisconnectsAsErrors = clientOptions == null || clientOptions.isLoggingRoutineDisconnectsAsErrors();
 
         if (proxySettings != null)
         {
@@ -644,6 +647,12 @@ public final class ClientConfiguration
     {
         // Using a manually written method here to override the name that Lombok would have given it
         return this.useIdentifiableThreadNames;
+    }
+
+    public boolean isLoggingRoutineDisconnectsAsErrors()
+    {
+        // Using a manually written method here to override the name that Lombok would have given it
+        return this.logRoutineDisconnectsAsErrors;
     }
 
     /**

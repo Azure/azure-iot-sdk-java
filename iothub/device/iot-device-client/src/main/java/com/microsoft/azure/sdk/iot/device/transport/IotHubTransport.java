@@ -72,7 +72,7 @@ public class IotHubTransport implements IotHubListener
     private IotHubConnectionStatusChangeCallback multiplexingStateCallback;
     private Object multiplexingStateCallbackContext;
 
-    private RetryPolicy multiplexingRetryPolicy = new ExponentialBackoffWithJitter();
+    private RetryPolicy multiplexingRetryPolicy;
 
     // Callback for notifying the DeviceIO layer of connection status change events. The deviceIO layer
     // should stop spawning send/receive threads when this layer is disconnected or disconnected retrying
@@ -179,6 +179,7 @@ public class IotHubTransport implements IotHubListener
         this.connectionStatus = IotHubConnectionStatus.DISCONNECTED;
         this.deviceIOConnectionStatusChangeCallback = deviceIOConnectionStatusChangeCallback;
         this.isMultiplexing = true;
+        this.multiplexingRetryPolicy = new ExponentialBackoffWithJitter();
         this.keepAliveInterval = keepAliveInterval;
         this.sendInterval = sendInterval;
         this.useIdentifiableThreadNames = useIdentifiableThreadNames;
@@ -1643,6 +1644,17 @@ public class IotHubTransport implements IotHubListener
         {
             if (throwable == null)
             {
+                log.debug("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
+            }
+            else if (this.getDefaultConfig() != null
+                    && !this.getDefaultConfig().isLoggingRoutineDisconnectsAsErrors()
+                    && newConnectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING
+                    && reason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN
+                    && (protocol == IotHubClientProtocol.MQTT || protocol == IotHubClientProtocol.MQTT_WS))
+            {
+                // This is a special case where the user has opted out of treating the routine
+                // MQTT/MQTT_WS SAS token disconnects as an error for logging purposes. As such,
+                // log at the debug level instead of warn or error level.
                 log.debug("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
             }
             else

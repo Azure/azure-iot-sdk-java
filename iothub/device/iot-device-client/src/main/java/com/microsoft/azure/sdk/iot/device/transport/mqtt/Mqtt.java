@@ -327,8 +327,6 @@ public abstract class Mqtt implements MqttCallback
     @Override
     public void connectionLost(Throwable throwable)
     {
-        log.warn("Mqtt connection lost", throwable);
-
         this.disconnect();
 
         if (this.listener != null)
@@ -343,6 +341,10 @@ public abstract class Mqtt implements MqttCallback
             {
                 transportException = new TransportException(throwable);
             }
+
+            // Logging this at a debug level instead of warning or error because the IoThubTransport
+            // level will log it to warning or error if applicable.
+            log.debug("Mqtt connection lost", transportException);
 
             this.listener.onConnectionLost(transportException, this.connectionId);
         }
