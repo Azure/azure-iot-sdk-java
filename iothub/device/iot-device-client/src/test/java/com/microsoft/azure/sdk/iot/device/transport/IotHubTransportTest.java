@@ -21,6 +21,8 @@ import java.util.concurrent.*;
 import static com.microsoft.azure.sdk.iot.device.IotHubConnectionStatusChangeReason.*;
 import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.*;
 import static junit.framework.TestCase.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit tests for IotHubTransportPacket.
@@ -265,6 +267,25 @@ public class IotHubTransportTest
 
         //assert
         assertEquals("updateStatus", methodsCalled.toString());
+    }
+
+    //Tests_SRS_IOTHUBTRANSPORT: [This function shall return the connection status of Iot Hub.]
+    @Test
+    public void shouldReturnIotHubConnectionStatus()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockedConfig.getDeviceId();
+                result = "someDeviceId";
+            }
+        };
+        final IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
+        Deencapsulation.setField(transport, "connectionStatus", CONNECTED);
+
+        //act
+        assertThat(transport.getConnectionStatus(), is(CONNECTED));
     }
 
     //Tests_SRS_IOTHUBTRANSPORT_34_016: [If the connection status of this object is DISCONNECTED_RETRYING, this function shall throw a TransportException.]

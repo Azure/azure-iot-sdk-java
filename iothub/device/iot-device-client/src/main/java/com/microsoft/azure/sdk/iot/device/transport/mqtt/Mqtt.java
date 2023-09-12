@@ -7,6 +7,7 @@ import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.MessageType;
 import com.microsoft.azure.sdk.iot.device.transport.TransportException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubListener;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.PahoExceptionTranslator;
@@ -327,23 +328,21 @@ public abstract class Mqtt implements MqttCallback
     @Override
     public void connectionLost(Throwable throwable)
     {
-        log.warn("Mqtt connection lost", throwable);
+        TransportException transportException = toTransportException(throwable);
+
+        if (transportException.isRetryable() && this.listener != null && this.listener.getConnectionStatus() == IotHubConnectionStatus.CONNECTED) 
+        {
+            log.info("Mqtt connection lost");
+        }
+        else
+        {
+            log.warn("Mqtt connection lost", throwable);
+        }
 
         this.disconnect();
 
         if (this.listener != null)
         {
-            TransportException transportException;
-            if (throwable instanceof MqttException)
-            {
-                transportException = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
-                log.trace("Mqtt connection loss interpreted into transport exception", throwable);
-            }
-            else
-            {
-                transportException = new TransportException(throwable);
-            }
-
             this.listener.onConnectionLost(transportException, this.connectionId);
         }
     }
@@ -520,6 +519,15 @@ public abstract class Mqtt implements MqttCallback
                 throw new IllegalArgumentException("Unexpected property string provided. Expected '=' symbol between key and value of the property in string: " + propertyString);
             }
         }
+    }
+
+    private TransportException toTransportException(Throwable throwable) {
+        if (throwable instanceof MqttException)
+        {
+            log.trace("Mqtt connection loss interpreted into transport exception", throwable);
+            return PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
+        }
+        return new TransportException(throwable);
     }
 
     void setListener(IotHubListener listener)

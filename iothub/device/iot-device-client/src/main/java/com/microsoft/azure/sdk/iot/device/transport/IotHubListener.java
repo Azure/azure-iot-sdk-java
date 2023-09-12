@@ -72,4 +72,11 @@ public interface IotHubListener
      * @param e the throwable that explains why the registration failed.
      */
     void onMultiplexedDeviceSessionRegistrationFailed(String connectionId, String deviceId, Exception e);
+
+    /**
+     * The current Iot Hub connection status
+     *
+     * @return
+     */
+    IotHubConnectionStatus getConnectionStatus();
 }

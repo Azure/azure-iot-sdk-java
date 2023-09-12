@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus.CONNECTED;
 import static com.microsoft.azure.sdk.iot.device.twin.DeviceOperations.*;
 import static org.junit.Assert.*;
 
@@ -762,7 +763,7 @@ public class MqttTest
 
     //Tests_SRS_Mqtt_34_045: [If this object has a saved listener, this function shall notify the listener that connection was lost.]
     @Test
-    public void connectionLostAttemptsToReconnectWithSASTokenStillValid(final @Mocked TransportException mockedTransportException) throws IOException, MqttException
+    public void connectionLostAttemptsToReconnectWithSASTokenStillValid(final @Mocked TransportException mockedTransportException, @Mocked final org.slf4j.Logger mockLogger) throws IOException, MqttException
     {
         //arrange
         Mqtt mockMqtt;
@@ -773,6 +774,10 @@ public class MqttTest
             {
                 new TransportException(t);
                 result = mockedTransportException;
+                mockedTransportException.isRetryable();
+                result = true;
+                mockedIotHubListener.getConnectionStatus();
+                result = CONNECTED;
                 mockedIotHubListener.onConnectionLost(mockedTransportException, anyString);
             }
         };
@@ -782,12 +787,21 @@ public class MqttTest
         {
             mockMqtt = instantiateMqtt(true, mockedIotHubListener);
             Deencapsulation.setField(mockMqtt, "mqttAsyncClient", mockMqttAsyncClient);
+            Deencapsulation.setField(mockMqtt, "log", mockLogger);
             mockMqtt.connectionLost(t);
         }
         catch (Exception e)
         {
             fail("Completed throwing exception - " + e.getCause() + e.getMessage());
         }
+
+        new Verifications()
+        {
+            {
+                mockLogger.info("Mqtt connection lost");
+                times = 1;
+            }
+        };
     }
 
     // Tests_SRS_Mqtt_34_021: [If the call peekMessage returns null then this method shall do nothing and return null]

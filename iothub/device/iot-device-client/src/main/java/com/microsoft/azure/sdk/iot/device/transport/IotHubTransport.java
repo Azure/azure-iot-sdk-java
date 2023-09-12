@@ -436,6 +436,12 @@ public class IotHubTransport implements IotHubListener
         }
     }
 
+    @Override
+    public IotHubConnectionStatus getConnectionStatus()
+    {
+        return this.connectionStatus;
+    }
+
     public void setMultiplexingRetryPolicy(RetryPolicy retryPolicy)
     {
         this.multiplexingRetryPolicy = retryPolicy;
@@ -1641,9 +1647,13 @@ public class IotHubTransport implements IotHubListener
     {
         if (this.connectionStatus != newConnectionStatus)
         {
-            if (throwable == null)
+            if (throwable == null || newConnectionStatus == IotHubConnectionStatus.CONNECTED)
             {
                 log.debug("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
+            } 
+            else if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED_RETRYING && reason == IotHubConnectionStatusChangeReason.EXPIRED_SAS_TOKEN)
+            {
+                log.info("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
             }
             else
             {
