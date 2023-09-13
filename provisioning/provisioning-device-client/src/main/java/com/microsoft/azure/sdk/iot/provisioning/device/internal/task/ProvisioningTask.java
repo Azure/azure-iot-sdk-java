@@ -343,7 +343,7 @@ public class ProvisioningTask implements Callable<Object>
             this.executeStateMachineForStatus(registrationOperationStatusParser);
             this.close();
         }
-        catch (ExecutionException | TimeoutException | ProvisioningDeviceClientException | SecurityProviderException e)
+        catch (ExecutionException | TimeoutException | ProvisioningDeviceClientException | SecurityProviderException | InterruptedException e)
         {
             //SRS_ProvisioningTask_25_006: [ This method shall invoke the status callback, if any of the task fail or throw any exception. ]
             this.dpsStatus = PROVISIONING_DEVICE_STATUS_ERROR;
