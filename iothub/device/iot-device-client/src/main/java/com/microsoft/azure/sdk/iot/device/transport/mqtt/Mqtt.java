@@ -329,25 +329,22 @@ public abstract class Mqtt implements MqttCallback
     {
         this.disconnect();
 
-        if (this.listener != null)
+        TransportException transportException;
+        if (throwable instanceof MqttException)
         {
-            TransportException transportException;
-            if (throwable instanceof MqttException)
-            {
-                transportException = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
-                log.trace("Mqtt connection loss interpreted into transport exception", throwable);
-            }
-            else
-            {
-                transportException = new TransportException(throwable);
-            }
-
-            // Logging this at a debug level instead of warning or error because the IoThubTransport
-            // level will log it to warning or error if applicable.
-            log.debug("Mqtt connection lost", transportException);
-
-            this.listener.onConnectionLost(transportException, this.connectionId);
+            transportException = PahoExceptionTranslator.convertToMqttException((MqttException) throwable, "Mqtt connection lost");
+            log.trace("Mqtt connection loss interpreted into transport exception", throwable);
         }
+        else
+        {
+            transportException = new TransportException(throwable);
+        }
+
+        // Logging this at a debug level instead of warning or error because the IoThubTransport
+        // level will log it to warning or error if applicable.
+        log.debug("Mqtt connection lost", transportException);
+
+        this.listener.onConnectionLost(transportException, this.connectionId);
     }
 
     /**
