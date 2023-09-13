@@ -1644,7 +1644,7 @@ public class IotHubTransport implements IotHubListener
         {
             if (throwable == null)
             {
-                log.debug("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
+                log.info("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
             }
             else if (this.getDefaultConfig() != null
                     && !this.getDefaultConfig().isLoggingRoutineDisconnectsAsErrors()
@@ -1655,7 +1655,7 @@ public class IotHubTransport implements IotHubListener
                 // This is a special case where the user has opted out of treating the routine
                 // MQTT/MQTT_WS SAS token disconnects as an error for logging purposes. As such,
                 // log at the debug level instead of warn or error level.
-                log.debug("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
+                log.info("Updating transport status to new status {} with reason {}", newConnectionStatus, reason);
             }
             else
             {
