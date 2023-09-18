@@ -167,10 +167,29 @@ public final class ClientOptions
     @Builder.Default
     private final boolean useIdentifiableThreadNames = true;
 
+    /**
+     * This option allows for routine disconnect events (such as expired SAS token disconnects
+     * when connecting over MQTT or MQTT_WS) to be logged at debug levels as opposed to error or
+     * warn levels. By default, these routine disconnects are logged at error or warn levels.
+     *
+     * Note that there is a degree of speculation involved when this client labels a disconnect
+     * as a routine disconnect. Generally, if the client is disconnected when the previous SAS
+     * token was expired, it will assume it was a routine disconnect. However, there may be
+     * legitimate disconnects due to network errors that could be mislabeled and not logged
+     * at a warning or error level if they occur around the time that a routine error is expected.
+     */
+    @Builder.Default
+    private final boolean logRoutineDisconnectsAsErrors = true;
 
     public boolean isUsingIdentifiableThreadNames()
     {
         // Using a manually written method here to override the name that Lombok would have given it
         return this.useIdentifiableThreadNames;
+    }
+
+    public boolean isLoggingRoutineDisconnectsAsErrors()
+    {
+        // Using a manually written method here to override the name that Lombok would have given it
+        return this.logRoutineDisconnectsAsErrors;
     }
 }
