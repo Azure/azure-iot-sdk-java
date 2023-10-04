@@ -69,6 +69,7 @@ final class AmqpsCbsSenderLinkHandler extends AmqpsSenderLinkHandler
         UUID correlationId = UUID.randomUUID();
         MessageImpl outgoingMessage = createCBSAuthenticationMessage(clientConfiguration, correlationId);
 
+        System.out.println("Sending CBS token");
         AmqpsSendResult sendResult = this.sendMessageAndGetDeliveryTag(outgoingMessage);
 
         //This message will be ignored when this send is acknowledged, so just provide an empty message for the map

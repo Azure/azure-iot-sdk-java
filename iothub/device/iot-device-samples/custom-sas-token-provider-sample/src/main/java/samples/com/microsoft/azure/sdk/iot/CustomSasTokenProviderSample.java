@@ -19,7 +19,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Scanner;
 
 /**
  * This sample demonstrates how to configure your device client to use a custom SAS token provider instead of
@@ -239,71 +239,16 @@ public class CustomSasTokenProviderSample
      */
     public static void main(String[] args) throws IOException, IotHubClientException, InterruptedException
     {
-        System.out.println("Starting...");
-        System.out.println("Beginning setup.");
+        String hostName = "";
+        String deviceId = "";
+        String deviceKey = "";
 
-        if (args.length != 4)
-        {
-            System.out.format(
-                    "Expected 4 arguments but received: %d.\n"
-                            + "The program should be called with the following args: \n"
-                            + "1. Host Name of your IoT Hub, for instance my-iot-hub.azure-devices.net \n"
-                            + "2. Id of your device\n"
-                            + "3. The device key of your device\n"
-                            + "4. (https | amqps | amqps_ws | mqtt | mqtt_ws)\n",
-                    args.length);
-            return;
-        }
-
-        String hostName = args[0];
-        String deviceId = args[1];
-        String deviceKey = args[2];
-
-        IotHubClientProtocol protocol;
-        String protocolStr = args[3];
-        if (protocolStr.equals("https"))
-        {
-            protocol = IotHubClientProtocol.HTTPS;
-        }
-        else if (protocolStr.equals("amqps"))
-        {
-            protocol = IotHubClientProtocol.AMQPS;
-        }
-        else if (protocolStr.equals("mqtt"))
-        {
-            protocol = IotHubClientProtocol.MQTT;
-        }
-        else if (protocolStr.equals("amqps_ws"))
-        {
-            protocol = IotHubClientProtocol.AMQPS_WS;
-        }
-        else if (protocolStr.equals("mqtt_ws"))
-        {
-            protocol = IotHubClientProtocol.MQTT_WS;
-        }
-        else
-        {
-            System.out.format(
-                    "Expected argument 4 to be one of 'mqtt', 'https', 'amqps' or 'amqps_ws' but received %s\n"
-                            + "The program should be called with the following args: \n"
-                            + "1. Host Name of your IoT Hub, for instance my-iot-hub.azure-devices.net \n"
-                            + "2. Id of your device\n"
-                            + "3. The device key of your device\n"
-                            + "4. (https | amqps | amqps_ws | mqtt | mqtt_ws)\n",
-                    protocolStr);
-            return;
-        }
-
-        System.out.println("Successfully read input parameters.");
-        System.out.format("Using communication protocol %s.\n", protocol.name());
-
-        System.out.println("Constructing SAS token provider");
-        int tokenTimeToLiveSeconds = 60 * 60; // 1 hour
-        int tokenRenewalBufferSeconds = 60; // token will recommend renewal after it reaches 1 minute before it expires
+        int tokenTimeToLiveSeconds = 1; // 1 second
+        int tokenRenewalBufferSeconds = -1;
         SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(hostName, deviceId, deviceKey, tokenTimeToLiveSeconds, tokenRenewalBufferSeconds);
 
         System.out.println("Constructing Device Client that will use the SAS token provider");
-        DeviceClient client = new DeviceClient(hostName, deviceId, sasTokenProvider, protocol);
+        DeviceClient client = new DeviceClient(hostName, deviceId, sasTokenProvider, IotHubClientProtocol.AMQPS);
 
         System.out.println("Successfully created an IoT Hub client.");
 
@@ -311,28 +256,8 @@ public class CustomSasTokenProviderSample
 
         client.open(true);
 
-        System.out.println("Opened connection to IoT Hub.");
-        System.out.println("Sending telemetry...");
-
-        double temperature = 20 + Math.random() * 10;
-        double humidity = 30 + Math.random() * 20;
-        String msgStr = "{\"temperature\":"+ temperature +",\"humidity\":"+ humidity +"}";
-
-        try
-        {
-            Message msg = new Message(msgStr);
-            msg.setContentType("application/json");
-            msg.setProperty("temperatureAlert", temperature > 28 ? "true" : "false");
-            msg.setMessageId(java.util.UUID.randomUUID().toString());
-            System.out.println(msgStr);
-
-            client.sendEvent(msg, D2C_MESSAGE_TIMEOUT_MILLISECONDS);
-            System.out.println("Successfully sent the message");
-        }
-        catch (IotHubClientException e)
-        {
-            System.out.println("Failed to send the message. Status code: " + e.getStatusCode());
-        }
+        System.out.println("Press any key to exit");
+        new Scanner(System.in).nextLine();
 
         // close the connection
         System.out.println("Closing the client...");
