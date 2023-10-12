@@ -904,6 +904,33 @@ public class MqttTwinTest
         }
     }
 
+    @Test
+    public void receiveSetQosForDesiredProp() throws TransportException
+    {
+        final byte[] actualPayload = "NotificationResponseDataContainingDesiredPropertiesDocument".getBytes(StandardCharsets.UTF_8);
+        final String expectedTopic = "$iothub/twin/PATCH/properties/desired/";
+        IotHubTransportMessage receivedMessage = null;
+        int expectedQualityOfService = 2;
+        try
+        {
+            //arrange
+            Queue<Pair<String, MqttMessage>> testreceivedMessages = new ConcurrentLinkedQueue<>();
+            MqttMessage mqttMessage = new MqttMessage(actualPayload);
+            mqttMessage.setQos(expectedQualityOfService);
+            testreceivedMessages.add(new MutablePair<>(expectedTopic, mqttMessage));
+            MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<>(), testreceivedMessages);
+
+            //act
+            receivedMessage = testTwin.receive();
+        }
+        finally
+        {
+            //assert
+            assertNotNull(receivedMessage);
+            assertEquals(expectedQualityOfService, receivedMessage.getQualityOfService());
+        }
+    }
+
     /*
     **Tests_SRS_MQTTDEVICETWIN_25_042: [If the topic is of type patch for desired properties then this method shall parse further to look for version which if found is set by calling setVersion]
      */
