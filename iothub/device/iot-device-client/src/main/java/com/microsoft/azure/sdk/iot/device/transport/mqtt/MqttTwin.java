@@ -342,6 +342,7 @@ class MqttTwin extends Mqtt
                                 {
                                     message = new IotHubTransportMessage(data, MessageType.DEVICE_TWIN);
                                     message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
+                                    message.setQualityOfService(mqttMessage.getQos());
                                 }
 
                                 // Case for $iothub/twin/PATCH/properties/desired/?$version={new version}
