@@ -224,9 +224,31 @@ public class ModuleClient extends InternalClient
                 sslContext = new IotHubSSLContext().getSSLContext();
             }
 
-            if (clientOptions == null || clientOptions.getSslContext() == null)
+            if (clientOptions != null && clientOptions.getSslContext() == null)
             {
-                // only override the SSLContext if the user didn't set it
+                // Clone the existing client options, but with the new SSLContext
+                clientOptions = ClientOptions.builder()
+                        .sasTokenExpiryTime(clientOptions.getSasTokenExpiryTime())
+                        .logRoutineDisconnectsAsErrors(clientOptions.isLoggingRoutineDisconnectsAsErrors())
+                        .receiveInterval(clientOptions.getReceiveInterval())
+                        .amqpAuthenticationSessionTimeout(clientOptions.getAmqpAuthenticationSessionTimeout())
+                        .amqpDeviceSessionTimeout(clientOptions.getAmqpDeviceSessionTimeout())
+                        .httpsConnectTimeout(clientOptions.getHttpsConnectTimeout())
+                        .httpsReadTimeout(clientOptions.getHttpsReadTimeout())
+                        .modelId(clientOptions.getModelId())
+                        .proxySettings(clientOptions.getProxySettings())
+                        .keepAliveInterval(clientOptions.getKeepAliveInterval())
+                        .threadNamePrefix(clientOptions.getThreadNamePrefix())
+                        .threadNameSuffix(clientOptions.getThreadNameSuffix())
+                        .useIdentifiableThreadNames(clientOptions.isUsingIdentifiableThreadNames())
+                        .sendInterval(clientOptions.getSendInterval())
+                        .messagesSentPerSendInterval(clientOptions.getMessagesSentPerSendInterval())
+                        .sslContext(sslContext)
+                        .build();
+            }
+            else if (clientOptions == null)
+            {
+                // only override the client options completely if the user didn't provide any
                 clientOptions = ClientOptions.builder().sslContext(sslContext).build();
             }
             else
