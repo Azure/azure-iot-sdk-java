@@ -108,7 +108,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
-                <version>4.1.86.Final</version> <!--e2e tests and samples only-->
+                <version>4.1.94.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
@@ -118,17 +118,17 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec</artifactId>
-                <version>4.1.86.Final</version> <!--e2e tests and samples only-->
+                <version>4.1.94.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http</artifactId>
-                <version>4.1.86.Final</version> <!--e2e tests and samples only-->
+                <version>4.1.94.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http2</artifactId>
-                <version>4.1.86.Final</version> <!--e2e tests and samples only-->
+                <version>4.1.94.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.projectreactor.netty</groupId>
@@ -143,12 +143,12 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcmail-jdk15on</artifactId>
-                <version>1.70</version>  <!--e2e tests and samples only-->
+                <version>1.74</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.70</version>  <!--e2e tests and samples only-->
+                <version>1.74</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -168,7 +168,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>32.0.0-jre</version> <!-- Nested dependency from ms client runtime. Overriding the version to use newer version-->
+                <version>32.0.0</version> <!-- Nested dependency from ms client runtime. Overriding the version to use newer version-->
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.woodstox</groupId>
