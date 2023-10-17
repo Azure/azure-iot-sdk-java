@@ -227,23 +227,7 @@ public class ModuleClient extends InternalClient
             if (clientOptions != null && clientOptions.getSslContext() == null)
             {
                 // Clone the existing client options, but with the new SSLContext
-                clientOptions = ClientOptions.builder()
-                        .sasTokenExpiryTime(clientOptions.getSasTokenExpiryTime())
-                        .logRoutineDisconnectsAsErrors(clientOptions.isLoggingRoutineDisconnectsAsErrors())
-                        .receiveInterval(clientOptions.getReceiveInterval())
-                        .amqpAuthenticationSessionTimeout(clientOptions.getAmqpAuthenticationSessionTimeout())
-                        .amqpDeviceSessionTimeout(clientOptions.getAmqpDeviceSessionTimeout())
-                        .httpsConnectTimeout(clientOptions.getHttpsConnectTimeout())
-                        .httpsReadTimeout(clientOptions.getHttpsReadTimeout())
-                        .modelId(clientOptions.getModelId())
-                        .proxySettings(clientOptions.getProxySettings())
-                        .keepAliveInterval(clientOptions.getKeepAliveInterval())
-                        .threadNamePrefix(clientOptions.getThreadNamePrefix())
-                        .threadNameSuffix(clientOptions.getThreadNameSuffix())
-                        .useIdentifiableThreadNames(clientOptions.isUsingIdentifiableThreadNames())
-                        .sendInterval(clientOptions.getSendInterval())
-                        .messagesSentPerSendInterval(clientOptions.getMessagesSentPerSendInterval())
-                        .sslContext(sslContext)
+                clientOptions = clientOptions.toBuilder().sslContext(sslContext)
                         .build();
             }
             else if (clientOptions == null)
