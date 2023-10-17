@@ -24,9 +24,9 @@ nohup $ANDROID_HOME/emulator/emulator -avd $avdName -gpu auto -no-snapshot > /de
 
 echo ''
 echo 'Waiting for emulator to boot up...'
-$ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done; input keyevent 82'
-echo ''
-echo "Emulator started"
+nohup $ANDROID_HOME/emulator/emulator -avd android_emulator -no-snapshot -no-audio -no-boot-anim -accel auto -gpu auto -qemu -lcd-density 420 > /dev/null 2>&1 &
+    $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done'
+    $ANDROID_HOME/platform-tools/adb devices echo "Emulator started"
 
 $ANDROID_HOME/platform-tools/adb devices
 
