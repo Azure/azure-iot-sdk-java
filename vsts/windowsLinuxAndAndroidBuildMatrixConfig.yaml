@@ -413,14 +413,6 @@ jobs:
         env:
           TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
 
-      - task: PublishTestResults@2
-        displayName: 'Publish Test Results'
-        inputs:
-          testResultsFiles: '**/outputs/androidTest-results/**/TEST*.xml'
-          failTaskOnFailedTests: true
-          testRunTitle: 'Test results'
-        condition: succeededOrFailed()
-
       - task : ComponentGovernanceComponentDetection@0
         displayName : Component Governance Detection
         inputs :
