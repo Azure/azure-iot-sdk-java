@@ -6,7 +6,6 @@ package samples.com.microsoft.azure.sdk.iot;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -18,6 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 
@@ -71,13 +71,13 @@ public class CustomSasTokenProviderSample
                 String scope = buildScope(hostName, deviceId);
 
                 byte[] signature = String.format(RAW_SIGNATURE_FORMAT, scope, this.expiryTimeSeconds).getBytes(SIGNATURE_CHARSET);
-                byte[] decodedDeviceKey = Base64.decodeBase64(deviceKey);
+                byte[] decodedDeviceKey = Base64.getDecoder().decode(deviceKey);
 
                 // HMAC encrypt the signature
                 byte[] hmacEncryptedSignature = encryptSignatureHmacSha256(signature, decodedDeviceKey);
 
                 // Base64 encode the HMAC encrypted byte[]
-                byte[] base64EncodedHmacEncryptedSignature = Base64.encodeBase64(hmacEncryptedSignature);
+                byte[] base64EncodedHmacEncryptedSignature = Base64.getEncoder().encode(hmacEncryptedSignature);
 
                 // Convert byte[] of base64 encoded and HMAC encrypted bits to a UTF-8 String
                 String utf8Sig = new String(base64EncodedHmacEncryptedSignature, SIGNATURE_CHARSET);

@@ -28,9 +28,9 @@ import javax.net.ssl.SSLContext;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 
-import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertEquals;
 
 /*
@@ -251,7 +251,7 @@ public class ContractAPIHttpTest
                 TpmRegistrationResultParser.createFromJson(new String(mockedHttpResponse.getBody()));
                 result = mockedTpmRegistrationResultParser;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
-                result = encodeBase64String("some auth key".getBytes(StandardCharsets.UTF_8));
+                result = Base64.getEncoder().encode("some auth key".getBytes(StandardCharsets.UTF_8));
                 new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();

@@ -13,8 +13,6 @@ import mockit.Expectations;
 import mockit.Mocked;
 import mockit.NonStrictExpectations;
 import mockit.Verifications;
-import org.apache.commons.codec.EncoderException;
-import org.apache.commons.codec.binary.Base32;
 import org.junit.Test;
 
 import javax.net.ssl.KeyManager;
@@ -47,9 +45,6 @@ public class SecurityProviderTpmTest
 
     @Mocked
     MessageDigest mockedMessageDigest;
-
-    @Mocked
-    Base32 mockedBase32;
 
     @Mocked
     SSLContext mockedSslContext;
@@ -103,7 +98,7 @@ public class SecurityProviderTpmTest
     //SRS_SecurityClientTpm_25_002: [ This method shall hash the EnrollmentKey using SHA-256. ]
     //SRS_SecurityClientTpm_25_003: [ This method shall convert the resultant hash to Base32 to convert all the data to be case agnostic and remove "=" from the string. ]
     @Test
-    public void getRegistrationIdSucceeds() throws SecurityProviderException, EncoderException
+    public void getRegistrationIdSucceeds() throws SecurityProviderException
     {
         //arrange
         SecurityProviderTpm securityClientTpm = new SecurityProviderTPMTestImpl(ENROLLMENT_KEY);
@@ -117,8 +112,6 @@ public class SecurityProviderTpmTest
         {
             {
                 mockedMessageDigest.digest(ENROLLMENT_KEY);
-                times = 1;
-                mockedBase32.encode((byte[]) any);
                 times = 1;
             }
         };

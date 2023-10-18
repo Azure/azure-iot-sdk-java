@@ -23,10 +23,9 @@ import java.security.cert.X509Certificate;
 import java.security.spec.AlgorithmParameterSpec;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
+import java.util.Base64;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-
-import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 
 /**
  * Utility class for generating self signed certificates, and computing their thumbprints
@@ -195,12 +194,12 @@ public class X509CertificateGenerator
 
     private static String getPrivateKeyPem(PrivateKey privateKey)
     {
-        return PRIVATE_KEY_HEADER + encodeBase64String(privateKey.getEncoded()) + PRIVATE_KEY_FOOTER;
+        return PRIVATE_KEY_HEADER + Base64.getEncoder().encodeToString(privateKey.getEncoded()) + PRIVATE_KEY_FOOTER;
     }
 
     private static String getPublicCertificatePem(X509Certificate certificate) throws CertificateEncodingException
     {
-        return PUBLIC_CERT_HEADER + encodeBase64String(certificate.getEncoded()) + PUBLIC_CERT_FOOTER;
+        return PUBLIC_CERT_HEADER + Base64.getEncoder().encodeToString(certificate.getEncoded()) + PUBLIC_CERT_FOOTER;
     }
 
     /**

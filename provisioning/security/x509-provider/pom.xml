@@ -49,12 +49,6 @@
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
             <artifactId>${security-provider-artifact-id}</artifactId>
             <version>${security-provider-version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-codec</groupId>
-                    <artifactId>commons-codec</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <!--Test dependencies-->
         <dependency>

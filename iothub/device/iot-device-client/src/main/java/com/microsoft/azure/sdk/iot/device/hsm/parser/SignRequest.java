@@ -12,8 +12,7 @@ import com.google.gson.annotations.SerializedName;
 import javax.crypto.Mac;
 
 import java.nio.charset.StandardCharsets;
-
-import static org.apache.commons.codec.binary.Base64.encodeBase64String;
+import java.util.Base64;
 
 // This suppression below is addressing warnings of fields used for serialization.
 @SuppressWarnings({"FieldCanBeLocal", "unused"}) // A number of private members are unused but may be filled in or used by serialization
@@ -48,7 +47,7 @@ public class SignRequest
 
     public void setData(byte[] data)
     {
-        this.data = encodeBase64String(data);
+        this.data = Base64.getEncoder().encodeToString(data);
     }
 
     public void setAlgo(Mac algo)

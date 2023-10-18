@@ -13,8 +13,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
+import java.util.Base64;
 
 public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasTokenAuthenticationProvider
 {
@@ -103,7 +102,7 @@ public class IotHubSasTokenHardwareAuthenticationProvider extends IotHubSasToken
                 throw new IOException("Security provider could not sign data successfully");
             }
 
-            byte[] base64Signature = encodeBase64(token);
+            byte[] base64Signature = Base64.getEncoder().encode(token);
             String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature, StandardCharsets.UTF_8), ENCODING_FORMAT_NAME);
             return String.format(SASTOKEN_FORMAT, encodedTokenScope, base64UrlEncodedSignature, expiryTimeUTC);
         }

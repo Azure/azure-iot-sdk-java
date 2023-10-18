@@ -10,12 +10,8 @@ import org.junit.Test;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertFalse;
@@ -65,7 +61,7 @@ public class HttpsBatchMessageTest
         String testBatchBody =
                 new String(batchMsg.getBody(), UTF8).replaceAll("\\s", "");
 
-        final String expectedMsgBody = encodeBase64String(msgBody.getBytes(StandardCharsets.UTF_8));
+        final String expectedMsgBody = Base64.getEncoder().encodeToString(msgBody.getBytes(StandardCharsets.UTF_8));
         assertThat(testBatchBody, containsString(expectedMsgBody));
     }
 

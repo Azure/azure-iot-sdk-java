@@ -12,10 +12,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Date;
-
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 public class SasTokenGenerator
 {
@@ -68,9 +66,9 @@ public class SasTokenGenerator
         try
         {
             byte[] textToSign = (resourceUri + "\n" + expiryTime).getBytes(StandardCharsets.UTF_8);
-            byte[] decodedDeviceKey = decodeBase64(devicePrimaryKey.getBytes(StandardCharsets.UTF_8));
+            byte[] decodedDeviceKey = Base64.getDecoder().decode(devicePrimaryKey.getBytes(StandardCharsets.UTF_8));
             byte[] signature = encryptHmacSha256(textToSign, decodedDeviceKey);
-            byte[] encryptedSignature = encodeBase64(signature);
+            byte[] encryptedSignature = Base64.getEncoder().encode(signature);
             String encryptedSignatureUtf8 = new String(encryptedSignature, StandardCharsets.UTF_8);
             return URLEncoder.encode(encryptedSignatureUtf8, ENCODING_CHARSET);
         }

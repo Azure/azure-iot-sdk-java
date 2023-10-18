@@ -13,9 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
+import java.util.Base64;
 
 /** Builds the authorization signature as a composition of functions. */
 @Slf4j
@@ -53,7 +51,7 @@ final class SignatureHelper
      */
     public static byte[] decodeDeviceKeyBase64(String deviceKey)
     {
-        return decodeBase64(deviceKey.getBytes(StandardCharsets.UTF_8));
+        return Base64.getDecoder().decode(deviceKey.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -98,7 +96,7 @@ final class SignatureHelper
      */
     public static byte[] encodeSignatureBase64(byte[] sig)
     {
-        return encodeBase64(sig);
+        return Base64.getEncoder().encode(sig);
     }
 
     /**

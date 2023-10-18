@@ -26,10 +26,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
-import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -1473,7 +1473,7 @@ public class ProvisioningTaskTest
                 mockedDeviceRegistrationResultParser.getTpm();
                 result = mockedTpm;
                 mockedTpm.getAuthenticationKey();
-                result = encodeBase64String("some auth key".getBytes(StandardCharsets.UTF_8));
+                result = Base64.getEncoder().encode("some auth key".getBytes(StandardCharsets.UTF_8));
                 mockedProvisioningDeviceClientConfig.getSecurityProvider();
                 result = mockedSecurityProviderTpm;
             }

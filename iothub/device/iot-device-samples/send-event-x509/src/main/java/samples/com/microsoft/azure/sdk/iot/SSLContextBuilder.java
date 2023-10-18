@@ -5,8 +5,6 @@
 
 package samples.com.microsoft.azure.sdk.iot;
 
-import org.apache.commons.codec.binary.Base64;
-
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import java.io.ByteArrayInputStream;
@@ -20,6 +18,7 @@ import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 
 /**
@@ -141,7 +140,7 @@ public class SSLContextBuilder
 
         privateKeyPEM = privateKeyPEM.replace("-----BEGIN PRIVATE KEY-----\n", "");
         privateKeyPEM = privateKeyPEM.replace("-----END PRIVATE KEY-----", "");
-        byte[] encoded = Base64.decodeBase64(privateKeyPEM.getBytes(StandardCharsets.UTF_8));
+        byte[] encoded = Base64.getDecoder().decode(privateKeyPEM.getBytes(StandardCharsets.UTF_8));
         KeyFactory kf = KeyFactory.getInstance(PRIVATE_KEY_ALGORITHM);
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
         return (RSAPrivateKey) kf.generatePrivate(keySpec);

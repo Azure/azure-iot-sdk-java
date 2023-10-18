@@ -28,11 +28,10 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.Callable;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ContractState.DPS_REGISTRATION_RECEIVED;
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 @Slf4j
 class RegisterTask implements Callable<RegistrationOperationStatusParser>
@@ -171,14 +170,14 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
         else if (securityProvider instanceof SecurityProviderSymmetricKey)
         {
             SecurityProviderSymmetricKey securityProviderSymmetricKey = (SecurityProviderSymmetricKey)securityProvider;
-            token = securityProviderSymmetricKey.HMACSignData(value.getBytes(StandardCharsets.UTF_8.displayName()), decodeBase64(securityProviderSymmetricKey.getSymmetricKey()));
+            token = securityProviderSymmetricKey.HMACSignData(value.getBytes(StandardCharsets.UTF_8.displayName()), Base64.getDecoder().decode(securityProviderSymmetricKey.getSymmetricKey()));
         }
 
         if (token == null || token.length == 0)
         {
             throw new ProvisioningDeviceSecurityException("Security client could not sign data successfully");
         }
-        byte[] base64Signature = encodeBase64(token);
+        byte[] base64Signature = Base64.getEncoder().encode(token);
         String base64UrlEncodedSignature = URLEncoder.encode(new String(base64Signature, StandardCharsets.UTF_8), StandardCharsets.UTF_8.displayName());
 
         //SRS_RegisterTask_25_015: [ If the provided security client is for Key then, this method shall build the SasToken of the format SharedAccessSignature sr=<tokenScope>&sig=<signature>&se=<expiryTime>&skn= and save it to authorization]

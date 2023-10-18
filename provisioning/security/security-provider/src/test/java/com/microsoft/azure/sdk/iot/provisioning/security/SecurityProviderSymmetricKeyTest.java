@@ -10,7 +10,6 @@ package com.microsoft.azure.sdk.iot.provisioning.security;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import mockit.*;
-import org.apache.commons.codec.binary.Base32;
 import org.junit.Test;
 
 import javax.crypto.Mac;
@@ -51,9 +50,6 @@ public class SecurityProviderSymmetricKeyTest
 
     @Mocked
     MessageDigest mockedMessageDigest;
-
-    @Mocked
-    Base32 mockedBase32;
 
     @Mocked
     SSLContext mockedSslContext;

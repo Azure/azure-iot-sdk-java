@@ -1,6 +1,5 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl;
 
-import com.google.common.io.BaseEncoding;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -961,7 +960,7 @@ public class ClientToProxyConnection extends ProxyConnection<HttpRequest>
         String fullValue = values.iterator().next();
         String value = StringUtils.substringAfter(fullValue, "Basic ").trim();
 
-        byte[] decodedValue = BaseEncoding.base64().decode(value);
+        byte[] decodedValue = Base64.getDecoder().decode(value);
 
         String decodedString = new String(decodedValue, Charset.forName("UTF-8"));
         

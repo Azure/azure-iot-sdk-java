@@ -23,10 +23,11 @@ import tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.Provisio
 
 import javax.net.ssl.SSLHandshakeException;
 
+import java.util.Base64;
+
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.fail;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
@@ -88,7 +89,7 @@ public class ProvisioningTests extends ProvisioningCommon
         assumeTrue(testInstance.protocol == HTTPS);
 
         SecurityProviderTpm securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
-        Attestation attestation = new TpmAttestation(new String(encodeBase64(securityProvider.getEndorsementKey())));
+        Attestation attestation = new TpmAttestation(new String(Base64.getEncoder().encode(securityProvider.getEndorsementKey())));
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
         testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
 

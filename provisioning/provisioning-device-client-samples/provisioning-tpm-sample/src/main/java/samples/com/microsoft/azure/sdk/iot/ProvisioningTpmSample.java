@@ -14,9 +14,8 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Scanner;
-
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 /**
  * TPM sample
@@ -48,7 +47,7 @@ public class ProvisioningTpmSample
         try
         {
             securityClientTPMEmulator = new SecurityProviderTPMEmulator();
-            System.out.println("Endorsement Key : \n" + new String(encodeBase64(securityClientTPMEmulator.getEndorsementKey()), StandardCharsets.UTF_8));
+            System.out.println("Endorsement Key : \n" + new String(Base64.getEncoder().encode(securityClientTPMEmulator.getEndorsementKey()), StandardCharsets.UTF_8));
             System.out.println("Registration Id : \n" + securityClientTPMEmulator.getRegistrationId());
             System.out.println("Please visit Azure Portal (https://portal.azure.com/) and create a TPM Individual Enrollment with the information above i.e EndorsementKey and RegistrationId \n" +
                                        "Press enter when you are ready to run registration after enrolling with the service");

@@ -23,10 +23,10 @@ import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProv
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.concurrent.*;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.*;
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 @Slf4j
 public class ProvisioningTask implements Callable<Object>
@@ -235,7 +235,7 @@ public class ProvisioningTask implements Callable<Object>
                         }
 
                         String authenticationKey = registrationStatus.getTpm().getAuthenticationKey();
-                        ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(decodeBase64(authenticationKey.getBytes(StandardCharsets.UTF_8)));
+                        ((SecurityProviderTpm) this.securityProvider).activateIdentityKey(Base64.getDecoder().decode(authenticationKey.getBytes(StandardCharsets.UTF_8)));
                     }
                     log.info("Device provisioning service assigned the device successfully");
                     this.invokeRegistrationCallback(registrationInfo, null);

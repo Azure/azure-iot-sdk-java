@@ -16,9 +16,8 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
-import static org.apache.commons.codec.binary.Base64.decodeBase64;
-import static org.apache.commons.codec.binary.Base64.encodeBase64String;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -52,7 +51,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("key".getBytes(StandardCharsets.UTF_8));
+        String sharedAccessKey = Base64.getEncoder().encodeToString("key".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
@@ -67,7 +66,7 @@ public class ProvisioningServiceSasTokenTest
             {
                 URLEncoder.encode(hostName.toLowerCase(),String.valueOf(StandardCharsets.UTF_8));
                 System.currentTimeMillis();
-                decodeBase64(sharedAccessKey.getBytes(charset));
+                Base64.getDecoder().decode(sharedAccessKey.getBytes(charset));
 
                 // Semmle flags this as sensitive call, but it is a false positive since it is for test purposes
                 byte[] body = { 1 }; // lgtm
@@ -94,7 +93,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("key".getBytes(StandardCharsets.UTF_8));
+        String sharedAccessKey = Base64.getEncoder().encodeToString("key".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
         ProvisioningConnectionString provisioningConnectionString = ProvisioningConnectionStringBuilder.createConnectionString(connectionString);
 
@@ -117,7 +116,7 @@ public class ProvisioningServiceSasTokenTest
         String hostName = "HOSTNAME." + deviceProvisioningServiceName;
         String sharedAccessKeyName = "ACCESSKEYNAME";
         String policyName = "SharedAccessKey";
-        String sharedAccessKey = encodeBase64String("key".getBytes(StandardCharsets.UTF_8));
+        String sharedAccessKey = Base64.getEncoder().encodeToString("key".getBytes(StandardCharsets.UTF_8));
         String connectionString = "HostName=" + hostName + ";SharedAccessKeyName=" + sharedAccessKeyName + ";" + policyName + "=" + sharedAccessKey;
 
         // Act

@@ -41,7 +41,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static junit.framework.TestCase.fail;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.junit.Assert.*;
 
 @Slf4j
@@ -314,7 +313,7 @@ public class ProvisioningCommon extends IntegrationTest
             if (testInstance.attestationType == AttestationType.TPM)
             {
                 securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
-                Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
+                Attestation attestation = new TpmAttestation(new String(Base64.getEncoder().encode(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
                 createTestIndividualEnrollment(attestation);
             }
             else if (testInstance.attestationType == AttestationType.X509)

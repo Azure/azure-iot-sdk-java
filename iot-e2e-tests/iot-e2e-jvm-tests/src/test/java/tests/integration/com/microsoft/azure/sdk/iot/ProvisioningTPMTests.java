@@ -23,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.Base64;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -32,7 +33,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED;
 import static com.microsoft.azure.sdk.iot.provisioning.service.configs.AttestationMechanismType.TPM;
 import static junit.framework.TestCase.*;
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 
 @Slf4j
 public class ProvisioningTPMTests
@@ -56,7 +56,7 @@ public class ProvisioningTPMTests
         String registrationId = UUID.randomUUID().toString();
         String provisionedDeviceId = "Some-Provisioned-Device-" + TPM + "-" + UUID.randomUUID().toString();
         SecurityProvider securityProvider = new SecurityProviderTPMEmulator(registrationId);
-        Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
+        Attestation attestation = new TpmAttestation(new String(Base64.getEncoder().encode(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
 
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(registrationId, attestation);
         individualEnrollment.setDeviceId(provisionedDeviceId);

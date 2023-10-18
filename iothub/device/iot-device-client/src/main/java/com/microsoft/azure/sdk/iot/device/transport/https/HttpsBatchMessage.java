@@ -7,12 +7,10 @@ import com.microsoft.azure.sdk.iot.device.MessageProperty;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.commons.codec.binary.Base64.encodeBase64String;
-
 
 /**
  * Builds a batched IoT Hub request body as a JSON array. The batched message
@@ -138,7 +136,7 @@ final class HttpsBatchMessage implements HttpsMessage
     private static void addJsonToStringBuilder(HttpsSingleMessage msg, StringBuilder jsonStringBuilder)
     {
         jsonStringBuilder.append('{' + BODY + KEY_VALUE_SEPARATOR);
-        jsonStringBuilder.append('\"').append(encodeBase64String(msg.getBody())).append("\",");
+        jsonStringBuilder.append('\"').append(Base64.getEncoder().encode(msg.getBody())).append("\",");
         jsonStringBuilder.append(BASE_ENCODED_KEY + KEY_VALUE_SEPARATOR);
         jsonStringBuilder.append(true);
         MessageProperty[] properties = msg.getProperties();

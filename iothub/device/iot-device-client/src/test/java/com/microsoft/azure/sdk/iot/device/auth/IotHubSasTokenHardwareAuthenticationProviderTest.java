@@ -22,8 +22,8 @@ import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Base64;
 
-import static org.apache.commons.codec.binary.Base64.encodeBase64;
 import static org.junit.Assert.*;
 
 /**
@@ -114,7 +114,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
 
-                encodeBase64((byte[]) any);
+                Base64.getEncoder().encode((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -304,7 +304,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
 
-                encodeBase64((byte[]) any);
+                Base64.getEncoder().encode((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -446,7 +446,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
 
-                encodeBase64((byte[]) any);
+                Base64.getEncoder().encode((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
@@ -485,7 +485,7 @@ public class IotHubSasTokenHardwareAuthenticationProviderTest
                 mockSecurityProviderTpm.signWithIdentity((byte[]) any);
                 result = tokenBytes;
 
-                encodeBase64((byte[]) any);
+                Base64.getEncoder().encode((byte[]) any);
                 result = tokenBytes;
 
                 URLEncoder.encode(anyString, encodingName);
