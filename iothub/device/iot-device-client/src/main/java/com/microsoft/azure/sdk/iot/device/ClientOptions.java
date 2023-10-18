@@ -13,7 +13,7 @@ import static com.microsoft.azure.sdk.iot.device.ClientConfiguration.DEFAULT_KEE
 /**
  * Options that allow configuration of the device client instance during initialization.
  */
-@Builder
+@Builder(toBuilder = true)
 public final class ClientOptions
 {
     private static final int DEFAULT_HTTPS_CONNECT_TIMEOUT_MILLISECONDS = 0;
