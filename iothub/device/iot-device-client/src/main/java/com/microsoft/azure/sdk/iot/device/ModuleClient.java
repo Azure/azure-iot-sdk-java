@@ -224,9 +224,15 @@ public class ModuleClient extends InternalClient
                 sslContext = new IotHubSSLContext().getSSLContext();
             }
 
-            if (clientOptions == null || clientOptions.getSslContext() == null)
+            if (clientOptions != null && clientOptions.getSslContext() == null)
             {
-                // only override the SSLContext if the user didn't set it
+                // Clone the existing client options, but with the new SSLContext
+                clientOptions = clientOptions.toBuilder().sslContext(sslContext)
+                        .build();
+            }
+            else if (clientOptions == null)
+            {
+                // only override the client options completely if the user didn't provide any
                 clientOptions = ClientOptions.builder().sslContext(sslContext).build();
             }
             else
