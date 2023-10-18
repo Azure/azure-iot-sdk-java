@@ -143,12 +143,12 @@
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcmail-jdk15on</artifactId>
-                <version>1.74</version>  <!--e2e tests and samples only-->
+                <version>1.70</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk15on</artifactId>
-                <version>1.74</version>  <!--e2e tests and samples only-->
+                <version>1.70</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
