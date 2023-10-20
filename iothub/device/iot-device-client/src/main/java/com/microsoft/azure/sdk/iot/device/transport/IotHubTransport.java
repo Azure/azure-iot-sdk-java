@@ -410,7 +410,9 @@ public class IotHubTransport implements IotHubListener
     @Override
     public void onMultiplexedDeviceSessionLost(TransportException e, String connectionId, String deviceId, boolean shouldReconnect)
     {
-        if (connectionId.equals(this.iotHubTransportConnection.getConnectionId()))
+        if (connectionId.equals(this.iotHubTransportConnection.getConnectionId())
+            && multiplexedDeviceConnectionStates.containsKey(deviceId)
+            && multiplexedDeviceConnectionStates.get(deviceId).getConnectionStatus() == IotHubConnectionStatus.CONNECTED)
         {
             log.debug("The device session in the multiplexed connection to the IoT Hub has been lost for device {}", deviceId);
             if (shouldReconnect)
@@ -1388,6 +1390,7 @@ public class IotHubTransport implements IotHubListener
             {
                 this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException, deviceSessionToReconnect);
                 log.debug("Reconnection for device {} was abandoned due to the operation timeout", deviceSessionToReconnect);
+                return;
             }
 
             multiplexedDeviceState.incrementReconnectionAttemptNumber();
@@ -1406,6 +1409,7 @@ public class IotHubTransport implements IotHubListener
             {
                 this.updateStatus(IotHubConnectionStatus.DISCONNECTED, IotHubConnectionStatusChangeReason.RETRY_EXPIRED, transportException, deviceSessionToReconnect);
                 log.debug("Reconnection for device {} was abandoned due to the retry policy", deviceSessionToReconnect);
+                return;
             }
 
             log.trace("Attempting to reconnect device session: attempt {}", multiplexedDeviceState.getReconnectionAttemptNumber());
@@ -1422,6 +1426,7 @@ public class IotHubTransport implements IotHubListener
             {
                 this.updateStatus(IotHubConnectionStatus.DISCONNECTED, this.exceptionToStatusChangeReason(transportException), transportException, deviceSessionToReconnect);
                 log.error("Reconnection for device {} was abandoned due to encountering a non-retryable exception", deviceSessionToReconnect, transportException);
+                return;
             }
         }
     }
@@ -1766,6 +1771,55 @@ public class IotHubTransport implements IotHubListener
         else if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED)
         {
             correlationCallbackCleanupThread.interrupt();
+            finalizeMultiplexedDevicesMessages(deviceId);
+        }
+    }
+
+    // When a multiplexed device has its session closed (expected or otherwise) all outgoing and pending
+    // messages should be removed and callbacks should be executed for each message to notify the user
+    // that the message was cancelled.
+    private void finalizeMultiplexedDevicesMessages(String deviceId)
+    {
+        //Check waiting packets, remove any that have expired.
+        IotHubTransportPacket packet = this.waitingPacketsQueue.poll();
+        Queue<IotHubTransportPacket> packetsToAddBackIntoWaitingPacketsQueue = new LinkedBlockingQueue<>();
+        while (packet != null)
+        {
+            if (packet.getMessage().getConnectionDeviceId().equals(deviceId))
+            {
+                packet.setStatus(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
+                this.addToCallbackQueue(packet);
+            }
+            else
+            {
+                //message didn't belong to this device, requeue it
+                packetsToAddBackIntoWaitingPacketsQueue.add(packet);
+            }
+
+            packet = this.waitingPacketsQueue.poll();
+        }
+
+        //Requeue all the messages that belong to other devices.
+        this.waitingPacketsQueue.addAll(packetsToAddBackIntoWaitingPacketsQueue);
+
+        //Check in progress messages
+        synchronized (this.inProgressMessagesLock)
+        {
+            List<String> messageIdsThatBelongToDisconnectedDevice = new ArrayList<>();
+            for (String messageId : this.inProgressPackets.keySet())
+            {
+                if (this.inProgressPackets.get(messageId).getMessage().getConnectionDeviceId().equals(deviceId))
+                {
+                    messageIdsThatBelongToDisconnectedDevice.add(messageId);
+                }
+            }
+
+            for (String messageId : messageIdsThatBelongToDisconnectedDevice)
+            {
+                IotHubTransportPacket expiredPacket = this.inProgressPackets.remove(messageId);
+                expiredPacket.setStatus(IotHubStatusCode.MESSAGE_CANCELLED_ONCLOSE);
+                this.addToCallbackQueue(expiredPacket);
+            }
         }
     }
 
