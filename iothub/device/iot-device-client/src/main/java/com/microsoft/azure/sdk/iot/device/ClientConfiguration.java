@@ -46,6 +46,8 @@ public final class ClientConfiguration
 
     private static final long DEFAULT_OPERATION_TIMEOUT = 4 * 60 * 1000; //4 minutes
 
+    private static final long MAX_SAS_TOKEN_EXPIRY_TIME_SECONDS = 10 * 365 * 24 * 60 * 60; //10 years
+
     private boolean useWebsocket;
 
     @Getter
@@ -242,6 +244,13 @@ public final class ClientConfiguration
             if (clientOptions.getSasTokenExpiryTime() <= 0)
             {
                 throw new IllegalArgumentException("ClientOption sasTokenExpiryTime must be greater than 0");
+            }
+
+            if (clientOptions.getSasTokenExpiryTime() >= MAX_SAS_TOKEN_EXPIRY_TIME_SECONDS)
+            {
+                // Higher values cause overflows that result in the SDK repeatedly renewing SAS tokens
+                // and are generally a security risk
+                throw new IllegalArgumentException("ClientOption sasTokenExpiryTime must be less than 10 years");
             }
 
             this.getSasTokenAuthentication().setTokenValidSecs(clientOptions.getSasTokenExpiryTime());
