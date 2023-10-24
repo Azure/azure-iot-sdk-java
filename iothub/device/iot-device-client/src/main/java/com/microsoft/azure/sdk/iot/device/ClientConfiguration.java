@@ -171,7 +171,7 @@ public final class ClientConfiguration
         log.debug("Device configured to use software based SAS authentication provider");
     }
 
-    ClientConfiguration(IotHubAuthenticationProvider authenticationProvider, IotHubClientProtocol protocol) throws IllegalArgumentException
+    ClientConfiguration(IotHubAuthenticationProvider authenticationProvider, IotHubClientProtocol protocol, ClientOptions options) throws IllegalArgumentException
     {
         if (!(authenticationProvider instanceof IotHubSasTokenAuthenticationProvider))
         {
@@ -179,6 +179,7 @@ public final class ClientConfiguration
         }
 
         this.protocol = protocol;
+        setClientOptionValues(options);
         this.authenticationProvider = authenticationProvider;
         this.useWebsocket = false;
         this.productInfo = new ProductInfo();

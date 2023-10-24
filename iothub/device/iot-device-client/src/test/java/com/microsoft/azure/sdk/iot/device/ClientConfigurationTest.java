@@ -82,7 +82,7 @@ public class ClientConfigurationTest
             }
         };
 
-        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS, null);
 
         String testIotHubHostname = config.getIotHubHostname();
 
@@ -102,7 +102,7 @@ public class ClientConfigurationTest
             }
         };
 
-        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS, null);
 
         //act
         String testIotHubHostname = config.getGatewayHostname();
@@ -128,7 +128,7 @@ public class ClientConfigurationTest
             }
         };
 
-        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS, null);
 
         final String testIotHubName = config.getIotHubName();
 
@@ -622,7 +622,7 @@ public class ClientConfigurationTest
     public void getAuthenticationTypeWorks() throws IOException
     {
         //arrange
-        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS);
+        ClientConfiguration config = new ClientConfiguration(mockSasTokenSoftwareAuthentication, IotHubClientProtocol.AMQPS, null);
 
         ClientConfiguration.AuthType expectedAuthType = ClientConfiguration.AuthType.SAS_TOKEN;
 
