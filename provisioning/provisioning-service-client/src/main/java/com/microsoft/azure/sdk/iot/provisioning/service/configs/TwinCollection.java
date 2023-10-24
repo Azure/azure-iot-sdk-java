@@ -178,11 +178,6 @@ public class TwinCollection extends HashMap<String, Object> implements Serializa
     @Override
     public Object put(String key, Object value)
     {
-        if (key == null || key.isEmpty())
-        {
-            throw new IllegalArgumentException("Key cannot be null or empty");
-        }
-
         Object last = get(key);
         if (value instanceof Map)
         {
