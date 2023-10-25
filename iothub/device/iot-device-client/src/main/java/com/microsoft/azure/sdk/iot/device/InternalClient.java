@@ -50,10 +50,11 @@ public class InternalClient
         setClientOptionValues(clientOptions);
     }
 
-    InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol)
+    InternalClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, ClientOptions options)
     {
-        this.config = new ClientConfiguration(iotHubAuthenticationProvider, protocol);
+        this.config = new ClientConfiguration(iotHubAuthenticationProvider, protocol, options);
         this.deviceIO = new DeviceIO(this.config);
+        setClientOptionValues(options);
     }
 
     InternalClient(String uri, String deviceId, SecurityProvider securityProvider, IotHubClientProtocol protocol, ClientOptions clientOptions) throws IOException

@@ -324,32 +324,6 @@ public class TwinCollectionTest
 
     /* SRS_TWIN_COLLECTION_21_010: [The put shall throw IllegalArgumentException if the provided key is null, empty, or invalid, or if the value is invalid.] */
     @Test (expected = IllegalArgumentException.class)
-    public void putThrowsOnKeyNull()
-    {
-        // arrange
-        TwinCollection twinCollection = new TwinCollection();
-
-        // act
-        twinCollection.put(null, "NewNiceCar");
-
-        // assert
-    }
-
-    /* SRS_TWIN_COLLECTION_21_010: [The put shall throw IllegalArgumentException if the provided key is null, empty, or invalid, or if the value is invalid.] */
-    @Test (expected = IllegalArgumentException.class)
-    public void putThrowsOnKeyEmpty()
-    {
-        // arrange
-        TwinCollection twinCollection = new TwinCollection();
-
-        // act
-        twinCollection.put("", "NewNiceCar");
-
-        // assert
-    }
-
-    /* SRS_TWIN_COLLECTION_21_010: [The put shall throw IllegalArgumentException if the provided key is null, empty, or invalid, or if the value is invalid.] */
-    @Test (expected = IllegalArgumentException.class)
     public void putThrowsOnValueInvalidArray()
     {
         // arrange

@@ -191,10 +191,6 @@ public class TwinCollection extends HashMap<String, Object> {
      */
     @Override
     public Object put(String key, Object value) {
-        if (key == null || key.isEmpty()) {
-            throw new IllegalArgumentException("Key cannot be null or empty");
-        }
-
         Object last = get(key);
         if (value instanceof Map) {
             super.put(key, new TwinCollection((Map<? extends String, Object>) value));

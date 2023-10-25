@@ -325,7 +325,23 @@ public class ModuleClient extends InternalClient
                             DEFAULT_SAS_TOKEN_BUFFER_PERCENTAGE,
                             sslContext);
 
-                return new ModuleClient(iotHubAuthenticationProvider, protocol);
+                if (clientOptions != null && clientOptions.getSslContext() == null)
+                {
+                    // Clone the existing client options, but with the new SSLContext
+                    clientOptions = clientOptions.toBuilder().sslContext(sslContext)
+                            .build();
+                }
+                else if (clientOptions == null)
+                {
+                    // only override the client options completely if the user didn't provide any
+                    clientOptions = ClientOptions.builder().sslContext(sslContext).build();
+                }
+                else
+                {
+                    log.debug("Ignoring trusted certs received from edgelet because custom SSLContext was provided in client options.");
+                }
+
+                return new ModuleClient(iotHubAuthenticationProvider, protocol, clientOptions);
             }
             catch (URISyntaxException | CertificateException | NoSuchAlgorithmException | KeyStoreException | KeyManagementException e)
             {
@@ -342,9 +358,9 @@ public class ModuleClient extends InternalClient
         }
     }
 
-    private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol)
+    private ModuleClient(IotHubAuthenticationProvider iotHubAuthenticationProvider, IotHubClientProtocol protocol, ClientOptions options)
     {
-        super(iotHubAuthenticationProvider, protocol);
+        super(iotHubAuthenticationProvider, protocol, options);
         commonConstructorSetup();
     }
 
