@@ -1642,7 +1642,7 @@ public class MultiplexingClientTests extends IntegrationTest
     // should not be affected nor should the multiplexed connection itself.
     @ContinuousIntegrationTest
     @Test
-    @FlakeyTest
+    @Ignore //Too flakey
     public void disableDeviceAfterOpenBeforeRegister() throws Exception
     {
         testInstance.setup(DEVICE_MULTIPLEX_COUNT);
