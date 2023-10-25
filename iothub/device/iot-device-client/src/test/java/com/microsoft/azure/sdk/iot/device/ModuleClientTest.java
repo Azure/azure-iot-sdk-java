@@ -606,8 +606,8 @@ public class ModuleClientTest
                 result = expectedTrustedCerts;
 
                 Deencapsulation.newInstance(ModuleClient.class,
-                        new Class[] {IotHubAuthenticationProvider.class, IotHubClientProtocol.class},
-                        mockedModuleAuthenticationWithHsm, (IotHubClientProtocol) any);
+                        new Class[] {IotHubAuthenticationProvider.class, IotHubClientProtocol.class, ClientOptions.class},
+                        mockedModuleAuthenticationWithHsm, (IotHubClientProtocol) any, (ClientOptions) any);
             }
         };
 
