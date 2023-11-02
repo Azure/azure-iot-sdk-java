@@ -16,6 +16,7 @@ import com.microsoft.azure.sdk.iot.device.transport.https.HttpsIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.https.exceptions.UnauthorizedException;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.MqttIotHubConnection;
 import com.microsoft.azure.sdk.iot.device.transport.mqtt.exceptions.MqttUnauthorizedException;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.net.ssl.SSLContext;
@@ -119,6 +120,7 @@ public class IotHubTransport implements IotHubListener
     private final boolean useIdentifiableThreadNames;
 
     // Flag set when close() starts. Acts as a signal to any running reconnection logic to not try again.
+    @Setter
     private boolean isClosing;
 
     // Used to store the CorrelationCallbackMessage, context, and start time for a correlationId
@@ -477,9 +479,16 @@ public class IotHubTransport implements IotHubListener
             int connectionAttempt = 0;
             long startTime = System.currentTimeMillis();
 
-            // this loop either ends in throwing an exception when retry expires, or by a break statement upon a successful openConnection() call
+            // this loop either ends in throwing an exception when retry expires,
+            // a break statement upon a successful openConnection() call,
+            // or the user attempts to close the client
             while (true)
             {
+                if (this.isClosing)
+                {
+                    throw new TransportException("Client was closed while attempting to open the connection");
+                }
+
                 RetryPolicy retryPolicy = isMultiplexing ?  multiplexingRetryPolicy : this.getDefaultConfig().getRetryPolicy();
 
                 try
