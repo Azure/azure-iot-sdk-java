@@ -206,6 +206,10 @@ final class DeviceIO implements IotHubConnectionStatusChangeCallback
      */
     void close()
     {
+        // Notify the transport layer that the user wants to close the connection. This
+        // will end any "open with retry" operations. Once any running open calls have ended,
+        // the state lock will be released and this close operation can proceed
+        this.transport.setClosing(true);
         synchronized (this.stateLock)
         {
             if (state == IotHubConnectionStatus.DISCONNECTED)
