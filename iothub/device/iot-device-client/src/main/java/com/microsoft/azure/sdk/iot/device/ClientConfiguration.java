@@ -48,6 +48,8 @@ public final class ClientConfiguration
 
     private static final long MAX_SAS_TOKEN_EXPIRY_TIME_SECONDS = 10 * 365 * 24 * 60 * 60; //10 years
 
+    private static final long DEFAULT_MESSAGE_EXPIRATION_CHECK_PERIOD = 10000;
+
     private boolean useWebsocket;
 
     @Getter
@@ -90,6 +92,9 @@ public final class ClientConfiguration
 
     @Getter
     private String threadNamePrefix = null;
+
+    @Getter
+    private long messageExpiredCheckPeriod;
 
     private boolean useIdentifiableThreadNames = true;
 
@@ -229,6 +234,7 @@ public final class ClientConfiguration
         this.threadNameSuffix = clientOptions != null ? clientOptions.getThreadNameSuffix() : null;
         this.useIdentifiableThreadNames = clientOptions == null || clientOptions.isUsingIdentifiableThreadNames();
         this.logRoutineDisconnectsAsErrors = clientOptions == null || clientOptions.isLoggingRoutineDisconnectsAsErrors();
+        this.messageExpiredCheckPeriod = clientOptions != null ? clientOptions.getMessageExpirationCheckPeriod() : DEFAULT_MESSAGE_EXPIRATION_CHECK_PERIOD;
 
         if (proxySettings != null)
         {

@@ -79,6 +79,9 @@ public class IotHubTransport implements IotHubListener
     // should stop spawning send/receive threads when this layer is disconnected or disconnected retrying
     private final IotHubConnectionStatusChangeCallback deviceIOConnectionStatusChangeCallback;
 
+    // Lock on reading and writing on the waitingPackets queue
+    final private Object waitingPacketsLock = new Object();
+
     // Lock on reading and writing on the inProgressPackets map
     final private Object inProgressMessagesLock = new Object();
 
@@ -130,6 +133,10 @@ public class IotHubTransport implements IotHubListener
     private final Thread correlationCallbackCleanupThread = new Thread(() -> checkForOldMessages());
     private static final int CORRELATION_CALLBACK_CLEANUP_PERIOD_MILLISECONDS = 60 * 60 * 1000;
 
+    // A job that runs periodically to remove any expired messages from the in progress and waiting queue
+    private final Thread expiredMessagesCleanupThread = new Thread(() -> checkForExpiredOutgoingMessages());
+    private final long messageExpirationCheckPeriod;
+
     /**
      * Constructor for an IotHubTransport object with default values
      *
@@ -160,6 +167,7 @@ public class IotHubTransport implements IotHubListener
         this.useIdentifiableThreadNames = defaultConfig.isUsingIdentifiableThreadNames();
         this.threadNamePrefix = defaultConfig.getThreadNamePrefix();
         this.threadNameSuffix = defaultConfig.getThreadNameSuffix();
+        this.messageExpirationCheckPeriod = defaultConfig.getMessageExpiredCheckPeriod();
     }
 
     public IotHubTransport(
@@ -172,7 +180,8 @@ public class IotHubTransport implements IotHubListener
             int sendInterval,
             boolean useIdentifiableThreadNames,
             String threadNamePrefix,
-            String threadNameSuffix) throws IllegalArgumentException
+            String threadNameSuffix,
+            long messageExpirationCheckPeriod) throws IllegalArgumentException
     {
         this.protocol = protocol;
         this.hostName = hostName;
@@ -187,6 +196,7 @@ public class IotHubTransport implements IotHubListener
         this.useIdentifiableThreadNames = useIdentifiableThreadNames;
         this.threadNamePrefix = threadNamePrefix;
         this.threadNameSuffix = threadNameSuffix;
+        this.messageExpirationCheckPeriod = messageExpirationCheckPeriod;
     }
 
     public Semaphore getSendThreadSemaphore()
@@ -763,35 +773,38 @@ public class IotHubTransport implements IotHubListener
 
         int timeSlice = maxNumberOfMessagesToSendPerThread;
 
-        while (this.connectionStatus == IotHubConnectionStatus.CONNECTED && timeSlice-- > 0)
+        synchronized (this.waitingPacketsLock)
         {
-            IotHubTransportPacket packet = waitingPacketsQueue.poll();
-
-            if (packet != null)
+            while (this.connectionStatus == IotHubConnectionStatus.CONNECTED && timeSlice-- > 0)
             {
-                Message message = packet.getMessage();
-                log.trace("Dequeued a message from waiting queue to be sent ({})", message);
+                IotHubTransportPacket packet = waitingPacketsQueue.poll();
 
-                if (message != null && this.isMessageValid(packet))
+                if (packet != null)
                 {
-                    sendPacket(packet);
+                    Message message = packet.getMessage();
+                    log.trace("Dequeued a message from waiting queue to be sent ({})", message);
 
-                    try
+                    if (message != null && this.isMessageValid(packet))
                     {
-                        String correlationId = message.getCorrelationId();
+                        sendPacket(packet);
 
-                        if (!correlationId.isEmpty())
+                        try
                         {
-                            CorrelationCallbackContext callbackContext = correlationCallbacks.get(correlationId);
-                            if (callbackContext != null && callbackContext.getCallback() != null)
+                            String correlationId = message.getCorrelationId();
+
+                            if (!correlationId.isEmpty())
                             {
-                                callbackContext.getCallback().onRequestSent(message, callbackContext.getUserContext());
+                                CorrelationCallbackContext callbackContext = correlationCallbacks.get(correlationId);
+                                if (callbackContext != null && callbackContext.getCallback() != null)
+                                {
+                                    callbackContext.getCallback().onRequestSent(message, callbackContext.getUserContext());
+                                }
                             }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        log.warn("Exception thrown while calling the onRequestSent callback in sendMessages", e);
+                        catch (Exception e)
+                        {
+                            log.warn("Exception thrown while calling the onRequestSent callback in sendMessages", e);
+                        }
                     }
                 }
             }
@@ -816,27 +829,30 @@ public class IotHubTransport implements IotHubListener
 
     private void checkForExpiredMessages()
     {
-        //Check waiting packets, remove any that have expired.
-        IotHubTransportPacket packet = this.waitingPacketsQueue.poll();
-        Queue<IotHubTransportPacket> packetsToAddBackIntoWaitingPacketsQueue = new LinkedBlockingQueue<>();
-        while (packet != null)
+        synchronized (this.waitingPacketsQueue)
         {
-            if (packet.getMessage().isExpired())
+            //Check waiting packets, remove any that have expired.
+            IotHubTransportPacket packet = this.waitingPacketsQueue.poll();
+            Queue<IotHubTransportPacket> packetsToAddBackIntoWaitingPacketsQueue = new LinkedBlockingQueue<>();
+            while (packet != null)
             {
-                packet.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
-                this.addToCallbackQueue(packet);
-            }
-            else
-            {
-                //message not expired, requeue it
-                packetsToAddBackIntoWaitingPacketsQueue.add(packet);
+                if (packet.getMessage().isExpired())
+                {
+                    packet.setStatus(IotHubStatusCode.MESSAGE_EXPIRED);
+                    this.addToCallbackQueue(packet);
+                }
+                else
+                {
+                    //message not expired, requeue it
+                    packetsToAddBackIntoWaitingPacketsQueue.add(packet);
+                }
+
+                packet = this.waitingPacketsQueue.poll();
             }
 
-            packet = this.waitingPacketsQueue.poll();
+            //Requeue all the non-expired messages.
+            this.waitingPacketsQueue.addAll(packetsToAddBackIntoWaitingPacketsQueue);
         }
-
-        //Requeue all the non-expired messages.
-        this.waitingPacketsQueue.addAll(packetsToAddBackIntoWaitingPacketsQueue);
 
         //Check in progress messages
         synchronized (this.inProgressMessagesLock)
@@ -886,6 +902,26 @@ public class IotHubTransport implements IotHubListener
                     correlationCallbacks.remove(correlationId);
                 }
             }
+        }
+        catch (InterruptedException e)
+        {
+            // The exception can be ignored since this thread is interrupted when the client is closing.
+            // Once interrupted, simply end this thread.
+        }
+    }
+
+    private void checkForExpiredOutgoingMessages()
+    {
+        try
+        {
+            Thread.currentThread().setName("azure-iot-sdk-IotHubMessageExpiryCheckerTask");
+            while (true)
+            {
+                Thread.sleep(this.messageExpirationCheckPeriod);
+                checkForExpiredMessages();
+                invokeCallbacks();
+            }
+
         }
         catch (InterruptedException e)
         {
@@ -1717,10 +1753,24 @@ public class IotHubTransport implements IotHubListener
                 {
                     // Thread has already started. No need to report this exception
                 }
+
+                try
+                {
+                    // 0 means that the user doesn't want to ever run this check
+                    if (messageExpirationCheckPeriod != 0)
+                    {
+                        expiredMessagesCleanupThread.start();
+                    }
+                }
+                catch (IllegalThreadStateException e)
+                {
+                    // Thread has already started. No need to report this exception
+                }
             }
             else if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED)
             {
                 correlationCallbackCleanupThread.interrupt();
+                expiredMessagesCleanupThread.interrupt();
             }
         }
     }
@@ -1766,20 +1816,8 @@ public class IotHubTransport implements IotHubListener
             invokeConnectionStatusChangeCallback(newConnectionStatus, previousStatus, reason, throwable, deviceId);
         }
 
-        if (newConnectionStatus == IotHubConnectionStatus.CONNECTED)
+        if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED)
         {
-            try
-            {
-                correlationCallbackCleanupThread.start();
-            }
-            catch (IllegalThreadStateException e)
-            {
-                // Thread has already started. No need to report this exception
-            }
-        }
-        else if (newConnectionStatus == IotHubConnectionStatus.DISCONNECTED)
-        {
-            correlationCallbackCleanupThread.interrupt();
             finalizeMultiplexedDevicesMessages(deviceId);
         }
     }
@@ -1911,28 +1949,6 @@ public class IotHubTransport implements IotHubListener
         }
 
         return (System.currentTimeMillis() - startTime) > this.getDefaultConfig().getOperationTimeout();
-    }
-
-    /**
-     * Returns if the provided packet has lasted longer than the device operation timeout
-     *
-     * @return true if the packet has been in the queues for longer than the device operation timeout and false otherwise
-     */
-    private boolean hasOperationTimedOut(long startTime, String deviceId)
-    {
-        if (startTime == 0)
-        {
-            return false;
-        }
-
-        ClientConfiguration config = this.getConfig(deviceId);
-        if (config == null)
-        {
-            log.debug("Operation has not timed out since the device it was associated with has been unregistered already.");
-            return false;
-        }
-
-        return (System.currentTimeMillis() - startTime) > config.getOperationTimeout();
     }
 
     /**

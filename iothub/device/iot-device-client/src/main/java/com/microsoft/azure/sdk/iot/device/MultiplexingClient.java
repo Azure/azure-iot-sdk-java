@@ -34,6 +34,7 @@ public class MultiplexingClient
     static final int DEFAULT_MAX_MESSAGES_TO_SEND_PER_THREAD = 10;
     private static final long DEFAULT_REGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
     private static final long DEFAULT_UNREGISTRATION_TIMEOUT_MILLISECONDS = 60 * 1000; // 1 minute
+    private static final long DEFAULT_MESSAGE_EXPIRATION_CHECK_PERIOD = 10000;
 
     // keys are deviceIds. Helps to optimize look ups later on which device Ids are already registered.
     private final Map<String, DeviceClient> multiplexedDeviceClients;
@@ -104,6 +105,7 @@ public class MultiplexingClient
         String threadNamePrefix = options != null ? options.getThreadNamePrefix() : null;
         String threadNameSuffix = options != null ? options.getThreadNameSuffix() : null;
         boolean useIdentifiableThreadNames = options == null || options.isUsingIdentifiableThreadNames();
+        long messageExpiredCheckPeriod = options != null ? options.getMessageExpirationCheckPeriod() : DEFAULT_MESSAGE_EXPIRATION_CHECK_PERIOD;
 
         if (sendPeriod < 0)
         {
@@ -130,7 +132,18 @@ public class MultiplexingClient
 
         // Optional settings from MultiplexingClientOptions
         SSLContext sslContext = options != null ? options.getSslContext() : null;
-        this.deviceIO = new DeviceIO(hostName, protocol, sslContext, proxySettings, keepAliveInterval, sendInterval, useIdentifiableThreadNames, threadNamePrefix, threadNameSuffix);
+        this.deviceIO = new DeviceIO(
+            hostName,
+            protocol,
+            sslContext,
+            proxySettings,
+            keepAliveInterval,
+            sendInterval,
+            useIdentifiableThreadNames,
+            threadNamePrefix,
+            threadNameSuffix,
+            messageExpiredCheckPeriod);
+
         this.deviceIO.setMaxNumberOfMessagesSentPerSendThread(sendMessagesPerThread);
         this.deviceIO.setSendPeriodInMilliseconds(sendPeriod);
         this.deviceIO.setReceivePeriodInMilliseconds(receivePeriod);
