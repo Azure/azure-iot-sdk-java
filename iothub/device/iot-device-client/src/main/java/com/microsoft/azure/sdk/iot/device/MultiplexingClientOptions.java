@@ -98,6 +98,25 @@ public final class MultiplexingClientOptions
     @Builder.Default
     private final boolean useIdentifiableThreadNames = true;
 
+    /**
+     * The period (in milliseconds) for how often the client will check queued and in-flight messages for expiry.
+     *
+     * Higher values mean that messages will be checked for expiry less often but this client will use less CPU. Higher
+     * values also mean that messages may not execute their callback with MESSAGE_EXPIRED close to the expected
+     * expiry time.
+     *
+     * Lower values mean that messages will be checked for expiry more often but this client will use more CPU. Lower
+     * values also mean that messages will execute their callback with MESSAGE_EXPIRED closer to the expected
+     * expiry time.
+     *
+     * By default, this value is 10 seconds.
+     *
+     * If set to 0, message expiry will never be checked.
+     */
+    @Getter
+    @Builder.Default
+    private final long messageExpirationCheckPeriod = 10000;
+
     public boolean isUsingIdentifiableThreadNames()
     {
         // Using a manually written method here to override the name that Lombok would have given it
