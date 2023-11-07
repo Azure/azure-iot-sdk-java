@@ -133,8 +133,8 @@ public class DeviceDeletionSample
                     {
                         Twin twin = twinQuery.next();
 
-                        //if (!twin.getDeviceId().toLowerCase().contains("longhaul"))
-                        //{
+                        if (!twin.getDeviceId().toLowerCase().contains("longhaul"))
+                        {
                             deviceIdsToRemove.add(twin.getDeviceId());
 
                             if (deviceIdsToRemove.size() >= 100)
@@ -142,7 +142,7 @@ public class DeviceDeletionSample
                                 System.out.println("Queried 100 devices, now attempting to delete them");
                                 break;
                             }
-                        //}
+                        }
                     }
 
                     if (deviceIdsToRemove.size() == 0)
