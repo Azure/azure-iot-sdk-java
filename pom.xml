@@ -133,7 +133,7 @@
             <dependency>
                 <groupId>io.projectreactor.netty</groupId>
                 <artifactId>reactor-netty-http</artifactId>
-                <version>1.0.26</version> <!--e2e tests and samples only-->
+                <version>1.0.39</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>commons-cli</groupId>
