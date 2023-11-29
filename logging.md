@@ -28,7 +28,7 @@ logs from must be specified in the properties file. Specified packages will incl
 of any subpackages, but do not include the logs of their dependencies. As an example, adding the package 
 ```com.microsoft.azure.sdk.iot.service``` will collect logs from classes like ```com.microsoft.azure.sdk.iot.service.messaging.MessagingClient```, 
 and will collect logs for classes like ```com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler``` but will not
-collect logs from a class from any of its dependencies.
+collect logs from any class outside of this namespace.
 
 Adding these packages to your log4j2.properties file should be sufficient to capture all logs that this SDK generates:
 ```
