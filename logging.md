@@ -12,7 +12,7 @@ the library org.slf4j.slf4j-log4j12
 
 Alongside the above dependency, you need to add log4j2.properties files into your code's resources folder that
 specify what package's logs will be captured, and at what log level. An example log4j.properties
-file can be seen in a device client sample [here](device/iot-device-samples/send-event/src/main/resources/log4j2.properties)
+file can be seen in a device client sample [here](iothub/device/iot-device-samples/send-event/src/main/resources/log4j2.properties)
 
 Note that the log4j2.properties file requires you to explicitly choose which packages to collect logs from. Packages to collect
 logs from must be specified in the properties file. Specified packages will include the logs
@@ -21,7 +21,7 @@ of any subpackages, but do not include the logs of their dependencies. As an exa
 and will collect logs for classes like ```com.microsoft.azure.sdk.iot.service.transport.amqps.AmqpSendHandler``` but will not
 collect logs from a class of its dependency, such as ```com.microsoft.azure.sdk.iot.provisioning.device.transport.amqp.ErrorLoggingBaseHandler```
 
-Adding these packages to your log4j.properties file should be sufficient to capture all logs that this SDK generates:
+Adding these packages to your log4j2.properties file should be sufficient to capture all logs that this SDK generates:
 ```
 log4j.logger.com.microsoft.azure.sdk.iot.device = DEBUG 
 log4j.logger.com.microsoft.azure.sdk.iot.service = DEBUG 
