@@ -2,16 +2,25 @@
 
 The Azure IoT SDK uses the [SLF4j](http://www.slf4j.org/faq.html) logging facade. In order to capture the SDK's logs, 
 you will need to provide a consumer for this logging facade. As an example, the sample projects in this repo use
-the library org.slf4j.slf4j-log4j12
-      
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.29</version>
-        </dependency>
+the library org.apache.logging.log4j.log4j-slf4j-impl
 
-Alongside the above dependency, you need to add log4j2.properties files into your code's resources folder that
-specify what package's logs will be captured, and at what log level. An example log4j.properties
+```xml
+<dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-api</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-core</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.apache.logging.log4j</groupId>
+    <artifactId>log4j-slf4j-impl</artifactId>
+</dependency>
+```
+
+Alongside the above dependencies, you need to add log4j2.properties files into your code's resources folder that
+specify what package's logs will be captured, and at what log level. An example log4j2.properties
 file can be seen in a device client sample [here](iothub/device/iot-device-samples/send-event/src/main/resources/log4j2.properties)
 
 Note that the log4j2.properties file requires you to explicitly choose which packages to collect logs from. Packages to collect
@@ -23,27 +32,26 @@ collect logs from a class of its dependency, such as ```com.microsoft.azure.sdk.
 
 Adding these packages to your log4j2.properties file should be sufficient to capture all logs that this SDK generates:
 ```
-log4j.logger.com.microsoft.azure.sdk.iot.device = DEBUG 
-log4j.logger.com.microsoft.azure.sdk.iot.service = DEBUG 
-log4j.logger.com.microsoft.azure.sdk.iot.deps = DEBUG 
-log4j.logger.com.microsoft.azure.sdk.iot.provisioning.device = DEBUG 
-log4j.logger.com.microsoft.azure.sdk.iot.provisioning.service = DEBUG 
-log4j.logger.com.microsoft.azure.sdk.iot.provisioning.security = DEBUG 
+logger.com.microsoft.azure.sdk.iot.device = DEBUG 
+logger.com.microsoft.azure.sdk.iot.service = DEBUG 
+logger.com.microsoft.azure.sdk.iot.deps = DEBUG 
+logger.com.microsoft.azure.sdk.iot.provisioning.device = DEBUG 
+logger.com.microsoft.azure.sdk.iot.provisioning.service = DEBUG 
+logger.com.microsoft.azure.sdk.iot.provisioning.security = DEBUG 
 ```
 
 Or for simplicity:
 ```
-log4j.logger.com.microsoft.azure.sdk.iot = DEBUG 
+logger.com.microsoft.azure.sdk.iot = DEBUG 
 ```
 
 This SDK does print logs at TRACE, DEBUG, INFO, WARN, and ERROR levels, and your log4j.properties file
-allows you to choose these levels for each package. For example, to get trace level logs in the deps package,
-but info level logs in the device and service packages, your log4j.properties file would include
+allows you to choose these levels for each package. For example, to get trace level logs in the service client package,
+but info level logs in the device client package, your log4j.properties file would include
 
 ```
-log4j.logger.com.microsoft.azure.sdk.iot.device = INFO 
-log4j.logger.com.microsoft.azure.sdk.iot.service = INFO 
-log4j.logger.com.microsoft.azure.sdk.iot.deps = TRACE 
+logger.com.microsoft.azure.sdk.iot.device = INFO 
+logger.com.microsoft.azure.sdk.iot.service = TRACE 
 ```
 
 Another notable logging consumer that works with SLF4j is [logback](http://logback.qos.ch/). For more information on 
