@@ -34,7 +34,6 @@ Adding these packages to your log4j2.properties file should be sufficient to cap
 ```
 logger.com.microsoft.azure.sdk.iot.device = DEBUG 
 logger.com.microsoft.azure.sdk.iot.service = DEBUG 
-logger.com.microsoft.azure.sdk.iot.deps = DEBUG 
 logger.com.microsoft.azure.sdk.iot.provisioning.device = DEBUG 
 logger.com.microsoft.azure.sdk.iot.provisioning.service = DEBUG 
 logger.com.microsoft.azure.sdk.iot.provisioning.security = DEBUG 
