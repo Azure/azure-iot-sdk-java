@@ -32,16 +32,26 @@ collect logs from a class from any of its dependencies.
 
 Adding these packages to your log4j2.properties file should be sufficient to capture all logs that this SDK generates:
 ```
-logger.com.microsoft.azure.sdk.iot.device = DEBUG 
-logger.com.microsoft.azure.sdk.iot.service = DEBUG 
-logger.com.microsoft.azure.sdk.iot.provisioning.device = DEBUG 
-logger.com.microsoft.azure.sdk.iot.provisioning.service = DEBUG 
-logger.com.microsoft.azure.sdk.iot.provisioning.security = DEBUG 
+logger.sdk.device.name = com.microsoft.azure.sdk.iot.device
+logger.sdk.device.level = INFO
+
+logger.sdk.device.name = com.microsoft.azure.sdk.iot.service
+logger.sdk.service.level = INFO
+
+logger.sdk.provisioningDevice.name = com.microsoft.azure.sdk.iot.provisioning.device
+logger.sdk.provisioningDevice.level = INFO
+
+logger.sdk.provisioningService.name = com.microsoft.azure.sdk.iot.provisioning.service
+logger.sdk.provisioningService.level = INFO
+
+logger.sdk.provisioningService.name = com.microsoft.azure.sdk.iot.provisioning.security
+logger.sdk.provisioningSecurity.level = INFO 
 ```
 
 Or for simplicity:
 ```
-logger.com.microsoft.azure.sdk.iot = DEBUG 
+logger.sdk.device.name = com.microsoft.azure.sdk.iot
+logger.sdk.device.level = INFO
 ```
 
 This SDK does print logs at TRACE, DEBUG, INFO, WARN, and ERROR levels, and your log4j.properties file
@@ -49,8 +59,11 @@ allows you to choose these levels for each package. For example, to get trace le
 but info level logs in the device client package, your log4j.properties file would include
 
 ```
-logger.com.microsoft.azure.sdk.iot.device = INFO 
-logger.com.microsoft.azure.sdk.iot.service = TRACE 
+logger.sdk.device.name = com.microsoft.azure.sdk.iot.device
+logger.sdk.device.level = INFO
+
+logger.sdk.device.name = com.microsoft.azure.sdk.iot.service
+logger.sdk.service.level = TRACE
 ```
 
 Another notable logging consumer that works with SLF4j is [logback](http://logback.qos.ch/). For more information on 
