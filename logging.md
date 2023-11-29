@@ -71,5 +71,5 @@ using logback with SLF4j, see [this tutorial](https://mkyong.com/logging/slf4j-l
 
 You can also make your existing logging framework compatible with SLF4j as documented [here](http://www.slf4j.org/faq.html#slf4j_compatible)
 
-
+For additional details about configuring a log4j2.properties file, or to see what alternatives there are for setting these logging settings, see the official Apache documentation [here](https://logging.apache.org/log4j/2.x/manual/configuration.html).
 
