@@ -35,7 +35,7 @@ Adding these packages to your log4j2.properties file should be sufficient to cap
 logger.sdk.device.name = com.microsoft.azure.sdk.iot.device
 logger.sdk.device.level = INFO
 
-logger.sdk.device.name = com.microsoft.azure.sdk.iot.service
+logger.sdk.service.name = com.microsoft.azure.sdk.iot.service
 logger.sdk.service.level = INFO
 
 logger.sdk.provisioningDevice.name = com.microsoft.azure.sdk.iot.provisioning.device
@@ -50,8 +50,8 @@ logger.sdk.provisioningSecurity.level = INFO
 
 Or for simplicity:
 ```
-logger.sdk.device.name = com.microsoft.azure.sdk.iot
-logger.sdk.device.level = INFO
+logger.sdk.name = com.microsoft.azure.sdk.iot
+logger.sdk.level = INFO
 ```
 
 This SDK does print logs at TRACE, DEBUG, INFO, WARN, and ERROR levels, and your log4j.properties file
@@ -62,7 +62,7 @@ but info level logs in the device client package, your log4j.properties file wou
 logger.sdk.device.name = com.microsoft.azure.sdk.iot.device
 logger.sdk.device.level = INFO
 
-logger.sdk.device.name = com.microsoft.azure.sdk.iot.service
+logger.sdk.service.name = com.microsoft.azure.sdk.iot.service
 logger.sdk.service.level = TRACE
 ```
 
