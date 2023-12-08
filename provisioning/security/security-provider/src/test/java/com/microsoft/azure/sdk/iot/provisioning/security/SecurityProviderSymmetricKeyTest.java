@@ -300,4 +300,28 @@ public class SecurityProviderSymmetricKeyTest
         //act
         securityProviderSymmetricKey.getSSLContext();
     }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void testConstructorThrowsForInvalidChar() throws SecurityProviderException
+    {
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, "some/invalidRegistrationId");
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void testConstructorThrowsForInvalidChar2() throws SecurityProviderException
+    {
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(testSymKey, "some\\invalidRegistrationId");
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void testConstructorThrowsForInvalidChar3() throws SecurityProviderException
+    {
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(new byte[10], "some/invalidRegistrationId");
+    }
+
+    @Test (expected = IllegalArgumentException.class)
+    public void testConstructorThrowsForInvalidChar4() throws SecurityProviderException
+    {
+        SecurityProviderSymmetricKey securityProviderSymmetricKey = new SecurityProviderSymmetricKey(new byte[10], "some\\invalidRegistrationId");
+    }
 }
