@@ -158,7 +158,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
     @Override
     public synchronized void open(RequestData requestData) throws ProvisioningDeviceConnectionException
     {
-        if (this.mqttConnection != null && !this.mqttConnection.isMqttConnected())
+        if (this.mqttConnection != null && this.mqttConnection.isMqttConnected())
         {
             throw new ProvisioningDeviceConnectionException("Open called on an already open connection");
         }
@@ -203,7 +203,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
     {
         try
         {
-            if (this.mqttConnection != null && this.mqttConnection.isMqttConnected() )
+            if (this.mqttConnection != null && this.mqttConnection.isMqttConnected())
             {
                 this.mqttConnection.disconnect();
             }
