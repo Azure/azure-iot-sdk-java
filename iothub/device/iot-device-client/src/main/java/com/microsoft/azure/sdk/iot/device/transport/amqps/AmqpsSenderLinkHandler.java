@@ -154,6 +154,21 @@ abstract class AmqpsSenderLinkHandler extends BaseHandler
     }
 
     @Override
+    public void onLinkLocalDetach(Event e)
+    {
+        // Link detach vs link close is functionally the same for our purposes.
+        // In both cases, the higher layers need to be notified that the link
+        // is no longer active so that retry can begin.
+        this.onLinkLocalClose(e);
+    }
+
+    @Override
+    public void onLinkRemoteDetach(Event e)
+    {
+        this.onLinkRemoteClose(e);
+    }
+
+    @Override
     public void onLinkFlow(Event event)
     {
         log.trace("Link flow received on {} sender link with address {} and link correlation id {}. Current link credit is now {}.", getLinkInstanceType(), this.senderLinkAddress, this.linkCorrelationId, event.getSender().getCredit());
