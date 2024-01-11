@@ -159,6 +159,21 @@ abstract class AmqpsReceiverLinkHandler extends BaseHandler
         }
     }
 
+    @Override
+    public void onLinkLocalDetach(Event e)
+    {
+        // Link detach vs link close is functionally the same for our purposes.
+        // In both cases, the higher layers need to be notified that the link
+        // is no longer active so that retry can begin.
+        this.onLinkLocalClose(e);
+    }
+
+    @Override
+    public void onLinkRemoteDetach(Event e)
+    {
+        this.onLinkRemoteClose(e);
+    }
+
     public boolean acknowledgeReceivedMessage(IotHubTransportMessage message, DeliveryState ackType)
     {
         if (this.receivedMessagesMap.containsKey(message))
