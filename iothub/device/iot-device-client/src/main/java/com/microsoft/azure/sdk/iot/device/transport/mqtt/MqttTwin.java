@@ -122,10 +122,12 @@ class MqttTwin extends Mqtt
                     throw new IllegalArgumentException("Request Id is Mandatory");
                 }
 
-                int version = message.getVersion();
-                topic.append(AND);
-                topic.append(VERSION);
-                topic.append(version);
+                Integer version = message.getVersion();
+                if (version != null) {
+                    topic.append(AND);
+                    topic.append(VERSION);
+                    topic.append(version);
+                }
                 break;
             }
             case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:

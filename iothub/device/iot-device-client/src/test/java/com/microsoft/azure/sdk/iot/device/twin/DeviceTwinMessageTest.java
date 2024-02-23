@@ -32,11 +32,12 @@ public class DeviceTwinMessageTest
         IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //assert
-        int actualVersion = Deencapsulation.getField(msg, "version");
+        Integer actualVersion = Deencapsulation.getField(msg, "version");
         String actualRequestId = Deencapsulation.getField(msg, "requestId");
         String actualStatus = Deencapsulation.getField(msg, "status");
         DeviceOperations operationType = Deencapsulation.getField(msg, "operationType");
 
+        assertNull(actualVersion);
         assertNull(actualRequestId);
         assertNull(actualStatus);
         assertEquals(operationType, DeviceOperations.DEVICE_OPERATION_UNKNOWN);
@@ -60,20 +61,21 @@ public class DeviceTwinMessageTest
         IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //act
-        int testVersion = msg.getVersion();
+        Integer testVersion = msg.getVersion();
         String testRequestId = msg.getRequestId();
         String testStatus = msg.getStatus();
         DeviceOperations testOpType = msg.getDeviceOperationType();
 
         //assert
-        int actualVersion = Deencapsulation.getField(msg, "version");
+        Integer actualVersion = Deencapsulation.getField(msg, "version");
         String actualRequestId = Deencapsulation.getField(msg, "requestId");
         String actualStatus = Deencapsulation.getField(msg, "status");
-        DeviceOperations operationType = Deencapsulation.getField(msg, "operationType");
+        DeviceOperations actualOperationType = Deencapsulation.getField(msg, "operationType");
 
-        assertEquals(actualRequestId, testRequestId);
-        assertEquals(actualStatus, testStatus);
-        assertEquals(actualVersion, testVersion);
+        assertEquals(testRequestId, actualRequestId);
+        assertEquals(testStatus, actualStatus);
+        assertEquals(testVersion, actualVersion);
+        assertEquals(testOpType, actualOperationType);
     }
 
     /*
@@ -87,10 +89,10 @@ public class DeviceTwinMessageTest
         IotHubTransportMessage msg = new IotHubTransportMessage(actualData, MessageType.DEVICE_TWIN);
 
         //act
-       msg.setVersion(12);
+        msg.setVersion(12);
 
         //assert
-        assertEquals(msg.getVersion(), 12);
+        assertEquals(12, msg.getVersion().intValue());
     }
 
     /*
@@ -108,7 +110,7 @@ public class DeviceTwinMessageTest
         int version = msg.getVersion();
 
         //assert
-        assertEquals(version, 12);
+        assertEquals(12, version);
 
     }
 

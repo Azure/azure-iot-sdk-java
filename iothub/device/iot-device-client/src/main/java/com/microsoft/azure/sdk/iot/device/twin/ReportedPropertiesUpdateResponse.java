@@ -15,5 +15,5 @@ public class ReportedPropertiesUpdateResponse
      * does not apply this reported properties update immediately.
      */
     @Getter
-    private final int version;
+    private final Integer version;
 }

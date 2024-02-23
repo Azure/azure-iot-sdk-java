@@ -62,7 +62,7 @@ public class IotHubTransportMessageTest
 
         // assert
         assertEquals(messageType, iotHubTransportMessage.getMessageType());
-        assertEquals(0, iotHubTransportMessage.getVersion());
+        assertNull(iotHubTransportMessage.getVersion());
         assertNull(iotHubTransportMessage.getRequestId());
         assertNull(iotHubTransportMessage.getStatus());
         assertEquals(DEVICE_OPERATION_UNKNOWN, iotHubTransportMessage.getDeviceOperationType());
@@ -89,7 +89,7 @@ public class IotHubTransportMessageTest
     public void setVersionSetsTheVersion()
     {
         // arrange
-        int version = 1234;
+        Integer version = 1234;
         byte[] data = new byte[1];
         MessageType messageType = MessageType.DEVICE_TWIN;
         IotHubTransportMessage iotHubTransportMessage = new IotHubTransportMessage(data, messageType);
