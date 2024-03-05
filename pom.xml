@@ -151,6 +151,21 @@
                 <version>1.70</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcmail-jdk18on</artifactId>
+                <version>1.77</version>  <!--e2e tests and samples only-->
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.77</version>  <!--e2e tests and samples only-->
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcpkix-jdk18on</artifactId>
+                <version>1.77</version> <!--e2e tests and samples only-->
+            </dependency>
+            <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
                 <version>2.17.1</version>  <!--e2e tests and samples only-->
