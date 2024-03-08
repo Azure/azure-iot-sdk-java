@@ -10,6 +10,7 @@ import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.twin.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,6 +54,26 @@ public class TwinTests extends TwinCommon
     public void testBasicTwinFlow() throws InterruptedException, IOException, IotHubException, TimeoutException, IotHubClientException
     {
         super.testBasicTwinFlow(true);
+    }
+
+    @Test
+    public void sendReportedPropertiesWithoutVersion() throws InterruptedException, IOException, IotHubException, TimeoutException, IotHubClientException
+    {
+        testInstance.testIdentity.getClient().open(true);
+        testInstance.testIdentity.getClient().subscribeToDesiredProperties(
+                (twin, context) ->
+                {
+                    // do nothing
+                },
+                null);
+        Twin twin = testInstance.testIdentity.getClient().getTwin();
+        twin.getReportedProperties().put("someKey", "someValue");
+        twin.getReportedProperties().setVersion(null);
+        testInstance.testIdentity.getClient().updateReportedProperties(twin.getReportedProperties());
+
+        Twin twinAfterReportedPropertiesUpdate = testInstance.testIdentity.getClient().getTwin();
+        Assert.assertEquals(twin.getReportedProperties(), twinAfterReportedPropertiesUpdate.getReportedProperties());
+        Assert.assertEquals(2, (int) twinAfterReportedPropertiesUpdate.getReportedProperties().getVersion());
     }
 
     @Test
