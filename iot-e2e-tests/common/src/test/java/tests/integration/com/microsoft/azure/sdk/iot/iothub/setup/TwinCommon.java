@@ -112,12 +112,12 @@ public class TwinCommon extends IntegrationTest
         {
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                this.testIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, authenticationType, false);
+                this.testIdentity = Tools.getTestDevice(iotHubConnectionString, protocol, authenticationType, true);
                 this.serviceTwin = new Twin(testIdentity.getDeviceId());
             }
             else
             {
-                this.testIdentity = Tools.getTestModule(iotHubConnectionString, protocol, authenticationType, false);
+                this.testIdentity = Tools.getTestModule(iotHubConnectionString, protocol, authenticationType, true);
                 this.serviceTwin = new Twin(testIdentity.getDeviceId(), ((TestModuleIdentity) testIdentity).getModuleId());
             }
 
