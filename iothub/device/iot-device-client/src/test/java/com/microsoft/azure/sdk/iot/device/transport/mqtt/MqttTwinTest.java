@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
 public class MqttTwinTest
 {
     final String resTopic = "$iothub/twin/res/#";
-    final int mockVersion = 5;
+    final Integer mockVersion = 5;
     final String mockReqId = String.valueOf(100);
 
     @Mocked
@@ -210,6 +210,44 @@ public class MqttTwinTest
                 result = mockReqId;
                 mockMessage.getVersion();
                 result = mockVersion;
+            }
+        };
+
+        //act
+        testTwin.send(mockMessage);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockMessage.getBytes();
+                times = 1;
+                Deencapsulation.invoke(mockMqtt, "publish", expectedTopic, mockMessage);
+                times = 1;
+            }
+        };
+    }
+    @Test
+    public void sendPublishesMessageForUpdateReportedPropertiesOnCorrectTopicWithoutVersion(@Mocked final Mqtt mockMqtt, @Mocked final IotHubTransportMessage mockMessage) throws TransportException
+    {
+        //arrange
+        final byte[] actualPayload = {0x61, 0x62, 0x63};
+        final String expectedTopic = "$iothub/twin/PATCH/properties/reported/?$rid="+ mockReqId;
+        MqttTwin testTwin = new MqttTwin("", mockedConnectOptions, new HashMap<>(), new ConcurrentLinkedQueue<>());
+        testTwin.start();
+        new NonStrictExpectations()
+        {
+            {
+                mockMessage.getBytes();
+                result = actualPayload;
+                mockMessage.getMessageType();
+                result = MessageType.DEVICE_TWIN;
+                mockMessage.getDeviceOperationType();
+                result = DEVICE_OPERATION_TWIN_UPDATE_REPORTED_PROPERTIES_REQUEST;
+                mockMessage.getRequestId();
+                result = mockReqId;
+                mockMessage.getVersion();
+                result = null;
             }
         };
 
@@ -462,7 +500,7 @@ public class MqttTwinTest
             assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_GET_RESPONSE);
             assertEquals(receivedMessage.getRequestId(), mockReqId);
             assertEquals("200", receivedMessage.getStatus());
-            assertEquals(0, receivedMessage.getVersion());
+            assertNull(receivedMessage.getVersion());
         }
     }
     @Test
@@ -624,7 +662,7 @@ public class MqttTwinTest
             assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_GET_RESPONSE);
             assertEquals(receivedMessage.getRequestId(), mockReqId);
             assertEquals("200", receivedMessage.getStatus());
-            assertEquals(0, receivedMessage.getVersion());
+            assertNull(receivedMessage.getVersion());
         }
     }
 
@@ -658,7 +696,7 @@ public class MqttTwinTest
             assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_UNKNOWN);
             assertNull(receivedMessage.getRequestId());
             assertEquals("200", receivedMessage.getStatus());
-            assertEquals(0, receivedMessage.getVersion());
+            assertNull(receivedMessage.getVersion());
         }
     }
 
@@ -731,7 +769,7 @@ public class MqttTwinTest
             assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_GET_RESPONSE);
             assertEquals(receivedMessage.getRequestId(), mockReqId);
             assertEquals("201", receivedMessage.getStatus());
-            assertEquals(0, receivedMessage.getVersion());
+            assertNull(receivedMessage.getVersion());
         }
     }
 
@@ -768,7 +806,7 @@ public class MqttTwinTest
             assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_GET_RESPONSE);
             assertEquals(receivedMessage.getRequestId(), mockReqId);
             assertEquals("200", receivedMessage.getStatus());
-            assertEquals(0, receivedMessage.getVersion());
+            assertNull(receivedMessage.getVersion());
 
             byte[] receivedMessageBytes = receivedMessage.getBytes();
             assertEquals(receivedMessageBytes.length, actualPayload.length);
@@ -854,7 +892,7 @@ public class MqttTwinTest
             assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
             assertNull(receivedMessage.getRequestId());
             assertNull(receivedMessage.getStatus());
-            assertEquals(0, receivedMessage.getVersion());
+            assertNull(receivedMessage.getVersion());
 
             byte[] receivedMessageBytes = receivedMessage.getBytes();
             assertEquals(receivedMessageBytes.length, actualPayload.length);
@@ -893,7 +931,7 @@ public class MqttTwinTest
             assertSame(receivedMessage.getDeviceOperationType(), DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_RESPONSE);
             assertNull(receivedMessage.getRequestId());
             assertNull(receivedMessage.getStatus());
-            assertEquals(0, receivedMessage.getVersion());
+            assertNull(receivedMessage.getVersion());
 
             byte[] receivedMessageBytes = receivedMessage.getBytes();
             assertEquals(receivedMessageBytes.length, actualPayload.length);

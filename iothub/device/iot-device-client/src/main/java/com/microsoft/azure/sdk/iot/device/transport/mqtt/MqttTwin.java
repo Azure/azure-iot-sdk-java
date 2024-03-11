@@ -122,28 +122,13 @@ class MqttTwin extends Mqtt
                     throw new IllegalArgumentException("Request Id is Mandatory");
                 }
 
-                int version = message.getVersion();
-                topic.append(AND);
-                topic.append(VERSION);
-                topic.append(version);
+                Integer version = message.getVersion();
+                if (version != null) {
+                    topic.append(AND);
+                    topic.append(VERSION);
+                    topic.append(version);
+                }
                 break;
-            }
-            case DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST:
-            {
-                // Building $iothub/twin/PATCH/properties/desired/?$version={new version}
-                topic.append(PATCH);
-                topic.append(BACKSLASH);
-                topic.append(PROPERTIES);
-                topic.append(BACKSLASH);
-                topic.append(DESIRED);
-
-                int version = message.getVersion();
-                topic.append(BACKSLASH);
-                topic.append(QUESTION);
-                topic.append(VERSION);
-                topic.append(version);
-                break;
-
             }
             default:
             {
@@ -177,7 +162,6 @@ class MqttTwin extends Mqtt
             return;
         }
 
-        String publishTopic = buildTopic(message);
         requestMap.put(message.getRequestId(), message.getDeviceOperationType());
 
         if (message.getDeviceOperationType() == DeviceOperations.DEVICE_OPERATION_TWIN_SUBSCRIBE_DESIRED_PROPERTIES_REQUEST)
@@ -195,6 +179,7 @@ class MqttTwin extends Mqtt
         }
         else
         {
+            String publishTopic = buildTopic(message);
             this.publish(publishTopic, message);
         }
     }
