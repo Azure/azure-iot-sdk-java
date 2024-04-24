@@ -121,9 +121,10 @@ This repository contains [provisioning service client SDK](./provisioning/provis
 
 Within the repository, you can find various types of simple samples that can help you get started.
 
-* [Device SDK Samples](./device/iot-device-samples)
-* [Service SDK Samples](./service/iot-service-samples)
-* [Provisioning SDK Samples](./provisioning/provisioning-samples)
+* [Device SDK samples](./iothub/device/iot-device-samples)
+* [Service SDK samples](https://github.com/Azure/azure-iot-service-sdk-java/tree/main/service/iot-service-samples)
+* [Provisioning SDK device samples](./provisioning/provisioning-device-client-samples)
+* [Provisioning SDK service samples](./provisioning/provisioning-service-client-samples)
 
 ## Logging
 
