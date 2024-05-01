@@ -10,10 +10,10 @@ name: CI - Ubuntu - Java 11
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  schedule:
+      - cron: '0 0 * * *' # run at 12 AM UTC
 
 jobs:
   build:
