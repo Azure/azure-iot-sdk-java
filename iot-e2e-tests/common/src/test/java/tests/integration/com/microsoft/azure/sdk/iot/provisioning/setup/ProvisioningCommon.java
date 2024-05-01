@@ -101,7 +101,10 @@ public class ProvisioningCommon extends IntegrationTest
         provisioningServiceIdScope = Tools.retrieveEnvironmentVariableValue(DPS_ID_SCOPE_ENV_VAR_NAME);
         provisioningServiceGlobalEndpointWithInvalidCert = Tools.retrieveEnvironmentVariableValue(DPS_GLOBAL_ENDPOINT_WITH_INVALID_CERT_ENV_VAR_NAME);
         provisioningServiceWithInvalidCertConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_WITH_INVALID_CERT_ENV_VAR_NAME);
-        isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
+        String pipelineTriggerType = Tools.retrieveEnvironmentVariableValue(TestConstants.PIPELINE_TRIGGER_TYPE);
+        isPullRequest = "pull_request".equalsIgnoreCase(pipelineTriggerType);
+
+        System.out.println("Pipeline trigger type: " + pipelineTriggerType);
     }
 
     public enum AttestationType

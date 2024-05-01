@@ -46,8 +46,10 @@ public class ReceiveMessagesCommon extends IntegrationTest
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         IntegrationTest.isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
-        IntegrationTest.isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
+        String pipelineTriggerType = Tools.retrieveEnvironmentVariableValue(TestConstants.PIPELINE_TRIGGER_TYPE);
+        isPullRequest = "pull_request".equalsIgnoreCase(pipelineTriggerType);
 
+        System.out.println("Pipeline trigger type: " + pipelineTriggerType);
         messageProperties = new HashMap<>(3);
         messageProperties.put("name1", "value1");
         messageProperties.put("name2", "value2");
