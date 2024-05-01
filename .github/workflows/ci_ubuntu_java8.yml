@@ -28,7 +28,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn -Dmaven.javadoc.skip=true install -T 2C --batch-mode -q
+      run: mvn install -T 2C --batch-mode -q
       env:
         IOT_DPS_CONNECTION_STRING: ${{ secrets.IOT_DPS_CONNECTION_STRING }}
         IOT_DPS_ID_SCOPE: ${{ secrets.IOT_DPS_ID_SCOPE }}
