@@ -15,7 +15,7 @@ if ($env:IOT_DPS_CONNECTION_STRING.length -eq 0)
 mvn install -DskipTests=true -T 2C
 
 #move to sample folder where you can run the sample that deletes all devices tied to a hub
-cd service/iot-service-samples/device-deletion-sample/target
+cd iot-e2e-tests/device-deletion-sample/target
 
 #Run sample code to delete all devices from these iot hubs
 echo "Cleaning up iot hub and dps"
