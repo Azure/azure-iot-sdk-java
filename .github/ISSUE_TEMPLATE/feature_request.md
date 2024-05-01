@@ -28,6 +28,8 @@ As an open source project, we welcome PRs for new features, and we don't want to
 
 Note that feature requests that only affect unsupported platforms may be closed as "won't fix" if we have no plans to support that platform. See [this document](../../supported_platforms.md) for details on which platforms are officially supported. 
 
+Note that the IoT hub service client SDK has been moved to [this repo](https://www.github.com/Azure/azure-iot-service-sdk-java) so if you want to create a feature request for that package, please file it [here](https://www.github.com/Azure/azure-iot-service-sdk-java/issues) instead.
+
 ------------------------------- delete above -------------------------------
 
 **Is your feature request related to a problem? Please describe.**

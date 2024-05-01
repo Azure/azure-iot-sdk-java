@@ -33,6 +33,8 @@ Below is a generic bug report format. We recommend you use it as a template and 
 
 Note that bugs that only affect unsupported platforms will likely be treated as feature requests, and may be closed as "won't fix" if we have no plans to support that platform. See [this document](../../supported_platforms.md) for details on which platforms are officially supported. 
 
+Note that the IoT hub service client SDK has been moved to [this repo](https://www.github.com/Azure/azure-iot-service-sdk-java) so if you want to file a bug on that package, please file it [here](https://www.github.com/Azure/azure-iot-service-sdk-java/issues) instead.
+
 ------------------------------- delete above -------------------------------
 
 

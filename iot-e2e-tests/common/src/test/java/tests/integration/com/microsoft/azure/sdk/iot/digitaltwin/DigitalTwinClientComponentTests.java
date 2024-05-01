@@ -11,10 +11,7 @@ import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.UpdateOperationUtility;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.customized.DigitalTwinGetHeaders;
 import com.microsoft.azure.sdk.iot.service.digitaltwin.models.*;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.serialization.BasicDigitalTwin;
 import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
 import com.microsoft.rest.ServiceResponseWithHeaders;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.digitaltwin.helpers.E2ETestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DigitalTwinTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
@@ -35,8 +33,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static java.util.Arrays.asList;
@@ -80,6 +76,7 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
     @Before
     public void setUp() throws URISyntaxException, IOException, IotHubException, IotHubClientException
     {
+        isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         this.deviceClient = createDeviceClient(protocol);
         deviceClient.open(false);
         digitalTwinClient = DigitalTwinClient.createFromConnectionString(IOTHUB_CONNECTION_STRING);
@@ -103,49 +100,6 @@ public class DigitalTwinClientComponentTests extends IntegrationTest
         Device registeredDevice = registryClient.addDevice(device);
         String deviceConnectionString = Tools.getDeviceConnectionString(IOTHUB_CONNECTION_STRING, registeredDevice);
         return new DeviceClient(deviceConnectionString, protocol, options);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void getDigitalTwin() {
-        // act
-        BasicDigitalTwin response = this.digitalTwinClient.getDigitalTwin(deviceId, BasicDigitalTwin.class);
-        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders = this.digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
-
-        // assert
-        assertEquals(response.getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
-        assertEquals(responseWithHeaders.body().getMetadata().getModelId(), E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID);
-    }
-
-    @Test
-    @StandardTierHubOnlyTest
-    public void updateDigitalTwin()
-    {
-        // arrange
-        String newProperty = "currentTemperature";
-        Integer newPropertyValue = 35;
-        String newComponent = "newThermostat";
-        String newComponentPath = "/newThermostat";
-        Map<String, Object> componentProperties = new HashMap<>();
-        componentProperties.put(newProperty, newPropertyValue);
-
-        DigitalTwinUpdateRequestOptions optionsWithoutEtag = new DigitalTwinUpdateRequestOptions();
-        optionsWithoutEtag.setIfMatch("*");
-
-        // get digital twin and Etag before update
-        ServiceResponseWithHeaders<BasicDigitalTwin, DigitalTwinGetHeaders> responseWithHeaders = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class);
-        DigitalTwinUpdateRequestOptions optionsWithEtag = new DigitalTwinUpdateRequestOptions();
-        optionsWithEtag.setIfMatch(responseWithHeaders.headers().eTag());
-
-        // act
-        // Add component at root level - conditional update with max overload
-        UpdateOperationUtility updateOperationUtility = new UpdateOperationUtility().appendAddComponentOperation(newComponentPath, componentProperties);
-        digitalTwinClient.updateDigitalTwinWithResponse(deviceId, updateOperationUtility.getUpdateOperations(), optionsWithEtag);
-        BasicDigitalTwin digitalTwin = digitalTwinClient.getDigitalTwinWithResponse(deviceId, BasicDigitalTwin.class).body();
-
-        // assert
-        assertEquals(E2ETestConstants.TEMPERATURE_CONTROLLER_MODEL_ID, digitalTwin.getMetadata().getModelId());
-        assertTrue(digitalTwin.getCustomProperties().containsKey(newComponent));
     }
 
     @Test

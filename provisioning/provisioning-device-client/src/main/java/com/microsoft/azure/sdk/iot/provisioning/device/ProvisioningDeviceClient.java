@@ -9,21 +9,21 @@ package com.microsoft.azure.sdk.iot.provisioning.device;
 
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.ProvisioningDeviceClientConfig;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.SDKUtils;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.task.ProvisioningTask;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.contract.ProvisioningDeviceClientContract;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
-import com.microsoft.azure.sdk.iot.provisioning.device.AdditionalData;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
 public class ProvisioningDeviceClient
 {
     private static final int MAX_THREADS_TO_RUN = 1;
+    private static final int DEFAULT_TIMEOUT_SECONDS = 60;
 
     private final ProvisioningDeviceClientConfig provisioningDeviceClientConfig;
     private final ProvisioningDeviceClientContract provisioningDeviceClientContract;
@@ -47,29 +47,24 @@ public class ProvisioningDeviceClient
     {
         if (globalEndpoint == null || globalEndpoint.isEmpty())
         {
-            //SRS_ProvisioningDeviceClient_25_001: [ The constructor shall throw IllegalArgumentException if globalEndpoint is null or empty. ]
             throw new IllegalArgumentException("global endpoint cannot be null or empty");
         }
 
         if (idScope == null || idScope.isEmpty())
         {
-            //SRS_ProvisioningDeviceClient_25_002: [ The constructor shall throw IllegalArgumentException if idScope is null or empty. ]
             throw new IllegalArgumentException("scope id cannot be null or empty");
         }
 
         if (protocol == null)
         {
-            //SRS_ProvisioningDeviceClient_25_003: [ The constructor shall throw IllegalArgumentException if protocol is null. ]
             throw new IllegalArgumentException("protocol cannot be null");
         }
 
         if (securityProvider == null)
         {
-            //SRS_ProvisioningDeviceClient_25_004: [ The constructor shall throw IllegalArgumentException if securityProvider is null. ]
             throw new IllegalArgumentException("Security provider cannot be null");
         }
 
-        //SRS_ProvisioningDeviceClient_25_005: [ The constructor shall create provisioningDeviceClientConfig and set all the provided values to it.. ]
         this.provisioningDeviceClientConfig = new ProvisioningDeviceClientConfig();
 
         this.provisioningDeviceClientConfig.setProvisioningServiceGlobalEndpoint(globalEndpoint);
@@ -77,16 +72,14 @@ public class ProvisioningDeviceClient
         this.provisioningDeviceClientConfig.setProtocol(protocol);
         this.provisioningDeviceClientConfig.setSecurityProvider(securityProvider);
 
-        //SRS_ProvisioningDeviceClient_25_006: [ The constructor shall create provisioningDeviceClientContract with the given config. ]
         this.provisioningDeviceClientContract = ProvisioningDeviceClientContract.createProvisioningContract(this.provisioningDeviceClientConfig);
-        //SRS_ProvisioningDeviceClient_25_007: [ The constructor shall create an executor service with fixed thread pool of size 1. ]
         this.executor = Executors.newFixedThreadPool(MAX_THREADS_TO_RUN);
 
         log.debug("Initialized a ProvisioningDeviceClient instance using SDK version {}", SDKUtils.PROVISIONING_DEVICE_CLIENT_VERSION);
     }
 
     /**
-     * Register's a device with the service and provides you with iothub uri and the registered device.
+     * Asynchronously registers a device with the service and provides you with iothub uri and the registered device.
      * @param provisioningDeviceClientRegistrationCallback Callback where you can retrieve the status of registration like iothub uri and the registered device or
      *                                                     any exception that was caused during registration process. Cannot be {@code null}.
      * @param context Context for the callback. Can be {@code null}.
@@ -96,21 +89,18 @@ public class ProvisioningDeviceClient
     {
         if (provisioningDeviceClientRegistrationCallback == null)
         {
-            //SRS_ProvisioningDeviceClient_25_008: [ This method shall throw IllegalArgumentException if provisioningDeviceClientRegistrationCallback is null. ]
             throw new IllegalArgumentException("registration callback cannot be null");
         }
 
-        //SRS_ProvisioningDeviceClient_25_009: [ This method shall set the config with the callback. ]
         this.provisioningDeviceClientConfig.setRegistrationCallback(provisioningDeviceClientRegistrationCallback, context);
 
-        //SRS_ProvisioningDeviceClient_25_010: [ This method shall start the executor with the ProvisioningTask. ]
         log.debug("Starting provisioning thread...");
         Callable<Object> provisioningTask = new ProvisioningTask(this.provisioningDeviceClientConfig, this.provisioningDeviceClientContract);
         executor.submit(provisioningTask);
     }
 
     /**
-     * Register's a device with the service and provides you with iothub uri and the registered device.
+     * Asynchronously registers a device with the service and provides you with iothub uri and the registered device.
      * @param provisioningDeviceClientRegistrationCallback Callback where you can retrieve the status of registration like iothub uri and the registered device or
      *                                                     any exception that was caused during registration process. Cannot be {@code null}.
      * @param context Context for the callback. Can be {@code null}.
@@ -121,19 +111,105 @@ public class ProvisioningDeviceClient
     {
         if (provisioningDeviceClientRegistrationCallback == null)
         {
-            //SRS_ProvisioningDeviceClient_25_008: [ This method shall throw IllegalArgumentException if provisioningDeviceClientRegistrationCallback is null. ]
             throw new IllegalArgumentException("registration callback cannot be null");
         }
 
-        this.provisioningDeviceClientConfig.setPayload(additionalData.getProvisioningPayload());
+        if (additionalData != null)
+        {
+            this.provisioningDeviceClientConfig.setPayload(additionalData.getProvisioningPayload());
+        }
 
-        //SRS_ProvisioningDeviceClient_25_009: [ This method shall set the config with the callback. ]
         this.provisioningDeviceClientConfig.setRegistrationCallback(provisioningDeviceClientRegistrationCallback, context);
 
-        //SRS_ProvisioningDeviceClient_25_010: [ This method shall start the executor with the ProvisioningTask. ]
         log.debug("Starting provisioning thread...");
         ProvisioningTask provisioningTask = new ProvisioningTask(this.provisioningDeviceClientConfig, this.provisioningDeviceClientContract);
         executor.submit(provisioningTask);
+    }
+
+    /**
+     * Synchronously registers a device with the service and provides you with iothub uri and the registered device.
+     * @return the details of the finished provisioning.
+     * @throws ProvisioningDeviceClientException If any exception is thrown during provisioning.
+     * @throws InterruptedException If this operation is interrupted while waiting for the provisioning to finish.
+     */
+    public ProvisioningDeviceClientRegistrationResult registerDeviceSync() throws ProvisioningDeviceClientException, InterruptedException
+    {
+        return registerDeviceSync(DEFAULT_TIMEOUT_SECONDS);
+    }
+
+    /**
+     * Synchronously registers a device with the service and provides you with iothub uri and the registered device.
+     * @param additionalData Additional data for device registration.
+     * @return the details of the finished provisioning.
+     * @throws ProvisioningDeviceClientException If any exception is thrown during provisioning.
+     * @throws InterruptedException If this operation is interrupted while waiting for the provisioning to finish.
+     */
+    public ProvisioningDeviceClientRegistrationResult registerDeviceSync(AdditionalData additionalData) throws ProvisioningDeviceClientException, InterruptedException
+    {
+        return registerDeviceSync(additionalData, DEFAULT_TIMEOUT_SECONDS);
+    }
+
+    /**
+     * Synchronously registers a device with the service and provides you with iothub uri and the registered device.
+     * @param timeout the amount of time, in seconds, to wait for provisioning to finish. If this operation exceeds the
+     * provided timeout, it will throw {@link ProvisioningDeviceClientException}.
+     * @return the details of the finished provisioning.
+     * @throws ProvisioningDeviceClientException If any exception is thrown during provisioning.
+     * @throws InterruptedException If this operation is interrupted while waiting for the provisioning to finish.
+     */
+    public ProvisioningDeviceClientRegistrationResult registerDeviceSync(int timeout) throws ProvisioningDeviceClientException, InterruptedException
+    {
+        return registerDeviceSync(null, timeout);
+    }
+
+    /**
+     * Synchronously registers a device with the service and provides you with iothub uri and the registered device.
+     * @param additionalData Additional data for device registration.
+     * @param timeout the amount of time, in seconds, to wait for provisioning to finish. If this operation exceeds the
+     * provided timeout, it will throw {@link ProvisioningDeviceClientException}.
+     * @return the details of the finished provisioning.
+     * @throws ProvisioningDeviceClientException If any exception is thrown during provisioning.
+     * @throws InterruptedException If this operation is interrupted while waiting for the provisioning to finish.
+     */
+    public ProvisioningDeviceClientRegistrationResult registerDeviceSync(AdditionalData additionalData, int timeout) throws ProvisioningDeviceClientException, InterruptedException
+    {
+        final CountDownLatch registrationLatch = new CountDownLatch(1);
+        AtomicReference<ProvisioningDeviceClientRegistrationResult> registrationResultReference = new AtomicReference<>();
+        AtomicReference<Exception> registrationExceptionReference = new AtomicReference<>();
+        registerDevice(
+            (provisioningDeviceClientRegistrationResult, e, context) ->
+            {
+                registrationResultReference.set(provisioningDeviceClientRegistrationResult);
+                registrationExceptionReference.set(e);
+                registrationLatch.countDown();
+            },
+            null,
+            additionalData);
+
+        // Wait until registration finishes or for a max amount of time
+        boolean timedOut = !registrationLatch.await(timeout, TimeUnit.SECONDS);
+        if (timedOut)
+        {
+            throw new ProvisioningDeviceClientException("Timed out waiting for registration to complete");
+        }
+
+        ProvisioningDeviceClientRegistrationResult registrationResult = registrationResultReference.get();
+        Exception registrationException = registrationExceptionReference.get();
+
+        if (registrationException != null)
+        {
+            if (registrationException instanceof ProvisioningDeviceHubException)
+            {
+                throw (ProvisioningDeviceHubException) registrationException;
+            }
+            else
+            {
+                // This shouldn't happen because the registration exception should always be of type ProvisioningDeviceHubException
+                throw new ProvisioningDeviceClientException("Failed to register", registrationException);
+            }
+        }
+
+        return registrationResult;
     }
 
     /**
@@ -141,7 +217,6 @@ public class ProvisioningDeviceClient
      */
     public void close()
     {
-        //SRS_ProvisioningDeviceClient_25_011: [ This method shall check if executor is terminated and if not shall shutdown the executor. ]
         if (executor != null && !executor.isTerminated())
         {
             executor.shutdownNow();

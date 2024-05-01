@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot</groupId>
     <artifactId>iot-sdk-java</artifactId>
-    <version>0.26.0</version>
+    <version>1.0.0</version>
     <name>Azure IoT Sdk Java</name>
     <packaging>pom</packaging>
     <developers>
@@ -14,17 +14,16 @@
         </developer>
     </developers>
     <modules>
-        <module>device</module>
-        <module>service</module>
         <module>iot-e2e-tests</module>
         <module>provisioning</module>
+        <module>iothub</module>
     </modules>
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.apache.qpid</groupId>
                 <artifactId>proton-j</artifactId>
-                <version>0.34.0</version>
+                <version>0.34.1</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -107,39 +106,34 @@
                 <version>2.7</version> <!--samples only-->
             </dependency>
             <dependency>
-                <groupId>com.azure</groupId>
-                <artifactId>azure-identity</artifactId>
-                <version>1.4.0</version> <!--e2e tests and samples only-->
-            </dependency>
-            <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
-                <version>4.1.86.Final</version> <!--e2e tests and samples only-->
+                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.86.Final</version> <!--e2e tests and samples only-->
+                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec</artifactId>
-                <version>4.1.86.Final</version> <!--e2e tests and samples only-->
+                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http</artifactId>
-                <version>4.1.86.Final</version> <!--e2e tests and samples only-->
+                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http2</artifactId>
-                <version>4.1.86.Final</version> <!--e2e tests and samples only-->
+                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.projectreactor.netty</groupId>
                 <artifactId>reactor-netty-http</artifactId>
-                <version>1.0.26</version> <!--e2e tests and samples only-->
+                <version>1.0.39</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>commons-cli</groupId>
@@ -174,7 +168,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>31.1-jre</version> <!-- Nested dependency from ms client runtime. Overriding the version to use newer version-->
+                <version>32.0.0-jre</version> <!-- Nested dependency from ms client runtime. Overriding the version to use newer version-->
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.woodstox</groupId>
@@ -195,10 +189,10 @@
         <dice-provider-artifact-id>dice-provider</dice-provider-artifact-id>
         <x509-provider-artifact-id>x509-provider</x509-provider-artifact-id>
 
-        <iot-device-client-version>2.1.3</iot-device-client-version>
-        <iot-service-client-version>2.1.5</iot-service-client-version>
-        <provisioning-device-client-version>2.0.3</provisioning-device-client-version>
-        <provisioning-service-client-version>2.0.2</provisioning-service-client-version>
+        <iot-device-client-version>2.5.0</iot-device-client-version>
+        <iot-service-client-version>2.1.6</iot-service-client-version>  <!--e2e tests only-->
+        <provisioning-device-client-version>2.1.3</provisioning-device-client-version>
+        <provisioning-service-client-version>2.0.3</provisioning-service-client-version>
         <security-provider-version>2.0.1</security-provider-version>
         <tpm-provider-emulator-version>2.0.1</tpm-provider-emulator-version>
         <tpm-provider-version>2.0.1</tpm-provider-version>

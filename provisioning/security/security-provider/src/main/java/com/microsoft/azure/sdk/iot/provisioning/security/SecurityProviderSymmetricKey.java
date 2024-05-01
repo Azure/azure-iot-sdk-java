@@ -41,6 +41,18 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
             throw new IllegalArgumentException("Registration ID cannot be null");
         }
 
+        // There are other invalid characters, but these characters affect the request path when registering
+        // and are difficult to notice without this catch
+        if (registrationId.contains("/"))
+        {
+            throw new IllegalArgumentException("Registration ID cannot contain \"/\" character");
+        }
+
+        if (registrationId.contains("\\"))
+        {
+            throw new IllegalArgumentException("Registration ID cannot contain \"\\\" character");
+        }
+
         this.primaryKey = symmetricKey;
         this.registrationId = registrationId;
     }
@@ -61,6 +73,18 @@ public class SecurityProviderSymmetricKey extends SecurityProvider
         if (registrationId == null || registrationId.isEmpty())
         {
             throw new IllegalArgumentException("Registration ID cannot be null");
+        }
+
+        // There are other invalid characters, but these characters affect the request path when registering
+        // and are difficult to notice without this catch
+        if (registrationId.contains("/"))
+        {
+            throw new IllegalArgumentException("Registration ID cannot contain \"/\" character");
+        }
+
+        if (registrationId.contains("\\"))
+        {
+            throw new IllegalArgumentException("Registration ID cannot contain \"\\\" character");
         }
 
         this.primaryKey = primaryKey.getBytes(StandardCharsets.UTF_8);

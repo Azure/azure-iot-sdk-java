@@ -43,6 +43,23 @@ public class SecurityProviderX509Cert extends SecurityProviderX509
         this.leafPrivateKey = leafPrivateKey;
         this.signerCertificates = signerCertificates;
         this.commonNameLeaf = this.getCommonName(this.leafCertificatePublic);
+
+        if (this.commonNameLeaf == null || this.commonNameLeaf.isEmpty())
+        {
+            throw new IllegalArgumentException("Common name cannot be null or empty");
+        }
+
+        // There are other invalid characters, but these characters affect the request path when registering
+        // and are difficult to notice without this catch
+        if (this.commonNameLeaf.contains("/"))
+        {
+            throw new IllegalArgumentException("Common name cannot contain \"/\" character");
+        }
+
+        if (this.commonNameLeaf.contains("\\"))
+        {
+            throw new IllegalArgumentException("Common name cannot contain \"\\\" character");
+        }
     }
 
     private String getCommonName(X509Certificate certificate)

@@ -6,35 +6,26 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.setup;
 
 
-import com.azure.core.credential.AzureSasCredential;
-import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.twin.DirectMethodPayload;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubServiceSasToken;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodRequestOptions;
+import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
 import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodResponse;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
+import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.After;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestIdentity;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestModuleIdentity;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.AMQPS;
+import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.MQTT;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
-import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_SIGNED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -61,7 +52,15 @@ public class DirectMethodsCommon extends IntegrationTest
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
         isBasicTierHub = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_BASIC_TIER_HUB_ENV_VAR_NAME));
         isPullRequest = Boolean.parseBoolean(Tools.retrieveEnvironmentVariableValue(TestConstants.IS_PULL_REQUEST));
-        return inputsCommon();
+
+        return Arrays.asList(
+            new Object[][]
+                {
+                    {AMQPS, SAS, ClientType.DEVICE_CLIENT},
+                    {MQTT, SAS, ClientType.DEVICE_CLIENT},
+                    {AMQPS, SAS, ClientType.MODULE_CLIENT},
+                    {MQTT, SAS, ClientType.MODULE_CLIENT},
+                });
     }
 
     protected static String iotHubConnectionString = "";
@@ -71,46 +70,6 @@ public class DirectMethodsCommon extends IntegrationTest
     protected static final String PAYLOAD_STRING = "This is a valid payload";
 
     protected DirectMethodTestInstance testInstance;
-
-    protected static Collection inputsCommon()
-    {
-        Collection<Object[]> inputs = new ArrayList<>();
-
-        for (ClientType clientType : ClientType.values())
-        {
-            for (IotHubClientProtocol protocol : IotHubClientProtocol.values())
-            {
-                if (protocol != HTTPS)
-                {
-                    for (AuthenticationType authenticationType : AuthenticationType.values())
-                    {
-                        if (authenticationType == SAS)
-                        {
-                            inputs.add(makeSubArray(protocol, authenticationType, clientType));
-                        }
-                        else if (authenticationType == SELF_SIGNED)
-                        {
-                            if (protocol != AMQPS_WS && protocol != MQTT_WS)
-                            {
-                                inputs.add(makeSubArray(protocol, authenticationType, clientType));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return inputs;
-    }
-
-    private static Object[] makeSubArray(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType)
-    {
-        Object[] inputSubArray = new Object[3];
-        inputSubArray[0] = protocol;
-        inputSubArray[1] = authenticationType;
-        inputSubArray[2] = clientType;
-        return inputSubArray;
-    }
 
     protected DirectMethodsCommon(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
@@ -328,16 +287,15 @@ public class DirectMethodsCommon extends IntegrationTest
 
                     try
                     {
-                        switch (methodName)
+                        if (METHOD_MODIFY.equals(methodName))
                         {
-                            case METHOD_MODIFY:
-                                result = modifyPayload(methodDataAsDifferentTypeObject);
-                                status = 1 + new Random().nextInt(998); // random number bound from 1 to 999
-                                break;
-                            default:
-                                result = "unknown:" + methodName;
-                                status = METHOD_NOT_DEFINED;
-                                break;
+                            result = modifyPayload(methodDataAsDifferentTypeObject);
+                            status = 1 + new Random().nextInt(998); // random number bound from 1 to 999
+                        }
+                        else
+                        {
+                            result = "unknown:" + methodName;
+                            status = METHOD_NOT_DEFINED;
                         }
                     }
                     catch (Exception e)
@@ -384,7 +342,7 @@ public class DirectMethodsCommon extends IntegrationTest
 
         // Assert
         assertNotNull(result);
-        assertEquals((long)METHOD_SUCCESS, (long)result.getStatus());
+        assertEquals(METHOD_SUCCESS, (long)result.getStatus());
         assertEquals(METHOD_LOOPBACK + ":" + PAYLOAD_STRING, result.getPayload(String.class));
     }
 
@@ -412,7 +370,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(Boolean.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(Boolean.class));
         }
         else if (payload instanceof byte[])
@@ -421,7 +379,7 @@ public class DirectMethodsCommon extends IntegrationTest
             assertPayloadHelper(new String((byte[]) options.getPayload(), StandardCharsets.UTF_8),
                     new String(this.testInstance.directMethodPayload.getPayload(byte[].class), StandardCharsets.UTF_8));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(new String((byte[]) this.testInstance.directMethodResponse.getPayload(), StandardCharsets.UTF_8),
                     new String(result.getPayload(byte[].class), StandardCharsets.UTF_8));
         }
@@ -430,7 +388,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(List.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(List.class));
         }
         else if (payload instanceof Map)
@@ -438,7 +396,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(Map.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(Map.class));
         }
         else if (payload instanceof CustomObject)
@@ -446,7 +404,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(CustomObject.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(CustomObject.class));
         }
         else
@@ -454,7 +412,7 @@ public class DirectMethodsCommon extends IntegrationTest
             // e2e test for DirectMethodRequestOptions and DirectMethodPayload
             assertPayloadHelper(options.getPayload(), this.testInstance.directMethodPayload.getPayload(String.class));
             // e2e test for DirectMethodResponse between device/module and service
-            assertEquals((long)this.testInstance.statusCode, (long)result.getStatus());
+            assertEquals(this.testInstance.statusCode, (long)result.getStatus());
             assertPayloadHelper(this.testInstance.directMethodResponse.getPayload(), result.getPayload(String.class));
         }
     }
@@ -468,20 +426,11 @@ public class DirectMethodsCommon extends IntegrationTest
 
         if (senderPayload instanceof CustomObject && receiverPayload instanceof CustomObject)
         {
-            assertEquals(((CustomObject)senderPayload).toString(), ((CustomObject)receiverPayload).toString());
+            assertEquals(senderPayload.toString(), receiverPayload.toString());
         }
         else
         {
             assertEquals(senderPayload, receiverPayload);
         }
-    }
-
-    protected static DirectMethodsClient buildDeviceMethodClientWithAzureSasCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        IotHubServiceSasToken serviceSasToken = new IotHubServiceSasToken(iotHubConnectionStringObj);
-        AzureSasCredential azureSasCredential = new AzureSasCredential(serviceSasToken.toString());
-        DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().httpReadTimeoutSeconds(HTTP_READ_TIMEOUT).build();
-        return new DirectMethodsClient(iotHubConnectionStringObj.getHostName(), azureSasCredential, options);
     }
 }

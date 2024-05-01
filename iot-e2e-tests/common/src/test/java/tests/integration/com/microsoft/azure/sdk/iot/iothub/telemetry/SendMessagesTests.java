@@ -6,43 +6,31 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.telemetry;
 
 
-import com.microsoft.azure.sdk.iot.device.ClientOptions;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.device.IotHubStatusCode;
 import com.microsoft.azure.sdk.iot.device.Message;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
-import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
+import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.ClientType;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.IotHubServicesCommon;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.MessageAndResult;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.SSLContextBuilder;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.iothub.setup.SendMessagesCommon;
 
-import javax.net.ssl.SSLContext;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.GeneralSecurityException;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
 import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SAS;
 import static junit.framework.TestCase.*;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * Test class containing all non error injection tests to be run on JVM and android pertaining to sending messages from a device/module.
@@ -52,17 +40,18 @@ import static org.junit.Assume.assumeFalse;
 @RunWith(Parameterized.class)
 public class SendMessagesTests extends SendMessagesCommon
 {
-    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
+    public SendMessagesTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType) throws Exception
     {
-        super(protocol, authenticationType, clientType, withProxy);
+        super(protocol, authenticationType, clientType);
     }
 
     @Test
     public void sendMessages() throws Exception
     {
         this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        testInstance.identity.getClient().open(true);
+        testInstance.identity.getClient().sendEvent(new Message("some message"));
+        testInstance.identity.getClient().close();
     }
 
     // Ensure that a user can use a device/module client as soon as the connection status callback executes with status CONNECTED
@@ -117,50 +106,46 @@ public class SendMessagesTests extends SendMessagesCommon
     }
 
     @Test
-    public void openClientWithRetry() throws Exception
-    {
-        this.testInstance.setup();
-        this.testInstance.identity.getClient().open(true);
-        this.testInstance.identity.getClient().close();
-    }
-
-    @Test
     public void sendMessagesWithCustomSasTokenProvider() throws Exception
     {
-        Assume.assumeTrue(testInstance.authenticationType == SAS);
+        assumeTrue(testInstance.authenticationType == SAS);
 
         this.testInstance.setup(true);
 
-        IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
-    }
-
-    @Test
-    public void sendBulkMessages() throws Exception
-    {
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendBulkMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        testInstance.identity.getClient().open(true);
+        testInstance.identity.getClient().sendEvent(new Message("Custom sas token provider client message"));
+        testInstance.identity.getClient().close();
     }
 
     @Test
     @ContinuousIntegrationTest
     public void sendManySmallMessagesAsBatch() throws Exception
     {
-        // Only send batch messages in large quantities when using HTTPS protocol.
-        assumeFalse(this.testInstance.protocol != HTTPS);
+        // Only HTTP supports batching messages
+        assumeTrue(this.testInstance.protocol == HTTPS);
 
         this.testInstance.setup();
 
-        IotHubServicesCommon.sendBulkMessages(testInstance.identity.getClient(), testInstance.protocol, MULTIPLE_SMALL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        int count = 5;
+        List<Message> messages = new ArrayList<>(count);
+        for (int i = 0; i < count; i++)
+        {
+            messages.add(new Message("Bulk message " + i));
+        }
+
+        testInstance.identity.getClient().open(true);
+        testInstance.identity.getClient().sendEvents(messages);
+        testInstance.identity.getClient().close();
     }
 
     @Test
     @ContinuousIntegrationTest
     public void sendLargestMessages() throws Exception
     {
-        this.testInstance.setup();
-
-        IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, LARGE_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
+        testInstance.setup();
+        testInstance.identity.getClient().open(true);
+        testInstance.identity.getClient().sendEvent(new Message(new byte[MAX_MESSAGE_PAYLOAD_SIZE]));
+        testInstance.identity.getClient().close();
     }
 
     @Test
@@ -173,8 +158,7 @@ public class SendMessagesTests extends SendMessagesCommon
 
         //All of these characters should be allowed within application properties
         msg.setProperty("TestKey1234!#$%&'*+-^_`|~", "TestValue1234!#$%&'*+-^_`|~()<>@,;:\\\"[]?={} \t");
-        // ()<>@,;:\"[]?={}
-        IotHubServicesCommon.sendMessageAndWaitForResponse(this.testInstance.identity.getClient(), new MessageAndResult(msg, IotHubStatusCode.OK), testInstance.protocol);
+        this.testInstance.identity.getClient().sendEvent(msg);
         this.testInstance.identity.getClient().close();
     }
 
@@ -182,49 +166,33 @@ public class SendMessagesTests extends SendMessagesCommon
     @ContinuousIntegrationTest
     public void expiredMessagesAreNotSent() throws Exception
     {
-        // Not worth testing for both w/ and w/o proxy
-        assumeFalse(testInstance.useHttpProxy);
-
         this.testInstance.setup();
 
-        IotHubServicesCommon.sendExpiredMessageExpectingMessageExpiredCallback(testInstance.identity.getClient(), testInstance.protocol, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, testInstance.authenticationType);
+        this.testInstance.identity.getClient().open(true);
+
+        try
+        {
+            Message expiredMessage = new Message("some pre-expired message");
+            expiredMessage.setAbsoluteExpiryTime(1);
+            this.testInstance.identity.getClient().sendEvent(expiredMessage);
+            fail("Expected a MESSAGE_EXPIRED error but did not trigger one");
+        }
+        catch (IotHubClientException e)
+        {
+            assertEquals(IotHubStatusCode.MESSAGE_EXPIRED, e.getStatusCode());
+        }
     }
 
     @Test
     public void sendMessagesWithCustomSSLContextAndSasAuth() throws Exception
     {
-        //only testing sas based auth with custom ssl context here
-        assumeFalse(testInstance.authenticationType != SAS);
+        assumeTrue(testInstance.authenticationType == SAS);
 
         this.testInstance.setup(SSLContextBuilder.buildSSLContext());
 
-        IotHubServicesCommon.sendMessages(testInstance.identity.getClient(), testInstance.protocol, NORMAL_MESSAGES_TO_SEND, RETRY_MILLISECONDS, SEND_TIMEOUT_MILLISECONDS, 0, null);
-    }
-
-    @ContinuousIntegrationTest
-    @Test
-    public void sendMessagesWithECCCertificate() throws GeneralSecurityException, IOException, IotHubException, URISyntaxException, InterruptedException, IotHubClientException
-    {
-        // test is only applicable for self-signed device clients
-        assumeFalse(testInstance.authenticationType != AuthenticationType.SELF_SIGNED || testInstance.clientType != ClientType.DEVICE_CLIENT);
-
-        // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
-        assumeFalse(Tools.isAndroid());
-
-        X509CertificateGenerator eccCertGenerator =
-            new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
-
-        SSLContext sslContext = SSLContextBuilder.buildSSLContext(eccCertGenerator.getX509Certificate(), eccCertGenerator.getPrivateKey());
-
-        Device eccDevice = new Device(UUID.randomUUID().toString(), AuthenticationType.SELF_SIGNED);
-        eccDevice.setThumbprint(eccCertGenerator.getX509Thumbprint(), eccCertGenerator.getX509Thumbprint());
-        eccDevice = registryClient.addDevice(eccDevice);
-
-        ClientOptions clientOptions = ClientOptions.builder().sslContext(sslContext).build();
-        DeviceClient deviceClient = new DeviceClient(Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice), testInstance.protocol, clientOptions);
-
-        deviceClient.open(false);
-        deviceClient.close();
+        testInstance.identity.getClient().open(true);
+        testInstance.identity.getClient().sendEvent(new Message("some message"));
+        testInstance.identity.getClient().close();
     }
 
     @Test

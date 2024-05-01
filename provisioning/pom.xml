@@ -7,13 +7,13 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-sdk-java</artifactId>
-        <version>0.26.0</version>
+        <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
     <artifactId>provisioning</artifactId>
     <name>Provisioning Client</name>
-    <version>1.8.1</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <description>The Microsoft Azure IoT Provisioning Client SDK for Java</description>
     <url>http://azure.github.io/azure-iot-sdk-java/</url>
@@ -21,7 +21,8 @@
         <module>provisioning-device-client</module>
         <module>provisioning-service-client</module>
         <module>security</module>
-        <module>provisioning-samples</module>
+        <module>provisioning-device-client-samples</module>
+        <module>provisioning-service-client-samples</module>
         <module>provisioning-tools</module>
     </modules>
 </project>

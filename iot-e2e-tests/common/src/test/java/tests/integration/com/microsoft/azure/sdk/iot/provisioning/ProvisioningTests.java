@@ -5,45 +5,23 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot.provisioning;
 
-
-import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
-import com.microsoft.azure.sdk.iot.device.twin.TwinCollection;
-import com.microsoft.azure.sdk.iot.provisioning.service.configs.DeviceCapabilities;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderTpm;
 import com.microsoft.azure.sdk.iot.provisioning.security.exceptions.SecurityProviderException;
 import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPMEmulator;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
-import com.microsoft.azure.sdk.iot.service.twin.Twin;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.exceptions.IotHubException;
-import org.junit.Assert;
-import org.junit.Ignore;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.CorrelationDetailsLoggingAssert;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ContinuousIntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DeviceProvisioningServiceTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.ProvisioningCommon;
 
 import javax.net.ssl.SSLHandshakeException;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import static com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientTransportProtocol.*;
 import static junit.framework.TestCase.assertNotNull;
@@ -67,7 +45,8 @@ public class ProvisioningTests extends ProvisioningCommon
     @ContinuousIntegrationTest
     public void individualEnrollmentRegistration() throws Exception
     {
-        basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
+        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint);
     }
 
     @Test
@@ -78,22 +57,23 @@ public class ProvisioningTests extends ProvisioningCommon
         assumeTrue("Skipping this test because only Symmetric Key attestion can be tested for enrollment groups",
             this.testInstance.attestationType == AttestationType.SYMMETRIC_KEY);
 
-        basicRegistrationFlow(EnrollmentType.GROUP);
+        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.GROUP);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint);
     }
 
-    @Ignore // The DPS instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
+        Assume.assumeTrue("Test infrastructure is only setup to run this test on Linux", Tools.isLinux());
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.INDIVIDUAL);
     }
 
-    @Ignore // The DPS instance we use for this test is currently offline, so this test cannot be run
     @Test
     @ContinuousIntegrationTest
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
+        Assume.assumeTrue("Test infrastructure is only setup to run this test on Linux", Tools.isLinux());
         enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType.GROUP);
     }
 
@@ -107,8 +87,8 @@ public class ProvisioningTests extends ProvisioningCommon
         //The test protocol has no bearing on this test since it only uses the provisioning service client, so the test should only run once.
         assumeTrue(testInstance.protocol == HTTPS);
 
-        SecurityProvider securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
-        Attestation attestation = new TpmAttestation(new String(encodeBase64(((SecurityProviderTpm) securityProvider).getEndorsementKey())));
+        SecurityProviderTpm securityProvider = new SecurityProviderTPMEmulator(testInstance.registrationId, MAX_TPM_CONNECT_RETRY_ATTEMPTS);
+        Attestation attestation = new TpmAttestation(new String(encodeBase64(securityProvider.getEndorsementKey())));
         IndividualEnrollment individualEnrollment = new IndividualEnrollment(testInstance.registrationId, attestation);
         testInstance.provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
 
@@ -129,13 +109,8 @@ public class ProvisioningTests extends ProvisioningCommon
         assumeFalse("Skipping test because it is being run on Android", Tools.isAndroid());
 
         testInstance.certificateAlgorithm = X509CertificateGenerator.CertificateAlgorithm.ECC;
-        basicRegistrationFlow(EnrollmentType.INDIVIDUAL);
-    }
-
-    private void basicRegistrationFlow(EnrollmentType enrollmentType) throws Exception
-    {
-        testInstance.securityProvider = getSecurityProviderInstance(enrollmentType);
-        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint, false, null, null, null);
+        testInstance.securityProvider = getSecurityProviderInstance(EnrollmentType.INDIVIDUAL);
+        registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpoint);
     }
 
     private void enrollmentWithInvalidRemoteServerCertificateFails(EnrollmentType enrollmentType) throws Exception
@@ -150,14 +125,14 @@ public class ProvisioningTests extends ProvisioningCommon
         // Register identity
         try
         {
-            registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpointWithInvalidCert, false, null, null, null);
+            registerDevice(testInstance.protocol, testInstance.securityProvider, provisioningServiceGlobalEndpointWithInvalidCert);
         }
         catch (Exception | AssertionError e)
         {
             if (testInstance.protocol == HTTPS)
             {
                 //SSLHandshakeException is buried in the message, not the cause, for HTTP
-                if (e.getMessage().contains("SSLHandshakeException"))
+                if (e.getCause().getCause().getMessage().contains("SSLHandshakeException"))
                 {
                     expectedExceptionEncountered = true;
                 }

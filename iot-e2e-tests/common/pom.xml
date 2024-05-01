@@ -4,12 +4,12 @@
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-e2e-tests</artifactId>
-        <version>0.26.0</version>
+        <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>iot-e2e-common</artifactId>
     <name>IoT Hub Java E2E Common Tests</name>
-    <version>0.26.0</version>
+    <version>1.0.0</version>
     <description>Test suite fot the Microsoft Azure IoT Device SDK for Java</description>
     <developers>
         <developer>
@@ -201,6 +201,20 @@
 
                     <!--Maven will spawn up as many threads as it wants/can while running tests in parallel-->
                     <useUnlimitedThreads>true</useUnlimitedThreads>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.12.4</version>
+                <configuration>
+                    <!--
+                    For some reason, this build will attempt to run the e2e tests as part of the
+                    maven failsafe plugin (which is expected) and then again as part of the maven
+                    surefire plugin (which is not expected). Adding this hardcoded "don't run
+                    tests in this module with the surefire plugin" seems to resolve this issue, though.
+                    -->
+                    <skipTests>true</skipTests>
                 </configuration>
             </plugin>
             <plugin>

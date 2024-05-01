@@ -6,7 +6,6 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.ErrInjTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 
 public class ErrInjTestRule implements TestRule
 {

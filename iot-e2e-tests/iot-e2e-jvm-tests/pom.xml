@@ -5,17 +5,13 @@
     <parent>
         <artifactId>iot-e2e-tests</artifactId>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
-        <version>0.26.0</version>
+        <version>1.0.0</version>
     </parent>
     <name>IoT Hub Java E2E JVM Tests</name>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>iot-e2e-jvm-tests</artifactId>
-    <version>0.26.0</version>
+    <version>1.0.0</version>
     <dependencies>
-        <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-identity</artifactId>
-        </dependency>
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-core</artifactId>
@@ -55,6 +51,18 @@
             <groupId>com.microsoft.azure.sdk.iot.provisioning.security</groupId>
             <artifactId>${tpm-provider-emulator-artifact-id}</artifactId>
             <version>${tpm-provider-emulator-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
         </dependency>
     </dependencies>
     <properties>

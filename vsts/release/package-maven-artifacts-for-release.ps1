@@ -7,7 +7,6 @@ param (
  [string]$provisioningDeviceClient,
  [string]$provisioningServiceClient,
  [string]$iotDeviceClient,
- [string]$iotServiceClient,
  [string]$defaultWorkingDirectory
  )
  
@@ -96,7 +95,7 @@ function PackageArtifacts($Sources, $Tools, $Output) {
 
         Set-Location $Sources
 
-        mvn clean install -DskipTests -T 2C # Attempt to build
+        mvn clean install -DskipTests -T 2C  --batch-mode -q # Attempt to build
         TestLastExitCode
 
         foreach ($job in $jobs) {
@@ -169,10 +168,9 @@ ValidateInputParameter $tpmProvider "tpmProvider" "tpm-provider" "provisioning/s
 ValidateInputParameter $x509Provider "x509Provider" "x509-provider" "provisioning/security/x509-provider"
 ValidateInputParameter $provisioningDeviceClient "provisioningDeviceClient" "provisioning-device-client" "provisioning/provisioning-device-client"
 ValidateInputParameter $provisioningServiceClient "provisioningServiceClient" "provisioning-service-client" "provisioning/provisioning-service-client"
-ValidateInputParameter $iotDeviceClient "iotDeviceClient" "iot-device-client" "device/iot-device-client"
-ValidateInputParameter $iotServiceClient "iotServiceClient" "iot-service-client" "service/iot-service-client"
+ValidateInputParameter $iotDeviceClient "iotDeviceClient" "iot-device-client" "iothub/device/iot-device-client"
 
-if (($securityProvider -eq "False") -and ($tpmProvider -eq "False") -and ($x509Provider -eq "False") -and ($provisioningDeviceClient -eq "False") -and ($provisioningServiceClient -eq "False") -and ($iotDeviceClient -eq "False") -and ($iotServiceClient -eq "False"))
+if (($securityProvider -eq "False") -and ($tpmProvider -eq "False") -and ($x509Provider -eq "False") -and ($provisioningDeviceClient -eq "False") -and ($provisioningServiceClient -eq "False") -and ($iotDeviceClient -eq "False"))
 {
     echo "No packages were configured to be released, so this pipeline would do nothing. Please schedule a new run of this pipeline, and configure at least one package to be released."
     exit 1

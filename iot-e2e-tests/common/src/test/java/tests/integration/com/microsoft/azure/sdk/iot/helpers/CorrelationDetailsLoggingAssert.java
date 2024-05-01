@@ -6,7 +6,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.helpers;
 
 import com.microsoft.azure.sdk.iot.device.InternalClient;
-import org.junit.ComparisonFailure;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -218,111 +217,5 @@ public class CorrelationDetailsLoggingAssert
         correlationString += " Timestamp: " + timeStamp;
 
         return baseMessage + "\n(Correlation details: <" + correlationString + ">)";
-    }
-
-
-    public void assertTrue(String message, boolean condition)
-    {
-        if (!condition)
-        {
-            fail(message);
-        }
-    }
-
-    public void assertTrue(boolean condition)
-    {
-        assertTrue(null, condition);
-    }
-
-    public void assertFalse(String message, boolean condition)
-    {
-        assertTrue(message, !condition);
-    }
-
-    public void assertFalse(boolean condition)
-    {
-        assertFalse(null, condition);
-    }
-
-    public void fail(String message)
-    {
-        if (message == null)
-        {
-            throw new AssertionError(buildExceptionMessage("", this.deviceIds, this.protocol, this.hostname, this.moduleIds));
-        }
-
-        throw new AssertionError(buildExceptionMessage(message, this.deviceIds, this.protocol, this.hostname, this.moduleIds));
-    }
-
-    public void fail()
-    {
-        fail(null);
-    }
-
-    public void assertEquals(String message, Object expected, Object actual)
-    {
-        if (equalsRegardingNull(expected, actual))
-        {
-            return;
-        }
-        else if (expected instanceof String && actual instanceof String)
-        {
-            String cleanMessage = message == null ? "" : message;
-            throw new ComparisonFailure(cleanMessage, (String) expected, (String) actual);
-        }
-        else
-        {
-            failNotEquals(message, expected, actual);
-        }
-    }
-
-    public void assertEquals(Object expected, Object actual)
-    {
-        assertEquals(null, expected, actual);
-    }
-
-    private boolean equalsRegardingNull(Object expected, Object actual)
-    {
-        if (expected == null)
-        {
-            return actual == null;
-        }
-
-        return isEquals(expected, actual);
-    }
-
-    private void failNotEquals(String message, Object expected, Object actual)
-    {
-        fail(format(message, expected, actual));
-    }
-
-    String format(String message, Object expected, Object actual)
-    {
-        String formatted = "";
-        if (message != null && !message.equals(""))
-        {
-            formatted = message + " ";
-        }
-        String expectedString = String.valueOf(expected);
-        String actualString = String.valueOf(actual);
-        if (expectedString.equals(actualString))
-        {
-            return formatted + "expected: " + formatClassAndValue(expected, expectedString) + " but was: " + formatClassAndValue(actual, actualString);
-        }
-        else
-        {
-            return formatted + "expected:<" + expectedString + "> but was:<" + actualString + ">";
-        }
-    }
-
-    private String formatClassAndValue(Object value, String valueString)
-    {
-        String className = value == null ? "null" : value.getClass().getName();
-        return className + "<" + valueString + ">";
-    }
-
-    private boolean isEquals(Object expected, Object actual)
-    {
-        return expected.equals(actual);
     }
 }

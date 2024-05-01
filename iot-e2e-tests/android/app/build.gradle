@@ -2,17 +2,12 @@ apply plugin: 'com.android.application'
 
 //***********************************************************************************************//
 def IOTHUB_CONNECTION_STRING_ENV_VAR_NAME = project.hasProperty('IOTHUB_CONNECTION_STRING') ? '"'+project.property('IOTHUB_CONNECTION_STRING')+'"' : '""'
-def IOTHUB_CONN_STRING_INVALIDCERT = project.hasProperty('IOTHUB_CONN_STRING_INVALIDCERT') ? '"'+project.property('IOTHUB_CONN_STRING_INVALIDCERT')+'"': '""'
-def STORAGE_ACCOUNT_CONNECTION_STRING = project.hasProperty('STORAGE_ACCOUNT_CONNECTION_STRING') ? '"'+project.property('STORAGE_ACCOUNT_CONNECTION_STRING')+'"': '""'
 def IOT_DPS_CONNECTION_STRING = project.hasProperty('IOT_DPS_CONNECTION_STRING') ? '"'+project.property('IOT_DPS_CONNECTION_STRING')+'"': '""'
 def INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('DPS_GLOBALDEVICEENDPOINT_INVALIDCERT') ? '"'+project.property('DPS_GLOBALDEVICEENDPOINT_INVALIDCERT')+'"': '""'
 def INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING = project.hasProperty('PROVISIONING_CONNECTION_STRING_INVALIDCERT') ? '"'+project.property('PROVISIONING_CONNECTION_STRING_INVALIDCERT')+'"': '""'
 def DEVICE_PROVISIONING_SERVICE_ID_SCOPE = project.hasProperty('IOT_DPS_ID_SCOPE') ? '"'+project.property('IOT_DPS_ID_SCOPE')+'"': '""'
 def IS_BASIC_TIER_HUB = project.hasProperty('IS_BASIC_TIER_HUB') ? '"'+project.property('IS_BASIC_TIER_HUB')+'"' : '"false"'
 def IS_PULL_REQUEST = project.hasProperty('IS_PULL_REQUEST') ? '"'+project.property('IS_PULL_REQUEST')+'"' : '"false"'
-def IOTHUB_CLIENT_ID = project.hasProperty('IOTHUB_CLIENT_ID') ? '"'+project.property('IOTHUB_CLIENT_ID')+'"' : '""'
-def IOTHUB_CLIENT_SECRET = project.hasProperty('IOTHUB_CLIENT_SECRET') ? '"'+project.property('IOTHUB_CLIENT_SECRET')+'"' : '""'
-def MSFT_TENANT_ID = project.hasProperty('MSFT_TENANT_ID') ? '"'+project.property('MSFT_TENANT_ID')+'"' : '""'
 def RECYCLE_TEST_IDENTITIES = project.hasProperty('RECYCLE_TEST_IDENTITIES') ? '"'+project.property('RECYCLE_TEST_IDENTITIES')+'"' : '"false"'
 
 def STRING='String'
@@ -34,17 +29,12 @@ android {
         each {
             //buildTypes.mBuildConfigFields 'DATATYPE','VARIABLE',|"GRADLE VARIABLE|"'
             buildConfigField STRING, 'IOTHUB_CONNECTION_STRING', IOTHUB_CONNECTION_STRING_ENV_VAR_NAME
-            buildConfigField STRING, 'IOTHUB_CONN_STRING_INVALIDCERT', IOTHUB_CONN_STRING_INVALIDCERT
-            buildConfigField STRING, 'STORAGE_ACCOUNT_CONNECTION_STRING', STORAGE_ACCOUNT_CONNECTION_STRING
             buildConfigField STRING, 'IOT_DPS_CONNECTION_STRING', IOT_DPS_CONNECTION_STRING
             buildConfigField STRING, 'DPS_GLOBALDEVICEENDPOINT_INVALIDCERT', INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT
             buildConfigField STRING, 'PROVISIONING_CONNECTION_STRING_INVALIDCERT', INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING
             buildConfigField STRING, 'IOT_DPS_ID_SCOPE', DEVICE_PROVISIONING_SERVICE_ID_SCOPE
             buildConfigField STRING, 'IS_BASIC_TIER_HUB', IS_BASIC_TIER_HUB
             buildConfigField STRING, 'IS_PULL_REQUEST', IS_PULL_REQUEST
-            buildConfigField STRING, 'IOTHUB_CLIENT_ID', IOTHUB_CLIENT_ID
-            buildConfigField STRING, 'IOTHUB_CLIENT_SECRET', IOTHUB_CLIENT_SECRET
-            buildConfigField STRING, 'MSFT_TENANT_ID', MSFT_TENANT_ID
             buildConfigField STRING, 'RECYCLE_TEST_IDENTITIES', RECYCLE_TEST_IDENTITIES
         }
     }
@@ -87,10 +77,10 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     // This jar contains the test code that will be run on android. This jar isn't in the m2 folder, but rather it is in this cloned repo after mvn install is run
-    implementation files('../../common/target/iot-e2e-common-0.26.0-tests.jar')
+    implementation files('../../common/target/iot-e2e-common-1.0.0-tests.jar')
 
     // This jar contains the dependencies of the test code. DeviceClient, for instance. This jar isn't in the m2 folder, but rather it is in this cloned repo after mvn install is run
-    implementation files('../../common/target/iot-e2e-common-0.26.0-with-deps.jar')
+    implementation files('../../common/target/iot-e2e-common-1.0.0-with-deps.jar')
 
     implementation ('org.apache.commons:commons-lang3:3.6')
     implementation ('javax.xml.stream:stax-api:1.0-2')

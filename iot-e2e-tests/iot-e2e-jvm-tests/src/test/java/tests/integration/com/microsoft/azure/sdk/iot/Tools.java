@@ -3,29 +3,13 @@
 
 package tests.integration.com.microsoft.azure.sdk.iot;
 
-import com.azure.core.credential.TokenCredential;
-import com.azure.identity.ClientSecretCredentialBuilder;
-import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionString;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
-import com.microsoft.azure.sdk.iot.service.messaging.IotHubServiceClientProtocol;
-import com.microsoft.azure.sdk.iot.service.messaging.MessagingClient;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClient;
-import com.microsoft.azure.sdk.iot.service.methods.DirectMethodsClientOptions;
 import com.microsoft.azure.sdk.iot.service.registry.Device;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
-import com.microsoft.azure.sdk.iot.service.registry.RegistryClientOptions;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
-import com.microsoft.azure.sdk.iot.service.twin.TwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClient;
-import com.microsoft.azure.sdk.iot.service.digitaltwin.DigitalTwinClientOptions;
-import com.microsoft.azure.sdk.iot.service.query.QueryClient;
-import com.microsoft.azure.sdk.iot.service.query.QueryClientOptions;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 public class Tools
@@ -37,10 +21,6 @@ public class Tools
 
     public static final String iotHubConnectionString = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
     public static final boolean isBasicTierHub = Boolean.parseBoolean(retrieveEnvironmentVariableValue(IS_BASIC_TIER_HUB_ENV_VAR_NAME));
-
-    private static String MSFT_TENANT_ID_ENV_VAR_NAME = "MSFT_TENANT_ID";
-    private static String IOTHUB_CLIENT_ID_ENV_VAR_NAME = "IOTHUB_CLIENT_ID";
-    private static String IOTHUB_CLIENT_SECRET_ENV_VAR_NAME = "IOTHUB_CLIENT_SECRET";
 
     private static final String ANDROID_BUILD_CONFIG_CLASS = "com.iothub.azure.microsoft.com.androide2e.test.BuildConfig";
 
@@ -87,70 +67,6 @@ public class Tools
         }
 
         return envVariables;
-    }
-
-    public static MessagingClient buildServiceClientWithTokenCredential(IotHubServiceClientProtocol protocol)
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
-        return new MessagingClient(iotHubConnectionStringObj.getHostName(), tokenCredential, protocol);
-    }
-
-    public static DigitalTwinClient buildDigitalTwinClientWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
-        DigitalTwinClientOptions options = DigitalTwinClientOptions.builder().build();
-        return new DigitalTwinClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
-    }
-
-    public static TwinClient buildTwinClientWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
-        TwinClientOptions options = TwinClientOptions.builder().build();
-        return new TwinClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
-    }
-
-    public static QueryClient buildQueryClientWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
-        QueryClientOptions options = QueryClientOptions.builder().build();
-        return new QueryClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
-    }
-
-    public static RegistryClient buildRegistryClientWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
-        RegistryClientOptions options = RegistryClientOptions.builder().build();
-        return new RegistryClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
-    }
-
-    public static TokenCredential buildTokenCredentialFromEnvironment()
-    {
-        String tenantId = retrieveEnvironmentVariableValue(MSFT_TENANT_ID_ENV_VAR_NAME);
-        String clientId = retrieveEnvironmentVariableValue(IOTHUB_CLIENT_ID_ENV_VAR_NAME);
-        String clientSecret = retrieveEnvironmentVariableValue(IOTHUB_CLIENT_SECRET_ENV_VAR_NAME);
-
-        Objects.requireNonNull(tenantId, MSFT_TENANT_ID_ENV_VAR_NAME + " not found in environment variables");
-        Objects.requireNonNull(clientId, IOTHUB_CLIENT_ID_ENV_VAR_NAME + " not found in environment variables");
-        Objects.requireNonNull(clientSecret, IOTHUB_CLIENT_SECRET_ENV_VAR_NAME + " not found in environment variables");
-
-        return new ClientSecretCredentialBuilder()
-            .clientSecret(clientSecret)
-            .clientId(clientId)
-            .tenantId(tenantId)
-            .build();
-    }
-
-    public static DirectMethodsClient buildDeviceMethodClientWithTokenCredential()
-    {
-        IotHubConnectionString iotHubConnectionStringObj = IotHubConnectionStringBuilder.createIotHubConnectionString(iotHubConnectionString);
-        TokenCredential tokenCredential = buildTokenCredentialFromEnvironment();
-        DirectMethodsClientOptions options = DirectMethodsClientOptions.builder().build();
-        return new DirectMethodsClient(iotHubConnectionStringObj.getHostName(), tokenCredential, options);
     }
 
     public static String getHostName(String iotHubConnectionString)
