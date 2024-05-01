@@ -21,7 +21,7 @@ jobs:
     - name: Build with Maven
       run: mvn -B package -DskipTests
     - name: Cleanup
-      run: java -jar iot-e2e-tests/device-deletion-sample/target/deviceDeletionSample.jar $env:IOTHUB_CONNECTION_STRING $env:IOT_DPS_CONNECTION_STRING
+      run: java -jar iot-e2e-tests/device-deletion-sample/target/deviceDeletionSample.jar
       env:
         IOT_DPS_CONNECTION_STRING: ${{ secrets.IOT_DPS_CONNECTION_STRING }}
         IOTHUB_CONNECTION_STRING: ${{ secrets.IOTHUB_CONNECTION_STRING }}
