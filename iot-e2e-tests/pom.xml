@@ -24,6 +24,7 @@
         <module>common</module>
         <module>edge-e2e</module>
         <module>iot-e2e-jvm-tests</module>
+        <module>device-deletion-sample</module>
     </modules>
     <build>
         <plugins>
