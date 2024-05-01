@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderTPM
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -63,6 +64,7 @@ public class ProvisioningTests extends ProvisioningCommon
 
     @Test
     @ContinuousIntegrationTest
+    @Ignore("Test infrastructure not setup yet")
     public void individualEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         Assume.assumeTrue("Test infrastructure is only setup to run this test on Linux", Tools.isLinux());
@@ -71,6 +73,7 @@ public class ProvisioningTests extends ProvisioningCommon
 
     @Test
     @ContinuousIntegrationTest
+    @Ignore("Test infrastructure not setup yet")
     public void groupEnrollmentWithInvalidRemoteServerCertificateFails() throws Exception
     {
         Assume.assumeTrue("Test infrastructure is only setup to run this test on Linux", Tools.isLinux());
