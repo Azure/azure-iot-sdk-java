@@ -42,22 +42,9 @@ public class DeviceDeletionSample
      */
     public static void main(String[] args) throws InterruptedException, Exception
     {
-        if (args.length != 1 && args.length != 2)
-        {
-            System.out.format(
-                    "Expected 1 or 2 arguments but received: %d.\n"
-                            + "1.) Iot hub connection string to hub, this sample will delete all devices registered in this hub\n"
-                            + "2.) (optional) DPS connection string, this sample will delete all enrollment groups and individual enrollments",
-                    args.length);
-            return;
-        }
+        String iotHubConnString = System.getenv("IOTHUB_CONNECTION_STRING");
+        String dpsConnString = System.getenv("IOT_DPS_CONNECTION_STRING");
 
-        if ((args[0] == null || args[0].isEmpty()) && (args[1] == null || args[1].isEmpty()))
-        {
-            throw new Exception("No connection string info provided");
-        }
-
-        String iotHubConnString = args[0];
         Thread hubCleanupRunnable = null;
         if (!(iotHubConnString == null || iotHubConnString.isEmpty() || iotHubConnString.equals(" ")))
         {
@@ -66,9 +53,8 @@ public class DeviceDeletionSample
         }
 
         Thread dpsCleanupRunnable = null;
-        if (args.length > 1 && args[1] != null && !args[1].isEmpty())
+        if (!(dpsConnString == null || dpsConnString.isEmpty() || dpsConnString.equals(" ")))
         {
-            String dpsConnString = args[1];
             dpsCleanupRunnable = new Thread(new DPSCleanupRunnable(dpsConnString));
             dpsCleanupRunnable.start();
         }
