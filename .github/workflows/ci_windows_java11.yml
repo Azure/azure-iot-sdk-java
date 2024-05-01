@@ -28,4 +28,13 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build with Maven
-      run: mvn install -DskipTests # Unit tests fail at runtime for Java 11+ due to an old mocking framework we used in these tests
+      run: mvn install -DskipUnitTests # Unit tests fail at runtime for Java 11+ due to an old mocking framework we used in these tests
+      env:
+        IOT_DPS_CONNECTION_STRING: ${{ secrets.IOT_DPS_CONNECTION_STRING }}
+        IOT_DPS_ID_SCOPE: ${{ secrets.IOT_DPS_ID_SCOPE }}
+        IOTHUB_CONNECTION_STRING: ${{ secrets.IOTHUB_CONNECTION_STRING }}
+        DPS_GLOBALDEVICEENDPOINT_INVALIDCERT: ${{ secrets.DPS_GLOBALDEVICEENDPOINT_INVALIDCERT }}
+        PROVISIONING_CONNECTION_STRING_INVALIDCERT: ${{ secrets.PROVISIONING_CONNECTION_STRING_INVALIDCERT }}
+        IS_BASIC_TIER_HUB: true
+        TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+        RECYCLE_TEST_IDENTITIES: true
