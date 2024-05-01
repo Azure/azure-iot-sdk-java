@@ -77,5 +77,10 @@
             <artifactId>provisioning-service-client</artifactId>
             <version>${provisioning-service-client-version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.sdk.iot</groupId>
+            <artifactId>iot-service-client</artifactId>
+            <version>${iot-service-client-version}</version>
+        </dependency>
     </dependencies>
 </project>
