@@ -39,3 +39,4 @@ jobs:
         IS_BASIC_TIER_HUB: true
         TARGET_BRANCH: $(System.PullRequest.TargetBranch)
         RECYCLE_TEST_IDENTITIES: true
+        IS_PULL_REQUEST: ${{github.event_name}} == "pull_request"
