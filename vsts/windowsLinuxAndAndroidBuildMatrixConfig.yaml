@@ -119,7 +119,7 @@ jobs:
     timeoutInMinutes: 180
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
-      vmImage: 'ubuntu-22.04'
+      name: 'sdk-net--ubuntu-20'
     displayName: Linux
     strategy:
       maxParallel: $[variables.maxParallel]
