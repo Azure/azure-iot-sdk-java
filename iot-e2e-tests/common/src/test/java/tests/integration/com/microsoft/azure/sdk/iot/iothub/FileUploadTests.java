@@ -26,6 +26,7 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -225,6 +226,7 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Ignore("Current test infrastructure doesn't support file upload to a storage account")
     public void getAndCompleteSasUriWithUpload() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException, IotHubClientException
     {
         // Android has some compatibility issues with the azure storage SDK
@@ -258,8 +260,8 @@ public class FileUploadTests extends IntegrationTest
         tearDownDeviceClient(deviceClient);
     }
 
-    @FlakeyTest
     @Test (timeout = MAX_MILLISECS_TIMEOUT_KILL_TEST)
+    @Ignore("Current test infrastructure doesn't support file upload to a storage account")
     public void getAndCompleteSasUriWithMultipleUploads() throws URISyntaxException, IOException, InterruptedException, IotHubException, GeneralSecurityException, StorageException, TimeoutException, IotHubClientException
     {
         // Android has some compatibility issues with the azure storage SDK
