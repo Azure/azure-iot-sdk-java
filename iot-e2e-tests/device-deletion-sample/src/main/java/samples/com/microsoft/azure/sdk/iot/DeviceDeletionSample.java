@@ -28,6 +28,7 @@ import com.microsoft.azure.sdk.iot.service.twin.TwinClient;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -194,7 +195,7 @@ public class DeviceDeletionSample
 
         String sasTokenString = new IotHubServiceSasToken(iotHubConnectionString).toString();
 
-        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes(), sasTokenString);
+        HttpRequest request = new HttpRequest(url, HttpMethod.POST, body.toJson().getBytes(StandardCharsets.UTF_8), sasTokenString);
         request.setHeaderField("Accept", "application/json");
         request.setHeaderField("Content-Type", "application/json");
         request.setHeaderField("charset", "utf-8");
