@@ -31,15 +31,9 @@ jobs:
         JDK 8: # only run Java 8 in nightly or CI builds.
           JAVA_VERSION: 8
     pool:
-      vmImage: windows-latest
+      name: sdk-net--win-vs2022
     displayName: Windows
     steps:
-      - powershell: ./vsts/echo_versions.ps1
-        displayName: 'Echo Versions'
-        env:
-          JAVA_VERSION: $(JAVA_VERSION)
-          COMMIT_FROM: $(COMMIT_FROM)
-
       - powershell: ./vsts/start_tpm_windows.ps1
         displayName: 'Start TPM Simulator'
         env:
@@ -133,12 +127,6 @@ jobs:
         displayName: 'Print Linux version'
         inputs:
           script: 'cat /etc/*release'
-
-      - powershell: ./vsts/echo_versions.ps1
-        displayName: 'Echo Versions'
-        env:
-          JAVA_VERSION: $(JAVA_VERSION)
-          COMMIT_FROM: $(COMMIT_FROM)
 
       - task : Docker@2
         displayName: "Login to ACR"
@@ -289,18 +277,11 @@ jobs:
   - job: AndroidBuild
     timeoutInMinutes: 30
     pool:
-      vmImage: ubuntu-latest
+      name: 'sdk-net--ubuntu-20'
     displayName: Android Build
 
     steps:
-      - powershell: ./vsts/echo_versions.ps1
-        displayName: 'Echo Versions'
-        env:
-          COMMIT_FROM: $(COMMIT_FROM)
-          JAVA_VERSION: 8 # Android build doesn't need to run for both JDK 8 and 11
-        condition: always()
-
-      - powershell: ./vsts/build_e2e_tests.ps1
+      - powershell: ./vsts/build_e2e_tests_windows.ps1
         displayName: 'E2E Tests Build'
         condition: always()
 

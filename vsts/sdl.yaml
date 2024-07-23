@@ -10,9 +10,15 @@ jobs:
 
   condition: succeeded()
   pool:
-    vmImage: windows-latest
+    name: sdk-net--win-vs2022
     timeoutInMinutes: 60
   steps:
+  - powershell: ./vsts/build_repo_sdl.ps1
+    displayName: 'Build Repo'
+    env:
+      JAVA_VERSION: $(JAVA_VERSION)
+      COMMIT_FROM: $(COMMIT_FROM)
+
   - task: Maven@3
     inputs:
       mavenPomFile: 'pom.xml' 
