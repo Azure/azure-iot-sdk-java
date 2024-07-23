@@ -13,10 +13,12 @@ jobs:
     name: sdk-net--win-vs2022
     timeoutInMinutes: 60
   steps:
-  - task : CmdLine@2
-    inputs :
-      script : 'choco install maven'
-      
+    - powershell: ./vsts/install_prerequisites.ps1
+      displayName: 'Install Prerequisites'
+      env:
+        JAVA_VERSION: $(JAVA_VERSION)
+        COMMIT_FROM: $(COMMIT_FROM)
+
   - task: Maven@3
     inputs:
       mavenPomFile: 'pom.xml' 

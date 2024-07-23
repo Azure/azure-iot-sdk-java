@@ -34,9 +34,11 @@ jobs:
       name: sdk-net--win-vs2022
     displayName: Windows
     steps:
-      - task : CmdLine@2
-        inputs :
-          script : 'choco install maven'
+      - powershell: ./vsts/install_prerequisites.ps1
+        displayName: 'Install Prerequisites'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          COMMIT_FROM: $(COMMIT_FROM)
 
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
