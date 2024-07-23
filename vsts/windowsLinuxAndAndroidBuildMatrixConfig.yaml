@@ -128,12 +128,6 @@ jobs:
         inputs:
           script: 'cat /etc/*release'
 
-      - powershell: ./vsts/echo_versions.ps1
-        displayName: 'Echo Versions'
-        env:
-          JAVA_VERSION: $(JAVA_VERSION)
-          COMMIT_FROM: $(COMMIT_FROM)
-
       - task : Docker@2
         displayName: "Login to ACR"
         inputs:
@@ -287,13 +281,6 @@ jobs:
     displayName: Android Build
 
     steps:
-      - powershell: ./vsts/echo_versions.ps1
-        displayName: 'Echo Versions'
-        env:
-          COMMIT_FROM: $(COMMIT_FROM)
-          JAVA_VERSION: 8 # Android build doesn't need to run for both JDK 8 and 11
-        condition: always()
-
       - powershell: ./vsts/build_e2e_tests_windows.ps1
         displayName: 'E2E Tests Build'
         condition: always()
