@@ -11,6 +11,7 @@ elseif (($env:JAVA_VERSION).equals("11"))
 
 choco install maven -y
 
+Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
 refreshenv
 
 
