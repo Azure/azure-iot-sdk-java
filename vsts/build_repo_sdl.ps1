@@ -16,4 +16,4 @@ refreshenv
 
 mvn -v
 
-mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C -DskipUnitTests --batch-mode -q
+mvn install `-Dmaven.test.skip=true `-Dmaven.javadoc.skip=true

@@ -13,8 +13,8 @@ jobs:
     name: sdk-net--win-vs2022
     timeoutInMinutes: 60
   steps:
-  - powershell: ./vsts/install_prerequisites.ps1
-    displayName: 'Install Prerequisites'
+  - powershell: ./vsts/build_repo_sdl.ps1
+    displayName: 'Build Repo'
     env:
       JAVA_VERSION: $(JAVA_VERSION)
       COMMIT_FROM: $(COMMIT_FROM)
