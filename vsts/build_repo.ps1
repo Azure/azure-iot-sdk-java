@@ -12,10 +12,15 @@ else
     Write-Host "Pull request build detected"
 }
 
+choco install maven
+
+mvn -v
+
 # Set the Java home equal to the Java version under test. Currently, Azure Devops hosted agents only support Java 8, 11 and 17
 # Since they are the current Java LTS versions
 if (($env:JAVA_VERSION).equals("8"))
 {
+    choco install openjdk8 -y
     $env:JAVA_HOME=$env:JAVA_HOME_8_X64
 
     if ($isPullRequestBuild.equals("true"))
@@ -30,6 +35,7 @@ if (($env:JAVA_VERSION).equals("8"))
 }
 elseif (($env:JAVA_VERSION).equals("11"))
 {
+    choco install openjdk11 -y
     $env:JAVA_HOME=$env:JAVA_HOME_11_X64
     mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C -DskipUnitTests --batch-mode -q
 }
