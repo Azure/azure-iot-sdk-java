@@ -13,6 +13,10 @@ jobs:
     name: sdk-net--win-vs2022
     timeoutInMinutes: 60
   steps:
+  - task : CmdLine@2
+    inputs :
+      script : 'choco install maven'
+      
   - task: Maven@3
     inputs:
       mavenPomFile: 'pom.xml' 
