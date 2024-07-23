@@ -1,4 +1,4 @@
-﻿choco install maven
+﻿choco install maven -y
 
 if (($env:JAVA_VERSION).equals("8"))
 {

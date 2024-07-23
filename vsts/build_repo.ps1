@@ -12,7 +12,7 @@ else
     Write-Host "Pull request build detected"
 }
 
-choco install maven
+choco install maven -y
 
 # Set the Java home equal to the Java version under test. Currently, Azure Devops hosted agents only support Java 8, 11 and 17
 # Since they are the current Java LTS versions
