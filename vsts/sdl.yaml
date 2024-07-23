@@ -10,7 +10,7 @@ jobs:
 
   condition: succeeded()
   pool:
-    vmImage: windows-latest
+    name: sdk-net--win-vs2022
     timeoutInMinutes: 60
   steps:
   - task: Maven@3
