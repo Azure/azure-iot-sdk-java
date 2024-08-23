@@ -39,7 +39,7 @@ jobs:
         env:
           COMMIT_FROM: $(COMMIT_FROM)
 
-      - powershell: ./vsts/build_repo.ps1
+      - powershell: ./vsts/build_repo_windows.ps1
         displayName: 'Build and Test'
         env:
           JAVA_VERSION: $(JAVA_VERSION)
@@ -228,7 +228,7 @@ jobs:
             127.0.0.1:2322:2322
           restartPolicy: unlessStopped
 
-      - powershell: ./vsts/build_repo.ps1
+      - powershell: ./vsts/build_repo_linux.ps1
         displayName: 'Build and Test'
         env:
           JAVA_VERSION: $(JAVA_VERSION)
