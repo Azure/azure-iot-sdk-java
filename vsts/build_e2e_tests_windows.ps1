@@ -1,10 +1,16 @@
 if (($env:JAVA_VERSION).equals("8"))
 {
+    Write-Host "Installing Java 8"
     choco install openjdk8 -y
 }
 elseif (($env:JAVA_VERSION).equals("11"))
 {
+    Write-Host "Installing Java 8"
     choco install openjdk11 -y
+}
+else
+{
+    Write-Error "Unrecognized Java version specified: " $env:JAVA_VERSION
 }
 
 choco install maven -y
