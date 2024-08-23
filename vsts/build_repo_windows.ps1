@@ -12,13 +12,12 @@ else
     Write-Host "Pull request build detected"
 }
 
-choco install maven -y
-
 # Set the Java home equal to the Java version under test. Currently, Azure Devops hosted agents only support Java 8, 11 and 17
 # Since they are the current Java LTS versions
 if (($env:JAVA_VERSION).equals("8"))
 {
     choco install openjdk8 -y
+    choco install maven -y
 
     Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
     refreshenv
@@ -40,6 +39,7 @@ if (($env:JAVA_VERSION).equals("8"))
 elseif (($env:JAVA_VERSION).equals("11"))
 {
     choco install openjdk11 -y
+    choco install maven -y
 
     Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
     refreshenv
