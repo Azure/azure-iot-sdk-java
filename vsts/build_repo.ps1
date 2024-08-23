@@ -23,6 +23,8 @@ if (($env:JAVA_VERSION).equals("8"))
     Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
     refreshenv
 
+    Write-Host "Java home value: " ($env:JAVA_HOME)
+
     mvn -v
 
     if ($isPullRequestBuild.equals("true"))
@@ -41,6 +43,8 @@ elseif (($env:JAVA_VERSION).equals("11"))
 
     Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
     refreshenv
+
+    Write-Host "Java home value: " ($env:JAVA_HOME)
 
     mvn -v
 
