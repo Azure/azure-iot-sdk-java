@@ -55,5 +55,5 @@ Older API versions have known issues that we don't plan to fix. For additional d
 
 - This library has known compatibility issues with JDK 7 and below, and those JDK versions are not supported.
 - This library does not officially support being run on MacOS.
-- This library does not officially support minification via [Proguard](http://android-doc.github.io/tools/help/proguard.html).
-- This library does not officially support being used in [Kotlin](https://kotlinlang.org) applications.
+- This library does not officially support minification via Proguard.
+- This library does not officially support being used in Kotlin applications.
