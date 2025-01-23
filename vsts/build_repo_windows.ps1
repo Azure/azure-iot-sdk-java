@@ -16,7 +16,15 @@ else
 # Since they are the current Java LTS versions
 if (($env:JAVA_VERSION).equals("8"))
 {
-    $env:JAVA_HOME=$env:JAVA_HOME_8_X64
+    choco install openjdk8 -y
+    choco install maven -y
+
+    Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+    refreshenv
+
+    Write-Host "Java home value: " ($env:JAVA_HOME)
+
+    mvn -v
 
     if ($isPullRequestBuild.equals("true"))
     {
@@ -30,14 +38,18 @@ if (($env:JAVA_VERSION).equals("8"))
 }
 elseif (($env:JAVA_VERSION).equals("11"))
 {
-    $env:JAVA_HOME=$env:JAVA_HOME_11_X64
+    choco install openjdk11 -y
+    choco install maven -y
+
+    Import-Module $env:ChocolateyInstall\helpers\chocolateyProfile.psm1
+    refreshenv
+
+    Write-Host "Java home value: " ($env:JAVA_HOME)
+
+    mvn -v
+
     mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C -DskipUnitTests --batch-mode -q
 }
-# Leaving this commented out to make it easy to add Java 17 support later
-#elseif (($env:JAVA_VERSION).equals("17"))
-#{
-#    $env:JAVA_HOME=$env:JAVA_HOME_17_X64
-#}
 else
 {
     Write-Host "Unrecognized or unsupported JDK version: " $env:JAVA_VERSION
