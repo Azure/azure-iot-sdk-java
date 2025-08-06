@@ -1700,4 +1700,168 @@ public class EnrollmentGroupTest
         //assert
         assertEquals(capabilities, actualDeviceCapabilities);
     }
+
+    /* Tests for credentialPolicyName functionality */
+    @Test
+    public void constructorWithJsonSetsCredentialPolicyName()
+    {
+        // arrange
+        final String expectedCredentialPolicyName = "test-credential-policy";
+        final String json = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"x509\",\n" +
+                "    \"x509\": {\n" +
+                "      \"signingCertificates\": {\n" +
+                "        \"primary\": {" +
+                "          \"certificate\":\"" + PUBLIC_KEY_CERTIFICATE_STRING + "\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"credentialPolicyName\": \"" + expectedCredentialPolicyName + "\"\n" +
+                "}";
+
+        // act
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(json);
+
+        // assert
+        assertEquals(expectedCredentialPolicyName, enrollmentGroup.getCredentialPolicyName());
+    }
+
+    @Test
+    public void constructorWithJsonSetsCredentialPolicyNameSucceedOnNull()
+    {
+        // arrange
+        final String json = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"x509\",\n" +
+                "    \"x509\": {\n" +
+                "      \"signingCertificates\": {\n" +
+                "        \"primary\": {" +
+                "          \"certificate\":\"" + PUBLIC_KEY_CERTIFICATE_STRING + "\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\"\n" +
+                "}";
+
+        // act
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(json);
+
+        // assert
+        assertNull(enrollmentGroup.getCredentialPolicyName());
+    }
+
+    @Test
+    public void setCredentialPolicyNameSucceed()
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
+        final String expectedCredentialPolicyName = "new-credential-policy";
+        assertNotEquals(expectedCredentialPolicyName, Deencapsulation.getField(enrollmentGroup, "credentialPolicyName"));
+
+        // act
+        enrollmentGroup.setCredentialPolicyName(expectedCredentialPolicyName);
+
+        // assert
+        assertEquals(expectedCredentialPolicyName, Deencapsulation.getField(enrollmentGroup, "credentialPolicyName"));
+        assertEquals(expectedCredentialPolicyName, enrollmentGroup.getCredentialPolicyName());
+    }
+
+    @Test
+    public void setCredentialPolicyNameSucceedOnNull()
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
+        enrollmentGroup.setCredentialPolicyName("initial-policy");
+
+        // act
+        enrollmentGroup.setCredentialPolicyName(null);
+
+        // assert
+        assertNull(Deencapsulation.getField(enrollmentGroup, "credentialPolicyName"));
+        assertNull(enrollmentGroup.getCredentialPolicyName());
+    }
+
+    @Test
+    public void getCredentialPolicyNameSucceed()
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
+        final String expectedCredentialPolicyName = "get-credential-policy";
+        Deencapsulation.setField(enrollmentGroup, "credentialPolicyName", expectedCredentialPolicyName);
+
+        // act
+        String actualCredentialPolicyName = enrollmentGroup.getCredentialPolicyName();
+
+        // assert
+        assertEquals(expectedCredentialPolicyName, actualCredentialPolicyName);
+    }
+
+    @Test
+    public void toJsonElementIncludesCredentialPolicyName()
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeStandardX509EnrollmentGroup();
+        final String credentialPolicyName = "json-test-policy";
+        enrollmentGroup.setCredentialPolicyName(credentialPolicyName);
+
+        String expectedJson = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"x509\",\n" +
+                "    \"x509\": {\n" +
+                "      \"signingCertificates\": {\n" +
+                "        \"primary\": {" +
+                "          \"certificate\":\"" + PUBLIC_KEY_CERTIFICATE_STRING + "\"\n" +
+                "        }\n" +
+                "      }\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"credentialPolicyName\": \"" + credentialPolicyName + "\"\n" +
+                "}";
+
+        // act
+        JsonElement result = enrollmentGroup.toJsonElement();
+
+        // assert
+        Helpers.assertJson(result.toString(), expectedJson);
+    }
+
+    @Test
+    public void toJsonElementExcludesCredentialPolicyNameWhenNull()
+    {
+        // arrange
+        EnrollmentGroup enrollmentGroup = makeStandardSymmetricKeyEnrollmentGroup();
+        // credentialPolicyName is null by default
+
+        String expectedJson = "{\n" +
+                "  \"enrollmentGroupId\": \"" + VALID_ENROLLMENT_GROUP_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"symmetricKey\",\n" +
+                "    \"symmetricKey\": {\n" +
+                "      \"primaryKey\": \"" + VALID_PRIMARY_KEY + "\",\n" +
+                "      \"secondaryKey\": \"" + VALID_SECONDARY_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\"\n" +
+                "}";
+
+        // act
+        JsonElement result = enrollmentGroup.toJsonElement();
+
+        // assert
+        Helpers.assertJson(result.toString(), expectedJson);
+        // Also verify that credentialPolicyName field is not present in the JSON
+        assertFalse(result.getAsJsonObject().has("credentialPolicyName"));
+    }
 }

@@ -1413,4 +1413,165 @@ public class IndividualEnrollmentTest
         //assert
         assertEquals(expectedIotHubs, actualIotHubs);
     }
+
+    /* Tests for credentialPolicyName functionality */
+    @Test
+    public void constructorWithJsonSetsCredentialPolicyName()
+    {
+        // arrange
+        final String expectedCredentialPolicyName = "test-credential-policy";
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"credentialPolicyName\": \"" + expectedCredentialPolicyName + "\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        assertEquals(expectedCredentialPolicyName, individualEnrollment.getCredentialPolicyName());
+    }
+
+    @Test
+    public void constructorWithJsonSetsCredentialPolicyNameSucceedOnNull()
+    {
+        // arrange
+        final String json = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\"\n" +
+                "}";
+
+        // act
+        IndividualEnrollment individualEnrollment = new IndividualEnrollment(json);
+
+        // assert
+        assertNull(individualEnrollment.getCredentialPolicyName());
+    }
+
+    @Test
+    public void setCredentialPolicyNameSucceed()
+    {
+        // arrange
+        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
+        final String expectedCredentialPolicyName = "new-credential-policy";
+        assertNotEquals(expectedCredentialPolicyName, Deencapsulation.getField(individualEnrollment, "credentialPolicyName"));
+
+        // act
+        individualEnrollment.setCredentialPolicyName(expectedCredentialPolicyName);
+
+        // assert
+        assertEquals(expectedCredentialPolicyName, Deencapsulation.getField(individualEnrollment, "credentialPolicyName"));
+        assertEquals(expectedCredentialPolicyName, individualEnrollment.getCredentialPolicyName());
+    }
+
+    @Test
+    public void setCredentialPolicyNameSucceedOnNull()
+    {
+        // arrange
+        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
+        individualEnrollment.setCredentialPolicyName("initial-policy");
+
+        // act
+        individualEnrollment.setCredentialPolicyName(null);
+
+        // assert
+        assertNull(Deencapsulation.getField(individualEnrollment, "credentialPolicyName"));
+        assertNull(individualEnrollment.getCredentialPolicyName());
+    }
+
+    @Test
+    public void getCredentialPolicyNameSucceed()
+    {
+        // arrange
+        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
+        final String expectedCredentialPolicyName = "get-credential-policy";
+        Deencapsulation.setField(individualEnrollment, "credentialPolicyName", expectedCredentialPolicyName);
+
+        // act
+        String actualCredentialPolicyName = individualEnrollment.getCredentialPolicyName();
+
+        // assert
+        assertEquals(expectedCredentialPolicyName, actualCredentialPolicyName);
+    }
+
+    @Test
+    public void toJsonElementIncludesCredentialPolicyName()
+    {
+        // arrange
+        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
+        final String credentialPolicyName = "json-test-policy";
+        individualEnrollment.setCredentialPolicyName(credentialPolicyName);
+
+        String expectedJson = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"deviceId\": \"" + VALID_DEVICE_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\",\n" +
+                "      \"storageRootKey\": \"" + VALID_STORAGE_ROOT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": false\n" +
+                "  },\n" +
+                "  \"credentialPolicyName\": \"" + credentialPolicyName + "\"\n" +
+                "}";
+
+        // act
+        JsonElement result = individualEnrollment.toJsonElement();
+
+        // assert
+        Helpers.assertJson(result.toString(), expectedJson);
+    }
+
+    @Test
+    public void toJsonElementExcludesCredentialPolicyNameWhenNull()
+    {
+        // arrange
+        IndividualEnrollment individualEnrollment = makeStandardEnrollment();
+        // credentialPolicyName is null by default
+
+        String expectedJson = "{\n" +
+                "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
+                "  \"deviceId\": \"" + VALID_DEVICE_ID + "\",\n" +
+                "  \"attestation\": {\n" +
+                "    \"type\": \"tpm\",\n" +
+                "    \"tpm\": {\n" +
+                "      \"endorsementKey\": \"" + VALID_ENDORSEMENT_KEY + "\",\n" +
+                "      \"storageRootKey\": \"" + VALID_STORAGE_ROOT_KEY + "\"\n" +
+                "    }\n" +
+                "  },\n" +
+                "  \"iotHubHostName\": \"" + VALID_IOTHUB_HOST_NAME + "\",\n" +
+                "  \"provisioningStatus\": \"enabled\",\n" +
+                "  \"capabilities\": {\n" +
+                "    \"iotEdge\": false\n" +
+                "  }\n" +
+                "}";
+
+        // act
+        JsonElement result = individualEnrollment.toJsonElement();
+
+        // assert
+        Helpers.assertJson(result.toString(), expectedJson);
+        // Also verify that credentialPolicyName field is not present in the JSON
+        assertFalse(result.getAsJsonObject().has("credentialPolicyName"));
+    }
 }
