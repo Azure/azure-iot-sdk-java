@@ -226,6 +226,18 @@ public class IndividualEnrollment extends Serializable
     @Setter
     private Collection<String> iotHubs;
 
+    // the credential policy name
+    private static final String CREDENTIAL_POLICY_NAME_TAG = "credentialPolicyName";
+    
+    /**
+     * Linked Azure Device Registry credential policy name (optional).
+     */
+    @Expose
+    @SerializedName(CREDENTIAL_POLICY_NAME_TAG)
+    @Getter
+    @Setter
+    private String credentialPolicyName;
+
     /**
      * CONSTRUCTOR
      *
@@ -357,6 +369,11 @@ public class IndividualEnrollment extends Serializable
         this.setAllocationPolicy(result.getAllocationPolicy());
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
         this.setReprovisionPolicy(result.getReprovisionPolicy());
+        
+        if (result.credentialPolicyName != null)
+        {
+            this.setCredentialPolicyName(result.getCredentialPolicyName());
+        }
     }
 
     /**

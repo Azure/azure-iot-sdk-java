@@ -218,6 +218,18 @@ public class EnrollmentGroup extends Serializable
     @Setter
     private DeviceCapabilities capabilities;
 
+    // the credential policy name
+    private static final String CREDENTIAL_POLICY_NAME_TAG = "credentialPolicyName";
+    
+    /**
+     * Linked Azure Device Registry credential policy name (optional).
+     */
+    @Expose
+    @SerializedName(CREDENTIAL_POLICY_NAME_TAG)
+    @Getter
+    @Setter
+    private String credentialPolicyName;
+
     /**
      * CONSTRUCTOR
      *
@@ -340,6 +352,11 @@ public class EnrollmentGroup extends Serializable
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
         this.setReprovisionPolicy(result.getReprovisionPolicy());
         this.setCapabilities(result.getCapabilities());
+        
+        if (result.credentialPolicyName != null)
+        {
+            this.setCredentialPolicyName(result.getCredentialPolicyName());
+        }
     }
 
     /**
