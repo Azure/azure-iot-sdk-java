@@ -43,13 +43,6 @@ resource iotHub 'Microsoft.Devices/IotHubs@2021-03-03-preview' = {
         maxDeliveryCount: 100
       }
     }
-    StorageEndpoints: {
-      '$default': {
-        sasTtlAsIso8601: 'PT1H'
-        connectionString: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${listkeys(storageAccount.id, '2019-06-01').keys[0].value}'
-        containerName: ContainerName
-      }
-    }
     enableFileUploadNotifications: true
   }
   sku: {
