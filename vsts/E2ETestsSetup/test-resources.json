@@ -77,10 +77,7 @@
       "name": "[parameters('HubName')]",
       "location": "[resourceGroup().location]",
       "identity": {
-        "type": "SystemAssigned, UserAssigned",
-        "userAssignedIdentities": {
-          "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('UserAssignedManagedIdentityName')))]": {}
-        }
+        "type": "SystemAssigned, UserAssigned"
       },
       "properties": {
         "eventHubEndpoints": {
