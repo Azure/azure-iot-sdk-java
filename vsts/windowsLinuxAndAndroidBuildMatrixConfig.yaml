@@ -34,7 +34,7 @@ jobs:
         inlineScript: |
           $jsonContent = az account show | ConvertFrom-Json
           $subscriptionId = $jsonContent.Id
-          $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup javasdkgate -GenerateResourcesForTestDevOpsPipeline
+          $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup javasdkgate
 
   ### Windows ###
   - job: Windows
@@ -167,7 +167,7 @@ jobs:
           versionSpec: $(JAVA_VERSION)
           jdkArchitectureOption: 'x64'
           jdkSourceOption: 'PreInstalled'
-          
+
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
