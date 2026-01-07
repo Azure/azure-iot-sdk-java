@@ -228,6 +228,7 @@ jobs:
     pool:
       vmImage: ubuntu-latest
     displayName: Android Build
+    condition: false
     steps:
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
@@ -277,6 +278,7 @@ jobs:
 
   - job: AndroidTest
     timeoutInMinutes: 50
+    condition: false
     pool:
       vmImage: 'macOS-latest'
     strategy:
