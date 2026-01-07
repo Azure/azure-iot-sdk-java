@@ -78,10 +78,7 @@ az deployment group create `
     --only-show-errors `
     --template-file "$PSScriptRoot\test-resources.json" `
     --parameters `
-    StorageAccountName=$storageAccountName `
-    HubUnitsCount=$iothubUnitsToBeCreated `
-    UserAssignedManagedIdentityName=$managedIdentityName `
-    EnableIotHubSecuritySolution=$EnableIotHubSecuritySolution
+    HubUnitsCount=$iothubUnitsToBeCreated
 
 if ($LastExitCode -ne 0)
 {
