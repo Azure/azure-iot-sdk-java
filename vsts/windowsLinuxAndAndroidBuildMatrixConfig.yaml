@@ -22,7 +22,7 @@ variables:
 jobs:
   - job: DeployCloudTestResources
     pool:
-      vmImage: windows-2022
+      vmImage: windows-latest
     steps:     
     - task: AzureCLI@2
       name: deployCloudTestResources 
@@ -55,6 +55,11 @@ jobs:
       vmImage: windows-latest
     displayName: Windows
     steps:
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: $(JAVA_VERSION)
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
@@ -157,6 +162,12 @@ jobs:
         inputs:
           script: 'cat /etc/*release'
 
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: $(JAVA_VERSION)
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'
+          
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
