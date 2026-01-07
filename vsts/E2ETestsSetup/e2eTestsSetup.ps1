@@ -8,7 +8,7 @@ param(
     [string] $ResourceGroup,
     
     [Parameter(Mandatory)]
-    [string] $SubscriptionId,
+    [string] $SubscriptionId
 )
 
 $startTime = (Get-Date)
