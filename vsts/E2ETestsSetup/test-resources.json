@@ -163,7 +163,7 @@
       },
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts/blobServices/containers', split(format('{0}/{1}', format('{0}/{1}', parameters('StorageAccountName'), parameters('BlobServiceName')), parameters('ContainerName')), '/')[0], split(format('{0}/{1}', format('{0}/{1}', parameters('StorageAccountName'), parameters('BlobServiceName')), parameters('ContainerName')), '/')[1], split(format('{0}/{1}', format('{0}/{1}', parameters('StorageAccountName'), parameters('BlobServiceName')), parameters('ContainerName')), '/')[2])]",
-        "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName'))]"
       ]
     },
     {
