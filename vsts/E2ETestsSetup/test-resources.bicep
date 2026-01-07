@@ -18,7 +18,7 @@ resource iotHub 'Microsoft.Devices/IotHubs@2021-03-03-preview' = {
   name: HubName
   location: resourceGroup().location
   identity: {
-    type: 'SystemAssigned, UserAssigned'
+    type: 'SystemAssigned'
   }
   properties: {
     eventHubEndpoints: {

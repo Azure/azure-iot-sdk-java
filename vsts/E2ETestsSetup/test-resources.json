@@ -77,7 +77,7 @@
       "name": "[parameters('HubName')]",
       "location": "[resourceGroup().location]",
       "identity": {
-        "type": "SystemAssigned, UserAssigned"
+        "type": "SystemAssigned"
       },
       "properties": {
         "eventHubEndpoints": {
