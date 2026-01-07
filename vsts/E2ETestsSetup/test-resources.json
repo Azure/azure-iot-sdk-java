@@ -70,6 +70,55 @@
       "dependsOn": [
         "[resourceId('Microsoft.Devices/IotHubs', parameters('HubName'))]"
       ]
+    },
+    {
+      "type": "Microsoft.Devices/IotHubs",
+      "apiVersion": "2021-03-03-preview",
+      "name": "[parameters('HubName')]",
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned, UserAssigned",
+        "userAssignedIdentities": {
+          "[format('{0}', resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('UserAssignedManagedIdentityName')))]": {}
+        }
+      },
+      "properties": {
+        "eventHubEndpoints": {
+          "events": {
+            "retentionTimeInDays": 1,
+            "partitionCount": 4
+          }
+        },
+        "cloudToDevice": {
+          "defaultTtlAsIso8601": "PT1H",
+          "maxDeliveryCount": 100,
+          "feedback": {
+            "ttlAsIso8601": "PT1H",
+            "lockDurationAsIso8601": "PT5S",
+            "maxDeliveryCount": 100
+          }
+        },
+        "messagingEndpoints": {
+          "fileNotifications": {
+            "ttlAsIso8601": "PT1H",
+            "lockDurationAsIso8601": "PT5S",
+            "maxDeliveryCount": 100
+          }
+        },
+        "StorageEndpoints": {
+          "$default": {
+            "sasTtlAsIso8601": "PT1H",
+            "connectionString": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}', parameters('StorageAccountName'), listkeys(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName')), '2019-06-01').keys[0].value)]",
+            "containerName": "[parameters('ContainerName')]"
+          }
+        },
+        "enableFileUploadNotifications": true
+      },
+      "sku": {
+        "name": "S1",
+        "tier": "Standard",
+        "capacity": "[parameters('HubUnitsCount')]"
+      }
     }
   ],
   "outputs": {

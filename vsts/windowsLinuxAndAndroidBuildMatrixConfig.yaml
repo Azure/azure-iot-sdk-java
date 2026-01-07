@@ -368,3 +368,21 @@ jobs:
           verbosity : 'Verbose'
           alertWarningLevel : 'Low' # The task will present a warning, but will not cause the build to fail
         condition : always()
+
+  - job: TearDownCloudTestResources
+    condition: always()
+    dependsOn:
+      - Windows
+      - Linux
+      - DeployCloudTestResources
+    pool:
+      vmImage: windows-2022
+    steps:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'iot hub sdk service connection'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az group delete --name javasdkgate --y
+          # don't forget to delete RBAC resources as well
