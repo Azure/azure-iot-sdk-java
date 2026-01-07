@@ -36,9 +36,13 @@ if ($PSversiontable.PSVersion -lt "7.0.0")
 $Region = $Region.Replace(' ', '')
 $iothubUnitsToBeCreated = 1
 
-#################################################################################################
-# Make any special modifications required to generate resources for the DevOps test pipeline.
-#################################################################################################
+## remove any characters that aren't letters or numbers, and then validate
+$storageAccountName = "$($ResourceGroup.ToLower())sa"
+$storageAccountName = [regex]::Replace($storageAccountName, "[^a-z0-9]", "")
+if (-not ($storageAccountName -match "^[a-z0-9][a-z0-9]{1,22}[a-z0-9]$"))
+{
+    throw "Storage account name derived from resource group has illegal characters: $storageAccountName"
+}
 
 $iothubUnitsToBeCreated = 5;
 
@@ -78,6 +82,7 @@ az deployment group create `
     --only-show-errors `
     --template-file "$PSScriptRoot\test-resources.json" `
     --parameters `
+    StorageAccountName=$storageAccountName `
     HubUnitsCount=$iothubUnitsToBeCreated
 
 if ($LastExitCode -ne 0)
