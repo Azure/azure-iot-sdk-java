@@ -37,7 +37,7 @@ jobs:
 
           $resourceGroupName = 'javasdkgate'+$CloudResourceUniqueSuffix
 
-          Write-Host "##vso[task.setvariable variable=resourceGroupName;isOutput=true]$resourceGroupName"
+          Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$resourceGroupName"
 
           $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup $resourceGroupName
 
@@ -381,7 +381,7 @@ jobs:
       - Linux
       - DeployCloudTestResources
     variables:
-      resourceGroupName: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.resourceGroupName'] ]
+      RESOURCE_GROUP_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.RESOURCE_GROUP_NAME'] ]
     pool:
       vmImage: windows-2022
     steps:
@@ -391,6 +391,7 @@ jobs:
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          Write-Host "Deleting resource group with name " + $resourceGroupName
-          az group delete --name $resourceGroupName --y
+          Write-Host "Deleting resource group with name "
+          Write-Host $(RESOURCE_GROUP_NAME)
+          az group delete --name $(RESOURCE_GROUP_NAME) --y
           # don't forget to delete RBAC resources as well
