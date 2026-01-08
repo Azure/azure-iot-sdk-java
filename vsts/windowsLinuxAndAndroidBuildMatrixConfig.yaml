@@ -388,7 +388,7 @@ jobs:
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          resourceGroupName = javasdkgate-$CloudResourceUniqueSuffix
+          resourceGroupName = 'javasdkgate-'+$CloudResourceUniqueSuffix
           Write-Host "Deleting resource group with name " + resourceGroupName
           az group delete --name resourceGroupName --y
           # don't forget to delete RBAC resources as well
