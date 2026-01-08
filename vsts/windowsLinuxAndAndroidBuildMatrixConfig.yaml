@@ -31,9 +31,9 @@ jobs:
           $jsonContent = az account show | ConvertFrom-Json
           $subscriptionId = $jsonContent.Id
 
-          $length = 5
-          $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-          $randomString = -join ((1..$length) | ForEach-Object { $characters | Get-Random })
+          $uniqueSuffixLength = 10
+          $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.ToCharArray()
+          $CloudResourceUniqueSuffix = -join ($characters | Get-Random -Count $uniqueSuffixLength)
           Write-Host "##vso[task.setvariable variable=$CloudResourceUniqueSuffix;isOutput=true]$randomString"
 
           $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup javasdkgate -CloudResourceUniqueSuffix $randomString
