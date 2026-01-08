@@ -121,6 +121,8 @@ if ($Region.EndsWith('euap', 'CurrentCultureIgnoreCase'))
     $dpsEndpoint = "global-canary.azure-devices-provisioning.net"
 }
 
+$dpsIdScope = az iot dps show -g $ResourceGroup --name $dpsName --query 'properties.idScope' --output tsv
+
 # Environment variables for IoT Hub E2E tests
 Write-Host "##vso[task.setvariable variable=IOTHUB_CONNECTION_STRING;isOutput=true]$iotHubConnectionString"
 Write-Host "##vso[task.setvariable variable=IOTHUB_X509_DEVICE_PFX_CERTIFICATE;isOutput=true]$iothubX509DevicePfxBase64"
