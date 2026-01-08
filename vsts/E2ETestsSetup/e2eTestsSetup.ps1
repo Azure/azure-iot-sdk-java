@@ -12,7 +12,7 @@ param(
 
     # The unique identifier so that this deployment won't collide with any concurrently-running pipeline setup
     [Parameter(Mandatory)]
-    [string] $UniqueSuffix
+    [string] $CloudResourceUniqueSuffix
 )
 
 $startTime = (Get-Date)
@@ -41,7 +41,7 @@ $Region = $Region.Replace(' ', '')
 $iothubUnitsToBeCreated = 1
 
 ## remove any characters that aren't letters or numbers, and then validate
-$storageAccountName = "$($ResourceGroup.ToLower())sa"
+$storageAccountName = "$($ResourceGroup.ToLower())sa-$CloudResourceUniqueSuffix"
 $storageAccountName = [regex]::Replace($storageAccountName, "[^a-z0-9]", "")
 if (-not ($storageAccountName -match "^[a-z0-9][a-z0-9]{1,22}[a-z0-9]$"))
 {
@@ -55,11 +55,11 @@ $iothubUnitsToBeCreated = 5;
 # deployment.
 ######################################################################################################
 
-$rgExists = az group exists --name $ResourceGroup
+$rgExists = az group exists --name $ResourceGroup-$CloudResourceUniqueSuffix
 if ($rgExists -eq "False")
 {
-    Write-Host "`nCreating resource group $ResourceGroup in $Region"
-    az group create --name $ResourceGroup --location $Region --output none
+    Write-Host "`nCreating resource group $ResourceGroup-$CloudResourceUniqueSuffix in $Region"
+    az group create --name $ResourceGroup-$CloudResourceUniqueSuffix --location $Region --output none
 }
 
 $resourceGroupId = az group show -n $ResourceGroup --query id --out tsv
@@ -80,13 +80,13 @@ Write-Host @"
 "@
 
 az deployment group create `
-    --resource-group $ResourceGroup `
+    --resource-group $ResourceGroup-$CloudResourceUniqueSuffix `
     --name $deploymentName `
     --output none `
     --only-show-errors `
     --template-file "$PSScriptRoot\test-resources.json" `
     --parameters `
-    StorageAccountName=$storageAccountName `
+    StorageAccountName=$storageAccountName-$CloudResourceUniqueSuffix `
     HubUnitsCount=$iothubUnitsToBeCreated
 
 if ($LastExitCode -ne 0)

@@ -34,9 +34,9 @@ jobs:
           $length = 5
           $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
           $randomString = -join ((1..$length) | ForEach-Object { $characters | Get-Random })
-          Write-Host "##vso[task.setvariable variable=$UniqueSuffix;isOutput=true]$randomString"
+          Write-Host "##vso[task.setvariable variable=$CloudResourceUniqueSuffix;isOutput=true]$randomString"
 
-          $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup javasdkgate -UniqueSuffix $randomString
+          $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup javasdkgate -CloudResourceUniqueSuffix $randomString
 
   ### Windows ###
   - job: Windows
@@ -378,7 +378,7 @@ jobs:
       - Linux
       - DeployCloudTestResources
     variables:
-      UniqueSuffix: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.UniqueSuffix'] ]
+      CloudResourceUniqueSuffix: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.CloudResourceUniqueSuffix'] ]
     pool:
       vmImage: windows-2022
     steps:
@@ -388,7 +388,7 @@ jobs:
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          resourceGroupName = javasdkgate-$UniqueSuffix
+          resourceGroupName = javasdkgate-$CloudResourceUniqueSuffix
           Write-Host "Deleting resource group with name " + resourceGroupName
           az group delete --name resourceGroupName --y
           # don't forget to delete RBAC resources as well
