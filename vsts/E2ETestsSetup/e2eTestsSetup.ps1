@@ -8,7 +8,11 @@ param(
     [string] $ResourceGroup,
     
     [Parameter(Mandatory)]
-    [string] $SubscriptionId
+    [string] $SubscriptionId,
+
+    # The unique identifier so that this deployment won't collide with any concurrently-running pipeline setup
+    [Parameter(Mandatory)]
+    [string] $UniqueSuffix
 )
 
 $startTime = (Get-Date)

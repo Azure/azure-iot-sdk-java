@@ -34,7 +34,13 @@ jobs:
         inlineScript: |
           $jsonContent = az account show | ConvertFrom-Json
           $subscriptionId = $jsonContent.Id
-          $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup javasdkgate
+
+          $length = 5
+          $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+          $randomString = -join ((1..$length) | ForEach-Object { $characters | Get-Random })
+          Write-Host "##vso[task.setvariable variable=$UniqueSuffix;isOutput=true]$randomString"
+
+          $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup javasdkgate -UniqueSuffix $randomString
 
   ### Windows ###
   - job: Windows
@@ -375,6 +381,8 @@ jobs:
       - Windows
       - Linux
       - DeployCloudTestResources
+    variables:
+      UniqueSuffix: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.UniqueSuffix'] ]
     pool:
       vmImage: windows-2022
     steps:
@@ -384,5 +392,7 @@ jobs:
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          az group delete --name javasdkgate --y
+          resourceGroupName = javasdkgate-$UniqueSuffix
+          Write-Host "Deleting resource group with name " + resourceGroupName
+          az group delete --name resourceGroupName --y
           # don't forget to delete RBAC resources as well
