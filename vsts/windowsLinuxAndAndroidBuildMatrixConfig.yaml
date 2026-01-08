@@ -35,7 +35,7 @@ jobs:
           $characters = 'abcdefghijklmnopqrstuvwxyz'.ToCharArray()
           $CloudResourceUniqueSuffix = -join ($characters | Get-Random -Count $uniqueSuffixLength)
 
-          resourceGroupName = 'javasdkgate'+$CloudResourceUniqueSuffix
+          $resourceGroupName = 'javasdkgate'+$CloudResourceUniqueSuffix
 
           Write-Host "##vso[task.setvariable variable=resourceGroupName;isOutput=true]$resourceGroupName"
 
