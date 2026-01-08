@@ -32,7 +32,7 @@ jobs:
           $subscriptionId = $jsonContent.Id
 
           $uniqueSuffixLength = 5
-          $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.ToCharArray()
+          $characters = 'abcdefghijklmnopqrstuvwxyz'.ToCharArray()
           $CloudResourceUniqueSuffix = -join ($characters | Get-Random -Count $uniqueSuffixLength)
           Write-Host "##vso[task.setvariable variable=$CloudResourceUniqueSuffix;isOutput=true]$randomString"
 
