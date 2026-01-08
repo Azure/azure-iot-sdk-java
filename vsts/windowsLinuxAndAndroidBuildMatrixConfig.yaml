@@ -31,7 +31,7 @@ jobs:
           $jsonContent = az account show | ConvertFrom-Json
           $subscriptionId = $jsonContent.Id
 
-          $uniqueSuffixLength = 10
+          $uniqueSuffixLength = 5
           $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.ToCharArray()
           $CloudResourceUniqueSuffix = -join ($characters | Get-Random -Count $uniqueSuffixLength)
           Write-Host "##vso[task.setvariable variable=$CloudResourceUniqueSuffix;isOutput=true]$randomString"
