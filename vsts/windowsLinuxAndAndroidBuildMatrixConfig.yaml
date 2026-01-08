@@ -13,11 +13,7 @@ trigger:
       - provisioning/provisioning-samples/*
 
 variables:
-  # Run JDK 8 + 11 in parallel if it is a pull request, but in serial otherwise
-  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
     maxParallel: 2
-  ${{ else }}:
-    maxParallel: 1
 
 jobs:
   - job: DeployCloudTestResources
