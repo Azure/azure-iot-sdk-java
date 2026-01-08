@@ -135,6 +135,4 @@ Write-Host "##vso[task.setvariable variable=DPS_IDSCOPE;isOutput=true]$dpsIdScop
 Write-Host "##vso[task.setvariable variable=PROVISIONING_CONNECTION_STRING;isOutput=true]$dpsConnectionString"
 Write-Host "##vso[task.setvariable variable=DPS_GLOBALDEVICEENDPOINT;isOutput=true]$dpsEndpoint"
 
-$endTime = (Get-Date)
-$elapsedTime = (($endTime - $startTime).TotalMinutes).ToString("N1")
-Write-Host "`n`nCompleted in $elapsedTime minutes.`n`t- For future sessions, run the generated file $loadScriptDir\$loadScriptName to load environment variables.`n`t- Values will be overwritten if you run e2eTestsSetup.ps1 with a same resource group name.`n"
+Write-Host "Done!"
