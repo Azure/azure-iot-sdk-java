@@ -21,7 +21,7 @@ jobs:
   - task: PowerShell@2
     inputs:
       targetType: 'inline'
-      script: 'mvn clean install -Dmaven.test.skip=true -Dmaven.javadoc.skip=true'
+      script: 'mvn package -Dmaven.test.skip=true'
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
     inputs:
