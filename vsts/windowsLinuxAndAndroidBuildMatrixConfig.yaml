@@ -245,6 +245,11 @@ jobs:
       vmImage: ubuntu-latest
     displayName: Android Build
     steps:
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: 8
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:

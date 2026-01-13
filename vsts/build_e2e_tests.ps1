@@ -1,1 +1,2 @@
-mvn install `-DskipTests `-Dmaven.javadoc.skip=true -T 2C --batch-mode -q
+mvn `-Dmaven.javadoc.skip=true --projects :iot-e2e-common `
+    --also-make clean install `-DskipTests --batch-mode `-q
