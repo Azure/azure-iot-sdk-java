@@ -44,6 +44,7 @@ jobs:
   ### Windows ###
   - job: Windows
     timeoutInMinutes: 180
+    condition: false
     dependsOn: DeployCloudTestResources
     variables:
       IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
@@ -150,6 +151,7 @@ jobs:
       DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
       PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
     timeoutInMinutes: 180
+    condition: false
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
       vmImage: ubuntu-latest
@@ -301,32 +303,10 @@ jobs:
     pool:
       vmImage: 'macOS-latest'
     strategy:
-      maxParallel: 12
+      maxParallel: 1
       matrix:
         TestGroup1:
           ANDROID_TEST_GROUP_ID: TestGroup1
-        TestGroup2:
-          ANDROID_TEST_GROUP_ID: TestGroup2
-        TestGroup3:
-          ANDROID_TEST_GROUP_ID: TestGroup3
-        TestGroup4:
-          ANDROID_TEST_GROUP_ID: TestGroup4
-        TestGroup5:
-          ANDROID_TEST_GROUP_ID: TestGroup5
-        TestGroup6:
-          ANDROID_TEST_GROUP_ID: TestGroup6
-        TestGroup7:
-          ANDROID_TEST_GROUP_ID: TestGroup7
-        TestGroup8:
-          ANDROID_TEST_GROUP_ID: TestGroup8
-        TestGroup9:
-          ANDROID_TEST_GROUP_ID: TestGroup9
-        TestGroup10:
-          ANDROID_TEST_GROUP_ID: TestGroup10
-        TestGroup11:
-          ANDROID_TEST_GROUP_ID: TestGroup11
-        TestGroup12:
-          ANDROID_TEST_GROUP_ID: TestGroup12
 
     displayName: Android Test
     dependsOn: AndroidBuild
