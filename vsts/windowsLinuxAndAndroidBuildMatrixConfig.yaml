@@ -249,9 +249,10 @@ jobs:
     steps:
       - task: JavaToolInstaller@0
         inputs:
-          versionSpec: 8
+          versionSpec: 17
           jdkArchitectureOption: 'x64'
           jdkSourceOption: 'PreInstalled'
+          
       - powershell: ./vsts/echo_versions.ps1
         displayName: 'Echo Versions'
         env:
