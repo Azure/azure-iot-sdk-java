@@ -1,13 +1,13 @@
 # This script assumes it is being run from the root of the repository
-cd iot-e2e-tests\android
+cd iot-e2e-tests\android2
 
 # This script pulls down this version of gradle because the default version installed on ADO
 # can change over time. This allows us more control over when we want to upgrade gradle versions
-Invoke-WebRequest -Uri "https://services.gradle.org/distributions/gradle-7.3.3-bin.zip" -OutFile ./gradle.zip
+Invoke-WebRequest -Uri "https://services.gradle.org/distributions/gradle-9.2.1-bin.zip" -OutFile ./gradle.zip
 Expand-Archive ./gradle.zip
 
 Write-Host "Starting the Gradle Wrapper"
-./gradle/gradle-7.3.3/bin/gradle wrapper --stacktrace
+./gradle/gradle-9.2.1/bin/gradle wrapper --stacktrace
 
 Write-Host "Assembling the source APK"
 ./gradlew :app:assembleDebug
@@ -17,13 +17,4 @@ Write-Host "Assembling the source APK"
 # and the emulators have no access to the environment variables on the OS that runs the emulator,
 # so this is the only way to pass along these secrets.
 Write-Host "Assembling the test APK with the provided secrets"
-./gradlew :app:assembleDebugAndroidTest `
-    `-PIOTHUB_CONNECTION_STRING=$env:IOTHUB_CONNECTION_STRING `
-    `-PIOT_DPS_CONNECTION_STRING=$env:IOT_DPS_CONNECTION_STRING `
-    `-PIOT_DPS_ID_SCOPE=$env:DEVICE_PROVISIONING_SERVICE_ID_SCOPE `
-    `-PDPS_GLOBALDEVICEENDPOINT_INVALIDCERT=$env:INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT `
-    `-PPROVISIONING_CONNECTION_STRING_INVALIDCERT=$env:INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING `
-    `-PDPS_GLOBALDEVICEENDPOINT=$env:DPS_GLOBALDEVICEENDPOINT `
-    `-PIS_BASIC_TIER_HUB=$env:IS_BASIC_TIER_HUB `
-    `-PIS_PULL_REQUEST=$env:isPullRequestBuild `
-    `-PRECYCLE_TEST_IDENTITIES=true
+./gradlew :app:assembleDebugAndroidTest 
