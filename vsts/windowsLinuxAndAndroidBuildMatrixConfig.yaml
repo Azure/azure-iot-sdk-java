@@ -279,7 +279,7 @@ jobs:
       - task: CopyFiles@2
         displayName: 'Copy Test Results to Artifact Staging Directory'
         inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk'
+          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/android2/app/build/outputs/apk'
           Contents: |
             *.*
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
@@ -326,13 +326,13 @@ jobs:
 
       - task: DownloadPipelineArtifact@0
         displayName: "Download APKs to test from previous job"
-        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        #condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         inputs:
           artifactName: 'androidBuildFiles'
           targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android2/app/build/outputs/apk
 
       - task: Bash@3
-        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        #condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Start Android Emulator'
         timeoutInMinutes: 15
         continueOnError: false
@@ -342,7 +342,7 @@ jobs:
 
       - task: Bash@3
         #only run tests on emulator if tests should be run, and if the emulator boot up was successful
-        condition: and(succeeded(), eq(variables['task.android.needToRunTestGroup'], 'yes'))
+        #condition: and(succeeded(), eq(variables['task.android.needToRunTestGroup'], 'yes'))
         displayName: 'Run tests on emulator'
         timeoutInMinutes: 45
         inputs:
