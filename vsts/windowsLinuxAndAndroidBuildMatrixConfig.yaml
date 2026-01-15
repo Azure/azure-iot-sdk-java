@@ -329,7 +329,7 @@ jobs:
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         inputs:
           artifactName: 'androidBuildFiles'
-          targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk
+          targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android2/app/build/outputs/apk
 
       - task: Bash@3
         condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
