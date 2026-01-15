@@ -7,7 +7,7 @@ Invoke-WebRequest -Uri "https://services.gradle.org/distributions/gradle-9.2.1-b
 Expand-Archive ./gradle.zip
 
 Write-Host "Starting the Gradle Wrapper"
-./gradle/gradle-9.2.1/bin/gradle wrapper --info
+./gradle/gradle-9.2.1/bin/gradle wrapper --stacktrace
 
 Write-Host "Assembling the source APK"
 ./gradlew :app:assembleDebug
