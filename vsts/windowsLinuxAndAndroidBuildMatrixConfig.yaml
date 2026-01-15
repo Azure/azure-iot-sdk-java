@@ -313,16 +313,16 @@ jobs:
     displayName: Android Test
     dependsOn: AndroidBuild
     steps:
-      - task: PowerShell@2
-        displayName: 'determine if testing needed'
-        condition: always()
-        inputs:
-          targetType: 'filePath'
-          filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
-        env:
-          TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
-          IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
-          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+      #- task: PowerShell@2
+      #  displayName: 'determine if testing needed'
+      #  condition: always()
+      #  inputs:
+      #    targetType: 'filePath'
+      #    filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
+      #  env:
+      #    TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
+      #    IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+      #    TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
       - task: DownloadPipelineArtifact@0
         displayName: "Download APKs to test from previous job"
