@@ -21,7 +21,8 @@ jobs:
       vmImage: windows-latest
     steps:     
     - task: AzureCLI@2
-      name: deployCloudTestResources 
+      name: deployCloudTestResources
+      condition: false 
       inputs:
         azureSubscription: 'iot hub sdk service connection'
         scriptType: 'pscore'
@@ -237,11 +238,11 @@ jobs:
 
   ### Android, Multi configuration build (Multiple different test groups to cover) ###
   - job: AndroidBuild
-    dependsOn: DeployCloudTestResources
-    variables:
-      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
-      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
-      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
+    #dependsOn: DeployCloudTestResources
+    #variables:
+    #  IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
+    #  DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
+    #  PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
     timeoutInMinutes: 30
     pool:
       vmImage: ubuntu-latest
@@ -268,11 +269,11 @@ jobs:
         displayName: 'Gradle Build'
         env:
           JAVA_VERSION: $(JAVA_VERSION)
-          IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
-          IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
-          IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
-          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
-          RECYCLE_TEST_IDENTITIES: true
+          #IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
+          #IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
+          #IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
+          #TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          #RECYCLE_TEST_IDENTITIES: true
         condition: always()
 
       - task: CopyFiles@2
@@ -359,7 +360,7 @@ jobs:
         condition : always()
 
   - job: TearDownCloudTestResources
-    condition: always()
+    condition: false
     dependsOn:
       - Windows
       - Linux
