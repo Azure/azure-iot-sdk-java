@@ -334,7 +334,7 @@ jobs:
       - task: Bash@3
         #condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Start Android Emulator'
-        timeoutInMinutes: 15
+        timeoutInMinutes: 60
         continueOnError: false
         inputs:
           targetType: 'filePath'
