@@ -22,12 +22,11 @@ echo ''
 echo "Starting emulator in background thread"
 nohup $ANDROID_HOME/emulator/emulator -avd $avdName -gpu auto -no-snapshot > /dev/null 2>&1 &
 
-yum install coreutils
 
 echo ''
 echo 'Waiting for emulator to boot up...'
 nohup $ANDROID_HOME/emulator/emulator -avd $avdName -no-snapshot -no-audio -no-boot-anim -accel auto -gpu auto -qemu -lcd-density 420 > /dev/null 2>&1 &
-timeout 600 $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done'
+$ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done'
 $ANDROID_HOME/platform-tools/adb devices echo "Emulator started"
 
 $ANDROID_HOME/platform-tools/adb devices
