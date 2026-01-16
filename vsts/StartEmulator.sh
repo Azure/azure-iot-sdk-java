@@ -9,7 +9,7 @@ EMU="${ANDROID_HOME}/emulator/emulator"
 ADB="${ANDROID_HOME}/platform-tools/adb"
 
 NAME_EMU="android_emulator"
-IMG_EMU='system-images;android-28;google_apis;x86'
+IMG_EMU='system-images;android-28;default;x86'
 
 # Install AVD files
 echo "y" | $SDK --install "${IMG_EMU}"
