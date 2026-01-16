@@ -22,8 +22,7 @@ echo ''
 echo "Starting emulator in background thread"
 nohup $ANDROID_HOME/emulator/emulator -avd $avdName -gpu auto -no-snapshot > /dev/null 2>&1 &
 
-apt-get update
-apt-get install coreutils
+yum install coreutils
 
 echo ''
 echo 'Waiting for emulator to boot up...'
