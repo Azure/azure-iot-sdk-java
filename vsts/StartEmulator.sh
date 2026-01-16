@@ -24,9 +24,9 @@ nohup $ANDROID_HOME/emulator/emulator -avd $avdName -gpu auto -no-snapshot > /de
 
 echo ''
 echo 'Waiting for emulator to boot up...'
-# Start emulator in background
-nohup $ANDROID_HOME/emulator/emulator -avd xamarin_android_emulator -no-snapshot -no-window -no-audio -no-boot-anim -accel on > /dev/null 2>&1 &
-$ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done;'
+nohup $ANDROID_HOME/emulator/emulator -avd $avdName -no-snapshot -no-audio -no-boot-anim -accel auto -gpu auto -qemu -lcd-density 420 > /dev/null 2>&1 &
+timeout 600 $ANDROID_HOME/platform-tools/adb wait-for-device shell 'while [[ -z $(getprop sys.boot_completed | tr -d '\r') ]]; do sleep 1; done'
+$ANDROID_HOME/platform-tools/adb devices echo "Emulator started"
 
 $ANDROID_HOME/platform-tools/adb devices
 
