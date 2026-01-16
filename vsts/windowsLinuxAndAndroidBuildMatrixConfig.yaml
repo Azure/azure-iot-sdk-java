@@ -303,12 +303,14 @@ jobs:
   - job: AndroidTest
     timeoutInMinutes: 50
     pool:
-      vmImage: 'macOS-11'
+      vmImage: 'macOS-latest'
     strategy:
       maxParallel: 1
       matrix:
         TestGroup1:
           ANDROID_TEST_GROUP_ID: TestGroup1
+        TestGroup2:
+          ANDROID_TEST_GROUP_ID: TestGroup2
 
     displayName: Android Test
     dependsOn: AndroidBuild

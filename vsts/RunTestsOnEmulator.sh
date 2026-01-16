@@ -22,8 +22,7 @@ echo 'Listing available instrumentations:'
 adb -e shell pm list instrumentation
 echo ''
 
-#annotationString="com.microsoft.azure.sdk.iot.android.helper.${TEST_GROUP_ID}"
-annotationString="com.microsoft.azure.sdk.iot.android.helper.1"
+annotationString="com.microsoft.azure.sdk.iot.androidtest.testgroup.${TEST_GROUP_ID}"
 echo 'Running android tests with annotation'
 echo $annotationString
 
