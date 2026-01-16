@@ -20,7 +20,7 @@ public class ExampleTest {
 
     @Test
     public void shouldFail() {
-        Assert.fail();
+        Assert.fail("lolololol");
     }
 
 }
