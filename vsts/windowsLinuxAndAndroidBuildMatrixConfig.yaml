@@ -303,7 +303,7 @@ jobs:
   - job: AndroidTest
     timeoutInMinutes: 50
     pool:
-      vmImage: 'macOS-latest'
+      vmImage: 'macOS-11'
     strategy:
       maxParallel: 1
       matrix:
