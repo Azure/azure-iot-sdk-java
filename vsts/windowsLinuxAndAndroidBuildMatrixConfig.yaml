@@ -363,7 +363,6 @@ jobs:
         condition : always()
 
   - job: TearDownCloudTestResources
-    condition: false
     dependsOn:
       - Windows
       - Linux
