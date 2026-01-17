@@ -272,7 +272,7 @@ jobs:
           IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
           IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
-          RECYCLE_TEST_IDENTITIES: true
+          RECYCLE_TEST_IDENTITIES: "true"
         condition: always()
 
       - task: CopyFiles@2
