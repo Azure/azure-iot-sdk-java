@@ -31,6 +31,7 @@ android {
 }
 
 dependencies {
+    androidTestImplementation libs.runner
     implementation libs.appcompat
     implementation libs.material
     testImplementation libs.junit
