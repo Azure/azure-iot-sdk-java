@@ -14,7 +14,16 @@ android {
         targetSdk 36
         versionCode 1
         versionName "1.0"
-
+        each {
+            buildConfigField STRING, 'IOTHUB_CONNECTION_STRING', IOTHUB_CONNECTION_STRING_ENV_VAR_NAME
+            buildConfigField STRING, 'IOT_DPS_CONNECTION_STRING', IOT_DPS_CONNECTION_STRING
+            buildConfigField STRING, 'DPS_GLOBALDEVICEENDPOINT_INVALIDCERT', INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT
+            buildConfigField STRING, 'PROVISIONING_CONNECTION_STRING_INVALIDCERT', INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING
+            buildConfigField STRING, 'IOT_DPS_ID_SCOPE', DEVICE_PROVISIONING_SERVICE_ID_SCOPE
+            buildConfigField STRING, 'IS_BASIC_TIER_HUB', IS_BASIC_TIER_HUB
+            buildConfigField STRING, 'IS_PULL_REQUEST', IS_PULL_REQUEST
+            buildConfigField STRING, 'RECYCLE_TEST_IDENTITIES', RECYCLE_TEST_IDENTITIES
+        }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -31,10 +40,25 @@ android {
 }
 
 dependencies {
+
+    // This jar contains the test code that will be run on android. This jar isn't in the m2 folder, but rather it is in this cloned repo after mvn install is run
+    implementation files('../../common/target/iot-e2e-common-1.0.0-tests.jar')
+
+    // This jar contains the dependencies of the test code. DeviceClient, for instance. This jar isn't in the m2 folder, but rather it is in this cloned repo after mvn install is run
+    implementation files('../../common/target/iot-e2e-common-1.0.0-with-deps.jar')
+
+    implementation ('org.apache.commons:commons-lang3:3.6')
+    implementation ('javax.xml.stream:stax-api:1.0-2')
+ 
     androidTestImplementation libs.runner
     implementation libs.appcompat
     implementation libs.material
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
 }
