@@ -74,6 +74,8 @@ dependencies {
 }
 
 repositories {
-    mavenLocal()
+    google()
     mavenCentral()
+    gradlePluginPortal()
+    mavenLocal()
 }
