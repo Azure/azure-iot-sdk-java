@@ -367,6 +367,7 @@ jobs:
     dependsOn:
       - Windows
       - Linux
+      - AndroidTest
       - DeployCloudTestResources
     variables:
       RESOURCE_GROUP_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.RESOURCE_GROUP_NAME'] ]
