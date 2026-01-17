@@ -25,7 +25,7 @@ android {
     
     defaultConfig {
         applicationId "com.microsoft.azure.sdk.iot.androidtest"
-        minSdkVersion 24
+        minSdkVersion 26
         targetSdk 28
         multiDexEnabled true
         versionCode 1
