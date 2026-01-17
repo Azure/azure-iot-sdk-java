@@ -2,6 +2,19 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
+//***********************************************************************************************//
+def IOTHUB_CONNECTION_STRING_ENV_VAR_NAME = project.hasProperty('IOTHUB_CONNECTION_STRING') ? '"'+project.property('IOTHUB_CONNECTION_STRING')+'"' : '""'
+def IOT_DPS_CONNECTION_STRING = project.hasProperty('IOT_DPS_CONNECTION_STRING') ? '"'+project.property('IOT_DPS_CONNECTION_STRING')+'"': '""'
+def INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT = project.hasProperty('DPS_GLOBALDEVICEENDPOINT_INVALIDCERT') ? '"'+project.property('DPS_GLOBALDEVICEENDPOINT_INVALIDCERT')+'"': '""'
+def INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING = project.hasProperty('PROVISIONING_CONNECTION_STRING_INVALIDCERT') ? '"'+project.property('PROVISIONING_CONNECTION_STRING_INVALIDCERT')+'"': '""'
+def DEVICE_PROVISIONING_SERVICE_ID_SCOPE = project.hasProperty('IOT_DPS_ID_SCOPE') ? '"'+project.property('IOT_DPS_ID_SCOPE')+'"': '""'
+def IS_BASIC_TIER_HUB = project.hasProperty('IS_BASIC_TIER_HUB') ? '"'+project.property('IS_BASIC_TIER_HUB')+'"' : '"false"'
+def IS_PULL_REQUEST = project.hasProperty('IS_PULL_REQUEST') ? '"'+project.property('IS_PULL_REQUEST')+'"' : '"false"'
+def RECYCLE_TEST_IDENTITIES = project.hasProperty('RECYCLE_TEST_IDENTITIES') ? '"'+project.property('RECYCLE_TEST_IDENTITIES')+'"' : '"false"'
+
+def STRING='String'
+//***********************************************************************************************//
+
 android {
     namespace 'com.microsoft.azure.sdk.iot.androidtest'
     compileSdk {
@@ -20,8 +33,8 @@ android {
             //buildConfigField STRING, 'DPS_GLOBALDEVICEENDPOINT_INVALIDCERT', INVALID_DEVICE_PROVISIONING_SERVICE_GLOBAL_ENDPOINT
             //buildConfigField STRING, 'PROVISIONING_CONNECTION_STRING_INVALIDCERT', INVALID_DEVICE_PROVISIONING_SERVICE_CONNECTION_STRING
             buildConfigField STRING, 'IOT_DPS_ID_SCOPE', DEVICE_PROVISIONING_SERVICE_ID_SCOPE
-            //buildConfigField STRING, 'IS_BASIC_TIER_HUB', IS_BASIC_TIER_HUB
-            //buildConfigField STRING, 'IS_PULL_REQUEST', IS_PULL_REQUEST
+            buildConfigField STRING, 'IS_BASIC_TIER_HUB', IS_BASIC_TIER_HUB
+            buildConfigField STRING, 'IS_PULL_REQUEST', IS_PULL_REQUEST
             buildConfigField STRING, 'RECYCLE_TEST_IDENTITIES', RECYCLE_TEST_IDENTITIES
         }
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
