@@ -15,12 +15,14 @@ def RECYCLE_TEST_IDENTITIES = project.hasProperty('RECYCLE_TEST_IDENTITIES') ? '
 def STRING='String'
 //***********************************************************************************************//
 
+android.buildFeatures.buildConfig = true
+
 android {
     namespace 'com.microsoft.azure.sdk.iot.androidtest'
     compileSdk {
         version = release(36)
     }
-
+    
     defaultConfig {
         applicationId "com.microsoft.azure.sdk.iot.androidtest"
         minSdk 24
