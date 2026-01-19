@@ -17,4 +17,8 @@ Write-Host "Assembling the source APK"
 # and the emulators have no access to the environment variables on the OS that runs the emulator,
 # so this is the only way to pass along these secrets.
 Write-Host "Assembling the test APK with the provided secrets"
-./gradlew :app:assembleDebugAndroidTest 
+./gradlew :app:assembleDebugAndroidTest `
+    `-PIOTHUB_CONNECTION_STRING=$env:IOTHUB_CONNECTION_STRING `
+    `-PIOT_DPS_CONNECTION_STRING=$env:IOT_DPS_CONNECTION_STRING `
+    `-PIOT_DPS_ID_SCOPE=$env:DEVICE_PROVISIONING_SERVICE_ID_SCOPE `
+    `-PRECYCLE_TEST_IDENTITIES=true
