@@ -22,6 +22,7 @@ public class Tools
     public static final String iotHubConnectionString = retrieveEnvironmentVariableValue(IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
     public static final boolean isBasicTierHub = Boolean.parseBoolean(retrieveEnvironmentVariableValue(IS_BASIC_TIER_HUB_ENV_VAR_NAME));
 
+//UNUSED? JVM test project
     private static final String ANDROID_BUILD_CONFIG_CLASS = "com.iothub.azure.microsoft.com.androide2e.test.BuildConfig";
 
     public static String retrieveEnvironmentVariableValue(String environmentVariableName)
