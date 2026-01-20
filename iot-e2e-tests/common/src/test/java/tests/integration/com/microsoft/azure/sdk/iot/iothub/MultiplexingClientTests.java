@@ -7,6 +7,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.github.monkeywie.proxyee.server.HttpProxyServer;
+import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
+import com.github.monkeywie.proxyee.server.auth.BasicHttpProxyAuthenticationProvider;
+import com.github.monkeywie.proxyee.server.auth.model.BasicHttpToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -117,7 +120,7 @@ public class MultiplexingClientTests extends IntegrationTest
     protected static final String testProxyUser = "proxyUsername"; // lgtm
 
     // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
-    protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
+    protected static final String testProxyPass = "1234"; // lgtm
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs() throws Exception
@@ -214,7 +217,17 @@ public class MultiplexingClientTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = new HttpProxyServer();
+        HttpProxyServerConfig config = new HttpProxyServerConfig();
+        config.setAuthenticationProvider(new BasicHttpProxyAuthenticationProvider() {
+            @Override
+            protected BasicHttpToken authenticate(String usr, String pwd) {
+                if (testProxyUser.equals(usr) && testProxyPass.equals(pwd)) {
+                    return new BasicHttpToken(usr, pwd);
+                }
+                return null;
+            }
+        });
+        proxyServer = new HttpProxyServer().serverConfig(config);
         proxyServer.start(testProxyPort);
     }
 
@@ -471,7 +484,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assumeTrue(testInstance.protocol == IotHubClientProtocol.AMQPS_WS);
 
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-        ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
+        ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray());
 
         //re-setup test instance to use proxy instead
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().proxySettings(proxySettings).build(), false);

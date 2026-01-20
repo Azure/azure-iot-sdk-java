@@ -7,6 +7,9 @@ package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
 import com.github.monkeywie.proxyee.server.HttpProxyServer;
+import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
+import com.github.monkeywie.proxyee.server.auth.BasicHttpProxyAuthenticationProvider;
+import com.github.monkeywie.proxyee.server.auth.model.BasicHttpToken;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -56,7 +59,7 @@ public class TokenRenewalTests extends IntegrationTest
     protected static final String testProxyUser = "proxyUsername"; // lgtm
 
     // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
-    protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
+    protected static final String testProxyPass = "1234"; // lgtm
 
 
     final int SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
@@ -90,7 +93,17 @@ public class TokenRenewalTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = new HttpProxyServer();
+        HttpProxyServerConfig config = new HttpProxyServerConfig();
+        config.setAuthenticationProvider(new BasicHttpProxyAuthenticationProvider() {
+            @Override
+            protected BasicHttpToken authenticate(String usr, String pwd) {
+                if (testProxyUser.equals(usr) && testProxyPass.equals(pwd)) {
+                    return new BasicHttpToken(usr, pwd);
+                }
+                return null;
+            }
+        });
+        proxyServer = new HttpProxyServer().serverConfig(config);
         proxyServer.start(testProxyPort);
     }
 
@@ -231,7 +244,7 @@ public class TokenRenewalTests extends IntegrationTest
             clients.add(createDeviceClient(protocol, null));
             if (protocol == HTTPS || protocol == MQTT_WS || protocol == AMQPS_WS)
             {
-                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
+                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray());
                 InternalClient client = createDeviceClient(protocol, proxySettings);
                 clients.add(client);
             }

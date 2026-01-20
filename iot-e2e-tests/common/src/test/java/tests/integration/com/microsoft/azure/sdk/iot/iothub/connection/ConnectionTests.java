@@ -1,6 +1,9 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.connection;
 
 import com.github.monkeywie.proxyee.server.HttpProxyServer;
+import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
+import com.github.monkeywie.proxyee.server.auth.BasicHttpProxyAuthenticationProvider;
+import com.github.monkeywie.proxyee.server.auth.model.BasicHttpToken;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -105,7 +108,7 @@ public class ConnectionTests extends IntegrationTest
             if (this.useHttpProxy)
             {
                 Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
             }
 
             if (clientType == ClientType.DEVICE_CLIENT)
@@ -124,7 +127,7 @@ public class ConnectionTests extends IntegrationTest
             if (this.useHttpProxy)
             {
                 Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
             }
 
             X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
@@ -181,12 +184,22 @@ public class ConnectionTests extends IntegrationTest
     protected static final String testProxyUser = "proxyUsername"; // lgtm
 
     // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
-    protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
+    protected static final String testProxyPass = "1234"; // lgtm
 
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = new HttpProxyServer();
+        HttpProxyServerConfig config = new HttpProxyServerConfig();
+        config.setAuthenticationProvider(new BasicHttpProxyAuthenticationProvider() {
+            @Override
+            protected BasicHttpToken authenticate(String usr, String pwd) {
+                if (testProxyUser.equals(usr) && testProxyPass.equals(pwd)) {
+                    return new BasicHttpToken(usr, pwd);
+                }
+                return null;
+            }
+        });
+        proxyServer = new HttpProxyServer().serverConfig(config);
         proxyServer.start(testProxyPort);
     }
 
@@ -253,7 +266,7 @@ public class ConnectionTests extends IntegrationTest
         if (testInstance.useHttpProxy)
         {
             Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+            optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
         }
 
         MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, testInstance.protocol, optionsBuilder.build());
