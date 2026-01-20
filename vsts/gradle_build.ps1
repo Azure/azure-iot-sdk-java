@@ -12,9 +12,6 @@ Write-Host "Starting the Gradle Wrapper"
 Write-Host "Assembling the source APK"
 ./gradlew :app:assembleDebug
 
-Write-Host "Android dependencies:"
-./gradlew app:dependencies
-
 # Unlike in the Linux/Windows e2e tests, these secrets are loaded into the Android BuildConfig.java
 # file that is generated during this assembly. This is done because the android tests run on emulators
 # and the emulators have no access to the environment variables on the OS that runs the emulator,
