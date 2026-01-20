@@ -71,12 +71,6 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
-
-    modules {
-        module("com.google.guava:listenablefuture") {
-            replacedBy("com.google.guava:guava", "listenablefuture is part of guava")
-        }
-    }
 }
 
 repositories {
