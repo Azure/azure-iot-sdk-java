@@ -63,7 +63,7 @@ dependencies {
 
     implementation ('org.apache.commons:commons-lang3:3.6')
     implementation ('javax.xml.stream:stax-api:1.0-2')
-    implementation ('com.google.guava:guava:32.0.0-jre')
+    //implementation ('com.google.guava:guava:33.3.1-jre')
  
     androidTestImplementation libs.runner
     implementation libs.appcompat
