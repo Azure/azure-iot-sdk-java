@@ -6,6 +6,7 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
+import com.github.monkeywie.proxyee.server.HttpProxyServer;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -22,8 +23,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.Timeout;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.RerunFailedTestRule;
@@ -91,16 +90,14 @@ public class TokenRenewalTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = DefaultHttpProxyServer.bootstrap()
-                .withPort(testProxyPort)
-                .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
-                .start();
+        proxyServer = new HttpProxyServer();
+        proxyServer.start(testProxyPort);
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        proxyServer.stop();
+        proxyServer.close();
     }
 
     /**

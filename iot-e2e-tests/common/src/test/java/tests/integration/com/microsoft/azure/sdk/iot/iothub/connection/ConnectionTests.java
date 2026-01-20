@@ -1,5 +1,6 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.connection;
 
+import com.github.monkeywie.proxyee.server.HttpProxyServer;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -16,8 +17,6 @@ import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
@@ -187,16 +186,14 @@ public class ConnectionTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = DefaultHttpProxyServer.bootstrap()
-            .withPort(testProxyPort)
-            .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
-            .start();
+        proxyServer = new HttpProxyServer();
+        proxyServer.start(testProxyPort);
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        proxyServer.stop();
+        proxyServer.close();
     }
 
     @Test(timeout = 60000) // 1 minute

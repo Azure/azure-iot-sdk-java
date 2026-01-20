@@ -25,6 +25,15 @@
         <module>edge-e2e</module>
         <module>iot-e2e-jvm-tests</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.github.monkeywie</groupId>
+            <artifactId>proxyee</artifactId>
+            <version>1.7.6</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
