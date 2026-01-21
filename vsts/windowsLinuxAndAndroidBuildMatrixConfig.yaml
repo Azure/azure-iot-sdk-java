@@ -44,7 +44,6 @@ jobs:
   ### Windows ###
   - job: Windows
     timeoutInMinutes: 180
-    condition: false
     dependsOn: DeployCloudTestResources
     variables:
       IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
@@ -151,7 +150,6 @@ jobs:
       DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
       PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
     timeoutInMinutes: 180
-    condition: false
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
       vmImage: ubuntu-latest
