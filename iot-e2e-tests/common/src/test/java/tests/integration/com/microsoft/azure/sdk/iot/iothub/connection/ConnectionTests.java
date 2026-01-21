@@ -115,13 +115,14 @@ public class ConnectionTests extends IntegrationTest
             ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
             if (this.useHttpProxy)
             {
-                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
                 if (this.useHttpProxyAuth)
                 {
+                    Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
                     optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
                 }
                 else
                 {
+                    Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostnameWithoutAuth, testProxyPortWithoutAuth));
                     optionsBuilder.proxySettings(new ProxySettings(testProxy));
                 }
             }
