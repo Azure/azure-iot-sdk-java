@@ -276,7 +276,7 @@ jobs:
       - task: CopyFiles@2
         displayName: 'Copy Test Results to Artifact Staging Directory'
         inputs:
-          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk'
+          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/android2/app/build/outputs/apk'
           Contents: |
             *.*
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
@@ -287,7 +287,7 @@ jobs:
         displayName: 'Publish APKs to test in next job'
         inputs:
           artifactName: 'androidBuildFiles'
-          targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
+          targetPath: 'iot-e2e-tests/android2/app/build/outputs/apk'
 
       - task: ComponentGovernanceComponentDetection@0
         displayName: Component Governance Detection
@@ -348,7 +348,7 @@ jobs:
         #condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         inputs:
           artifactName: 'androidBuildFiles'
-          targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk
+          targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android2/app/build/outputs/apk
 
       - task: Bash@3
         #condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
