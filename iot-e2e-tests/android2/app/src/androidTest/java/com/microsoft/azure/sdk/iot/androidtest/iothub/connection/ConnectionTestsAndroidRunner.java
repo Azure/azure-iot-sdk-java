@@ -12,8 +12,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.iothub.connection.Connectio
 @RunWith(Parameterized.class)
 public class ConnectionTestsAndroidRunner extends ConnectionTests
 {
-    public ConnectionTestsAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy) throws Exception
+    public ConnectionTestsAndroidRunner(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy, boolean withProxyAuth) throws Exception
     {
-        super(protocol, authenticationType, clientType, withProxy);
+        super(protocol, authenticationType, clientType, withProxy, withProxyAuth);
     }
 }
