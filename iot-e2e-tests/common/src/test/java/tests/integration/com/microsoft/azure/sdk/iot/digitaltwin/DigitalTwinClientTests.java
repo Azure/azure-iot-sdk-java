@@ -4,6 +4,9 @@
 package tests.integration.com.microsoft.azure.sdk.iot.digitaltwin;
 
 import com.github.monkeywie.proxyee.server.HttpProxyServer;
+import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
+import com.github.monkeywie.proxyee.server.auth.BasicHttpProxyAuthenticationProvider;
+import com.github.monkeywie.proxyee.server.auth.model.BasicHttpToken;
 import com.google.gson.JsonElement;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
@@ -134,8 +137,10 @@ public class DigitalTwinClientTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = new HttpProxyServer();
-        proxyServer.start(testProxyPort);
+        HttpProxyServerConfig config = new HttpProxyServerConfig();
+        config.setHandleSsl(false);
+        proxyServer = new HttpProxyServer().serverConfig(config);
+        proxyServer.startAsync(testProxyPort);
     }
 
     @AfterClass

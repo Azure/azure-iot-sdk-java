@@ -103,8 +103,9 @@ public class TokenRenewalTests extends IntegrationTest
                 return null;
             }
         });
+        config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
-        proxyServer.start(testProxyPort);
+        proxyServer.startAsync(testProxyPort);
     }
 
     @AfterClass

@@ -22,10 +22,8 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.security.GeneralSecurityException;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -199,14 +197,18 @@ public class ConnectionTests extends IntegrationTest
                 return null;
             }
         });
+        config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
-        proxyServer.start(testProxyPort);
+        proxyServer.startAsync(testProxyPort);
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        proxyServer.close();
+        if (proxyServer != null)
+        {
+            proxyServer.close();
+        }
     }
 
     @Test(timeout = 60000) // 1 minute
