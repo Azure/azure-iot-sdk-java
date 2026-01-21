@@ -1,6 +1,6 @@
-package com.microsoft.azure.sdk.iot.androidtest;
+package com.microsoft.azure.sdk.iot.androidtest.iothub.connection;
 
-import com.microsoft.azure.sdk.iot.androidtest.testgroup.TestGroup11;
+import com.microsoft.azure.sdk.iot.androidtest.testgroup.*;
 import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import org.junit.runner.RunWith;
