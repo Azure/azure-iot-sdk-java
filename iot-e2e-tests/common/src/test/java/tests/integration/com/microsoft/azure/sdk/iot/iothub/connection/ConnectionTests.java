@@ -40,7 +40,7 @@ public class ConnectionTests extends IntegrationTest
     private static String iotHubConnectionString;
     private static String hostName;
 
-    @Parameterized.Parameters(name = "{0}_{1}_{2}_{3}")
+    @Parameterized.Parameters(name = "{0}_{1}_{2}_{3}_{4}")
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
