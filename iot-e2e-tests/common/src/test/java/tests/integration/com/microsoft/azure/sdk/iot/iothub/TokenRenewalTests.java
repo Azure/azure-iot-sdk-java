@@ -94,15 +94,7 @@ public class TokenRenewalTests extends IntegrationTest
     public static void startProxy()
     {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
-        config.setAuthenticationProvider(new BasicHttpProxyAuthenticationProvider() {
-            @Override
-            protected BasicHttpToken authenticate(String usr, String pwd) {
-                if (testProxyUser.equals(usr) && testProxyPass.equals(pwd)) {
-                    return new BasicHttpToken(usr, pwd);
-                }
-                return null;
-            }
-        });
+        config.setAuthenticationProvider(new BasicProxyAuthenticator(testProxyUser, testProxyPass));
         config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
         proxyServer.startAsync(testProxyPort);

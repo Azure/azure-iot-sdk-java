@@ -54,13 +54,7 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ErrorInjectionHelper;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.EventCallback;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.RerunFailedTestRule;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.ThrottleResistantTestRule;
@@ -218,15 +212,7 @@ public class MultiplexingClientTests extends IntegrationTest
     public static void startProxy()
     {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
-        config.setAuthenticationProvider(new BasicHttpProxyAuthenticationProvider() {
-            @Override
-            protected BasicHttpToken authenticate(String usr, String pwd) {
-                if (testProxyUser.equals(usr) && testProxyPass.equals(pwd)) {
-                    return new BasicHttpToken(usr, pwd);
-                }
-                return null;
-            }
-        });
+        config.setAuthenticationProvider(new BasicProxyAuthenticator(testProxyUser, testProxyPass));
         config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
         proxyServer.startAsync(testProxyPort);
