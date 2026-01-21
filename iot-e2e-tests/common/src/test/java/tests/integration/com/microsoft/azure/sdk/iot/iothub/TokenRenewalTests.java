@@ -55,12 +55,6 @@ public class TokenRenewalTests extends IntegrationTest
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8898;
 
-    // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
-    protected static final String testProxyUser = "proxyUsername"; // lgtm
-
-    // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
-    protected static final String testProxyPass = "1234"; // lgtm
-
 
     final int SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
     final long EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS = 600; //service extends 10 minute grace period after a token has expired
@@ -94,7 +88,6 @@ public class TokenRenewalTests extends IntegrationTest
     public static void startProxy()
     {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
-        config.setAuthenticationProvider(new BasicProxyAuthenticator(testProxyUser, testProxyPass));
         config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
         proxyServer.startAsync(testProxyPort);
@@ -237,7 +230,7 @@ public class TokenRenewalTests extends IntegrationTest
             clients.add(createDeviceClient(protocol, null));
             if (protocol == HTTPS || protocol == MQTT_WS || protocol == AMQPS_WS)
             {
-                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray());
+                ProxySettings proxySettings = new ProxySettings(testProxy);
                 InternalClient client = createDeviceClient(protocol, proxySettings);
                 clients.add(client);
             }

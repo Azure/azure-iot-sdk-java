@@ -110,12 +110,6 @@ public class MultiplexingClientTests extends IntegrationTest
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8849;
 
-    // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
-    protected static final String testProxyUser = "proxyUsername"; // lgtm
-
-    // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
-    protected static final String testProxyPass = "1234"; // lgtm
-
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs() throws Exception
     {
@@ -212,7 +206,6 @@ public class MultiplexingClientTests extends IntegrationTest
     public static void startProxy()
     {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
-        config.setAuthenticationProvider(new BasicProxyAuthenticator(testProxyUser, testProxyPass));
         config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
         proxyServer.startAsync(testProxyPort);
@@ -471,7 +464,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assumeTrue(testInstance.protocol == IotHubClientProtocol.AMQPS_WS);
 
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-        ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray());
+        ProxySettings proxySettings = new ProxySettings(testProxy);
 
         //re-setup test instance to use proxy instead
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().proxySettings(proxySettings).build(), false);

@@ -49,39 +49,47 @@ public class ConnectionTests extends IntegrationTest
         return Arrays.asList(
             new Object[][]
                 {
-                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, false},
-                    {AMQPS, SAS, ClientType.DEVICE_CLIENT, false},
-                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, false},
-                    {MQTT, SAS, ClientType.DEVICE_CLIENT, false},
-                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, false},
+                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, false, false},
+                    {AMQPS, SAS, ClientType.DEVICE_CLIENT, false, false},
+                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, false, false},
+                    {MQTT, SAS, ClientType.DEVICE_CLIENT, false, false},
+                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, false, false},
 
-                    {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
-                    {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
-                    {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
-                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                    {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false, false},
+                    {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false, false},
+                    {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, false, false},
+                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false, false},
 
-                    {AMQPS, SAS, ClientType.MODULE_CLIENT, false},
-                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, false},
-                    {MQTT, SAS, ClientType.MODULE_CLIENT, false},
-                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, false},
+                    {AMQPS, SAS, ClientType.MODULE_CLIENT, false, false},
+                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, false, false},
+                    {MQTT, SAS, ClientType.MODULE_CLIENT, false, false},
+                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, false, false},
 
-                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
-                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
-                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
+                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, false, false},
+                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, false, false},
+                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, false, false},
 
-                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, true},
-                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, true},
-                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true},
-                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true},
-                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, true},
-                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true},
-                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true},
+                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, true, false},
+                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, true, false},
+                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true, false},
+                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true, false},
+                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, true, false},
+                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true, false},
+                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true, false},
+
+                    // TODO AMQP_WS with proxy with auth doesn't work against our test proxy. It does work against
+                    // other proxies, so this is likely just a bug in our current test proxy
+                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, true, true},
+                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true, true},
+                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true, true},
+                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true, true},
+                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true, true},
                 });
     }
 
-    public ConnectionTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy)
+    public ConnectionTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy, boolean withProxyAuth)
     {
-        this.testInstance = new ConnectionTestInstance(protocol, authenticationType, clientType, withProxy);
+        this.testInstance = new ConnectionTestInstance(protocol, authenticationType, clientType, withProxy, withProxyAuth);
     }
 
     public class ConnectionTestInstance
@@ -91,13 +99,15 @@ public class ConnectionTests extends IntegrationTest
         public AuthenticationType authenticationType;
         public ClientType clientType;
         public boolean useHttpProxy;
+        public boolean useHttpProxyAuth;
 
-        public ConnectionTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean useHttpProxy)
+        public ConnectionTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean useHttpProxy, boolean useHttpProxyAuth)
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
             this.useHttpProxy = useHttpProxy;
+            this.useHttpProxyAuth = useHttpProxyAuth;
         }
 
         public void setup() throws Exception
@@ -106,15 +116,13 @@ public class ConnectionTests extends IntegrationTest
             if (this.useHttpProxy)
             {
                 Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                // TODO AMQP_WS proxy authentication doesn't work against our automated test proxy library. It does work against other proxies though, so it is probably a bug in the test proxy
-                // Just testing the proxy support w/o proxy user + pass for now
-                if (this.protocol == AMQPS_WS)
+                if (this.useHttpProxyAuth)
                 {
-                    optionsBuilder.proxySettings(new ProxySettings(testProxy));
+                    optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
                 }
                 else
                 {
-                    optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
+                    optionsBuilder.proxySettings(new ProxySettings(testProxy));
                 }
             }
 
@@ -187,6 +195,10 @@ public class ConnectionTests extends IntegrationTest
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8899;
 
+    protected static HttpProxyServer proxyServerWithoutAuth;
+    protected static String testProxyHostnameWithoutAuth = "127.0.0.1";
+    protected static int testProxyPortWithoutAuth = 9000;
+
     // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
     protected static final String testProxyUser = "proxyUsername"; // lgtm
 
@@ -201,6 +213,11 @@ public class ConnectionTests extends IntegrationTest
         config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
         proxyServer.startAsync(testProxyPort);
+
+        HttpProxyServerConfig configWithoutAuth = new HttpProxyServerConfig();
+        config.setHandleSsl(false);
+        proxyServerWithoutAuth = new HttpProxyServer().serverConfig(configWithoutAuth);
+        proxyServerWithoutAuth.startAsync(testProxyPortWithoutAuth);
     }
 
     @AfterClass
@@ -209,6 +226,11 @@ public class ConnectionTests extends IntegrationTest
         if (proxyServer != null)
         {
             proxyServer.close();
+        }
+
+        if (proxyServerWithoutAuth != null)
+        {
+            proxyServerWithoutAuth.close();
         }
     }
 
@@ -268,8 +290,16 @@ public class ConnectionTests extends IntegrationTest
         MultiplexingClientOptions.MultiplexingClientOptionsBuilder optionsBuilder = MultiplexingClientOptions.builder();
         if (testInstance.useHttpProxy)
         {
-            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
+            if (testInstance.useHttpProxyAuth)
+            {
+                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
+            }
+            else
+            {
+                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostnameWithoutAuth, testProxyPortWithoutAuth));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy));
+            }
         }
 
         MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, testInstance.protocol, optionsBuilder.build());
