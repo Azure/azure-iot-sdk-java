@@ -1,5 +1,5 @@
 # This script assumes it is being run from the root of the repository
-cd iot-e2e-tests\android2
+cd iot-e2e-tests\android
 
 # This script pulls down this version of gradle because the default version installed on ADO
 # can change over time. This allows us more control over when we want to upgrade gradle versions
