@@ -20,5 +20,5 @@ Write-Host "Assembling the test APK with the provided secrets"
 ./gradlew :app:assembleDebugAndroidTest `
     `-PIOTHUB_CONNECTION_STRING=$env:IOTHUB_CONNECTION_STRING `
     `-PIOT_DPS_CONNECTION_STRING=$env:IOT_DPS_CONNECTION_STRING `
-    `-PIOT_DPS_ID_SCOPE=$env:DEVICE_PROVISIONING_SERVICE_ID_SCOPE `
+    `-PIOT_DPS_ID_SCOPE=$env:IOT_DPS_ID_SCOPE `
     `-PRECYCLE_TEST_IDENTITIES=true
