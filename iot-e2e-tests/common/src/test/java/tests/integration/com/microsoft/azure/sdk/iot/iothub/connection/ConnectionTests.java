@@ -249,7 +249,7 @@ public class ConnectionTests extends IntegrationTest
         testInstance.identity.getClient().close();
     }
 
-    @Test
+    @Test(timeout = 60000) // 1 minute
     @IotHubTest
     public void CanOpenMultiplexingConnection() throws Exception
     {
