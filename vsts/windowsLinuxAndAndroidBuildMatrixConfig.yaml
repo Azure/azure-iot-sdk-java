@@ -16,7 +16,7 @@ variables:
     maxParallel: 2
 
 jobs:
-  - job: DeployCloudTestResources
+  - job: DeployCloudTestResources #TODO need this step to always run? Or only run delete resources if all stages pass? Then run nightly cleanup of rgs?
     pool:
       vmImage: windows-latest
     steps:     
