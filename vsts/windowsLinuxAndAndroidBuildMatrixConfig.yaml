@@ -16,7 +16,7 @@ variables:
     maxParallel: 2
 
 jobs:
-  - job: DeployCloudTestResources #TODO need this step to always run? Or only run delete resources if all stages pass? Then run nightly cleanup of rgs?
+  - job: DeployCloudTestResources
     pool:
       vmImage: windows-latest
     steps:     
@@ -332,26 +332,26 @@ jobs:
     displayName: Android Test
     dependsOn: AndroidBuild
     steps:
-      #- task: PowerShell@2
-      #  displayName: 'determine if testing needed'
-      #  condition: always()
-      #  inputs:
-      #    targetType: 'filePath'
-      #    filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
-      #  env:
-      #    TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
-      #    IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
-      #    TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+      - task: PowerShell@2
+        displayName: 'determine if testing needed'
+        condition: always()
+        inputs:
+          targetType: 'filePath'
+          filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
+        env:
+          TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
+          IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
 
       - task: DownloadPipelineArtifact@0
         displayName: "Download APKs to test from previous job"
-        #condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         inputs:
           artifactName: 'androidBuildFiles'
           targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk
 
       - task: Bash@3
-        #condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
         displayName: 'Start Android Emulator'
         timeoutInMinutes: 15
         continueOnError: false
@@ -361,7 +361,7 @@ jobs:
 
       - task: Bash@3
         #only run tests on emulator if tests should be run, and if the emulator boot up was successful
-        #condition: and(succeeded(), eq(variables['task.android.needToRunTestGroup'], 'yes'))
+        condition: and(succeeded(), eq(variables['task.android.needToRunTestGroup'], 'yes'))
         displayName: 'Run tests on emulator'
         timeoutInMinutes: 45
         inputs:
