@@ -216,7 +216,7 @@ public class ConnectionTests extends IntegrationTest
         proxyServer.startAsync(testProxyPort);
 
         HttpProxyServerConfig configWithoutAuth = new HttpProxyServerConfig();
-        config.setHandleSsl(false);
+        configWithoutAuth.setHandleSsl(false);
         proxyServerWithoutAuth = new HttpProxyServer().serverConfig(configWithoutAuth);
         proxyServerWithoutAuth.startAsync(testProxyPortWithoutAuth);
     }
