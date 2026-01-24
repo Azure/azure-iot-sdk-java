@@ -39,7 +39,7 @@ public class BasicProxyAuthenticator implements HttpProxyAuthenticationProvider<
     public BasicHttpToken authenticate(String authorization) {
         String usr = "";
         String pwd = "";
-        if (authorization != null && authorization.startsWith(AUTH_TYPE_BASIC)) {
+        if (authorization != null && authorization.length() > 0) {
             String token = authorization.substring(AUTH_TYPE_BASIC.length() + 1);
             String decode = new String(Base64.getDecoder().decode(token));
             String[] arr = decode.split(":");
