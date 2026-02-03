@@ -1,0 +1,125 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - doc/*
+      - device/iot-device-samples/*
+      - service/iot-service-samples/*
+      - provisioning/provisioning-samples/*
+
+variables:
+    maxParallel: 2
+
+jobs:
+  - job: DeployCloudTestResources
+    pool:
+      vmImage: windows-latest
+    steps:     
+    - template: templates/DeployCloudResources.yaml
+
+  - job: Linux
+    dependsOn: DeployCloudTestResources
+    variables:
+      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
+      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
+      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
+    timeoutInMinutes: 180
+    pool:
+      # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
+      vmImage: ubuntu-latest
+    displayName: Linux
+    strategy:
+      maxParallel: $[variables.maxParallel]
+      matrix:
+        JDK 11: # always run Java 11
+          JAVA_VERSION: 11
+        JDK 8: # only run Java 8 in nightly or CI builds.
+          JAVA_VERSION: 8
+    steps:
+      - task: CmdLine@2
+        displayName: 'Print Linux version'
+        inputs:
+          script: 'cat /etc/*release'
+
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: $(JAVA_VERSION)
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'
+
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          COMMIT_FROM: $(COMMIT_FROM)
+
+      - task: Docker@1
+        displayName: 'Start TPM Simulator'
+        inputs:
+          containerregistrytype: 'Container Registry'
+          command: 'Run an image'
+          imageName: aziotbld/testtpm
+          containerName: 'testtpm-instance'
+          ports: |
+            127.0.0.1:2321:2321
+            127.0.0.1:2322:2322
+          restartPolicy: unlessStopped
+
+      - powershell: ./vsts/build_repo.ps1
+        displayName: 'Build and Test'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
+          IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
+          IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES: true
+
+      - task: CopyFiles@2
+        condition: always()
+        displayName: 'Copy Test Results to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/*.trx
+            **/*.xml
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        continueOnError: true
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact Staging Directory'
+        condition: always()
+        continueOnError: true
+
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results'
+        condition: always()
+        inputs:
+          mergeTestResults: true
+          testRunTitle: "Linux JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
+        continueOnError: true
+
+      - task: ComponentGovernanceComponentDetection@0
+        displayName: Component Governance Detection
+        condition: always()
+        inputs:
+          scanType: 'Register'
+          verbosity: 'Verbose'
+          alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
+
+  - job: TearDownCloudTestResources
+    condition: always()
+    dependsOn:
+      - Linux
+      - DeployCloudTestResources
+    variables:
+      RESOURCE_GROUP_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.RESOURCE_GROUP_NAME'] ]
+    pool:
+      vmImage: windows-2022
+    steps:
+    - template: templates/DeleteCloudResources.yaml

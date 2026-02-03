@@ -1,0 +1,21 @@
+steps:
+- task: AzureCLI@2
+  name: deployCloudTestResources
+  inputs:
+    azureSubscription: 'iot hub sdk service connection'
+    scriptType: 'pscore'
+    scriptLocation: 'inlineScript'
+    pwsh: true
+    inlineScript: |
+      $jsonContent = az account show | ConvertFrom-Json
+      $subscriptionId = $jsonContent.Id
+
+      $uniqueSuffixLength = 5
+      $characters = 'abcdefghijklmnopqrstuvwxyz'.ToCharArray()
+      $CloudResourceUniqueSuffix = -join ($characters | Get-Random -Count $uniqueSuffixLength)
+
+      $resourceGroupName = 'javasdkgate'+$CloudResourceUniqueSuffix
+
+      Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$resourceGroupName"
+
+      $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup $resourceGroupName

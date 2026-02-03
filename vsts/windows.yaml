@@ -1,0 +1,135 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - doc/*
+      - device/iot-device-samples/*
+      - service/iot-service-samples/*
+      - provisioning/provisioning-samples/*
+
+variables:
+    maxParallel: 2
+
+jobs:
+  - job: DeployCloudTestResources
+    pool:
+      vmImage: windows-latest
+    steps:     
+    - template: templates/DeployCloudResources.yaml
+
+  - job: Windows
+    timeoutInMinutes: 180
+    dependsOn: DeployCloudTestResources
+    variables:
+      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
+      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
+      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
+    strategy:
+      maxParallel: $[variables.maxParallel]
+      matrix:
+        JDK 11: # always run Java 11
+          JAVA_VERSION: 11
+        JDK 8: # only run Java 8 in nightly or CI builds.
+          JAVA_VERSION: 8
+    pool:
+      vmImage: windows-latest
+    displayName: Windows
+    steps:
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: $(JAVA_VERSION)
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          COMMIT_FROM: $(COMMIT_FROM)
+
+      - powershell: ./vsts/start_tpm_windows.ps1
+        displayName: 'Start TPM Simulator'
+        env:
+          COMMIT_FROM: $(COMMIT_FROM)
+
+      - powershell: ./vsts/build_repo.ps1
+        displayName: 'Build and Test'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
+          IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
+          IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES: true
+
+      - task: CopyFiles@2
+        displayName: 'Copy Test Results to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/*.trx
+            **/*.xml
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        continueOnError: true
+
+      - task: CopyFiles@2
+        displayName: 'Copy Build Results to Artifact Staging Directory'
+        condition: always()
+        inputs:
+          flattenFolders: true
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/target/*.jar
+            **/target/*.pom
+            !**/target/*-sources.jar
+            !**/target/*-javadoc.jar
+            !**/target/dice-*
+            !**/target/provisioning-x509-cert-generator*
+            !**/target/*emulator*
+            !**/*sample*/**/target/**
+            !**/*test*/**/target/**
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/buildOutput'
+        continueOnError: true
+
+      - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+        displayName: 'Generate SBOM for Build Artifacts'
+        condition: always()
+        inputs:
+          BuildDropPath: '$(Build.ArtifactStagingDirectory)/buildOutput'
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact Staging Directory'
+        condition: always()
+        continueOnError: true
+
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results'
+        condition: always()
+        inputs:
+          mergeTestResults: true
+          testRunTitle: "Windows JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
+        continueOnError: true
+
+      - task: ComponentGovernanceComponentDetection@0
+        displayName: Component Governance Detection
+        condition: always()
+        inputs:
+          scanType: 'Register'
+          verbosity: 'Verbose'
+          alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
+
+  - job: TearDownCloudTestResources
+    condition: always()
+    dependsOn:
+      - Windows
+      - DeployCloudTestResources
+    variables:
+      RESOURCE_GROUP_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.RESOURCE_GROUP_NAME'] ]
+    pool:
+      vmImage: windows-2022
+    steps:
+    - template: templates/DeleteCloudResources.yaml
