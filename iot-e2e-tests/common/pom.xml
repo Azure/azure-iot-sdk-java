@@ -42,6 +42,12 @@
             <groupId>com.microsoft.azure.sdk.iot</groupId>
             <artifactId>${iot-service-client-artifact-id}</artifactId>
             <version>${iot-service-client-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.microsoft.rest</groupId>
+                    <artifactId>client-runtime</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.microsoft.azure.sdk.iot.provisioning</groupId>
@@ -101,7 +107,6 @@
             <artifactId>commons-lang3</artifactId>
             <version>3.5</version>
         </dependency>
-
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>

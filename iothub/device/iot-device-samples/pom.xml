@@ -34,7 +34,6 @@
         <module>module-invoke-method-sample</module>
         <module>send-event-with-proxy</module>
         <module>device-reconnection-sample</module>
-        <module>pnp-device-sample</module>
         <module>custom-sas-token-provider-sample</module>
         <module>unix-domain-socket-sample</module>
     </modules>
