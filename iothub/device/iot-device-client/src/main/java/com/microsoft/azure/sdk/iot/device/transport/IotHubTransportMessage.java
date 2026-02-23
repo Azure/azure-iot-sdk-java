@@ -36,6 +36,10 @@ public class IotHubTransportMessage extends Message
     @Setter
     private int qualityOfService;
 
+    @Getter
+    @Setter
+    private CertificateSigningResponseCallback certificateSigningResponseCallback;
+
     /**
      * Constructor with binary data and message type
      * @param data The byte array of the message.

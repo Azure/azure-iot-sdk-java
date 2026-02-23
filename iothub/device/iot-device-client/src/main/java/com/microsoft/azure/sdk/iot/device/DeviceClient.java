@@ -4,13 +4,16 @@
 package com.microsoft.azure.sdk.iot.device;
 
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * <p>
@@ -269,6 +272,21 @@ public final class DeviceClient extends InternalClient
     public boolean isMultiplexed()
     {
         return this.isMultiplexed;
+    }
+
+    // TODO docs, timeouts?
+    public void sendCertificateSigningRequest(CertificateSigningRequest request, CertificateSigningResponseCallback callback)
+    {
+        // This one message signals to lower layers to both subscribe to MQTT response topic (if not already subscribed)
+        // and to send the CSR. This is a bit different from how methods/twins work but vastly simplifies the user
+        // experience here (compared to having a separate method for subscribing to CSR response topic).
+        IotHubTransportMessage certificateSigningRequest = new IotHubTransportMessage(request.toJson());
+        certificateSigningRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_CERTIFICATE_SIGNING_REQUEST);
+        certificateSigningRequest.setCertificateSigningResponseCallback(callback);
+        certificateSigningRequest.setMessageType(MessageType.CERTIFICATE_SIGNING_REQUEST);
+        certificateSigningRequest.setRequestId(UUID.randomUUID().toString());
+
+        this.getDeviceIO().sendEventAsync(certificateSigningRequest, null, null, this.config.getDeviceId());
     }
 
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client

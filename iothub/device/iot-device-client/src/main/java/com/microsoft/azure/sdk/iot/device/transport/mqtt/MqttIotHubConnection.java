@@ -27,8 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_METHODS;
-import static com.microsoft.azure.sdk.iot.device.MessageType.DEVICE_TWIN;
+import static com.microsoft.azure.sdk.iot.device.MessageType.*;
 import static com.microsoft.azure.sdk.iot.device.transport.mqtt.Mqtt.MAX_IN_FLIGHT_COUNT;
 import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.MQTT_VERSION_3_1_1;
 
@@ -62,6 +61,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private final MqttMessaging deviceMessaging;
     private final MqttTwin deviceTwin;
     private final MqttDirectMethod directMethod;
+    private final MqttCertificateSigning certificateSigning;
 
     private final Map<IotHubTransportMessage, Integer> receivedMessagesToAcknowledge = new ConcurrentHashMap<>();
 
@@ -237,6 +237,12 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             connectOptions,
             unacknowledgedSentMessages,
             receivedMessages);
+
+        this.certificateSigning = new MqttCertificateSigning(
+                deviceId,
+                connectOptions,
+                unacknowledgedSentMessages,
+                receivedMessages);
     }
 
     /**
@@ -367,6 +373,12 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             log.trace("Sending MQTT device twin message ({})", message);
             this.deviceTwin.send((IotHubTransportMessage) message);
         }
+        else if (message.getMessageType() == CERTIFICATE_SIGNING_REQUEST && message instanceof IotHubTransportMessage)
+        {
+            this.certificateSigning.start();
+            log.trace("Sending MQTT certificate signing request message ({})", message);
+            this.certificateSigning.send((IotHubTransportMessage) message);
+        }
         else
         {
             log.trace("Sending MQTT device telemetry message ({})", message);
@@ -455,10 +467,18 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
             else
             {
-                transportMessage = deviceMessaging.receive();
+                transportMessage = certificateSigning.receive();
                 if (transportMessage != null)
                 {
-                    log.trace("Received MQTT device messaging message ({})", transportMessage);
+                    log.trace("Received MQTT certificate signing message ({})", transportMessage);
+                }
+                else
+                {
+                    transportMessage = deviceMessaging.receive();
+                    if (transportMessage != null)
+                    {
+                        log.trace("Received MQTT device messaging message ({})", transportMessage);
+                    }
                 }
             }
         }
