@@ -97,6 +97,11 @@ public class ContractAPIHttp extends ProvisioningDeviceClientContract
         //SRS_ContractAPIHttp_25_001: [The constructor shall save the scope id and hostname.]
         this.idScope = idScope;
         this.hostName = hostName;
+
+        if (provisioningDeviceClientConfig.getCertificateSigningRequest() != null && !provisioningDeviceClientConfig.getCertificateSigningRequest().isEmpty())
+        {
+            throw new UnsupportedOperationException("Including a certificate signing request with a provisioning request is not supported over HTTP");
+        }
     }
 
     private HttpRequest prepareRequest(

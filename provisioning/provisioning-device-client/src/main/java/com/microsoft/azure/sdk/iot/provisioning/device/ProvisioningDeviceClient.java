@@ -117,6 +117,7 @@ public class ProvisioningDeviceClient
         if (additionalData != null)
         {
             this.provisioningDeviceClientConfig.setPayload(additionalData.getProvisioningPayload());
+            this.provisioningDeviceClientConfig.setCertificateSigningRequest(additionalData.getClientCertificateSigningRequest());
         }
 
         this.provisioningDeviceClientConfig.setRegistrationCallback(provisioningDeviceClientRegistrationCallback, context);
