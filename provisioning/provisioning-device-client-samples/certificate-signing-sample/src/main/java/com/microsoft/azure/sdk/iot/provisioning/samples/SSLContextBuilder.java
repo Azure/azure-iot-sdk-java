@@ -30,7 +30,8 @@ public class SSLContextBuilder
 {
     private static final String SSL_CONTEXT_INSTANCE = "TLSv1.2";
     private static final String CERTIFICATE_TYPE = "X.509";
-    private static final String PRIVATE_KEY_ALGORITHM = "RSA"; //TODO ECC support
+    private static final String RSA_PRIVATE_KEY_ALGORITHM = "RSA";
+    private static final String ECC_PRIVATE_KEY_ALGORITHM = "ECDSA";
 
     private static final String CERTIFICATE_ALIAS = "cert-alias";
     private static final String PRIVATE_KEY_ALIAS = "key-alias";
@@ -100,27 +101,42 @@ public class SSLContextBuilder
 
         // By leaving the TrustManager array null, the SSLContext will trust the certificates stored on your device's
         // trusted root certification authorities certificate store.
-        //
-        // This must include the Baltimore CyberTrust Root public certificate: https://baltimore-cybertrust-root.chain-demos.digicert.com/info/index.html
-        // and eventually it will need to include the DigiCert Global Root G2 public certificate: https://global-root-g2.chain-demos.digicert.com/info/index.html
         sslContext.init(kmf.getKeyManagers(), null, new SecureRandom());
 
         return sslContext;
     }
 
-    private static RSAPrivateKey parsePrivateKeyString(String privateKeyPEM) throws GeneralSecurityException
+    private static PrivateKey parsePrivateKeyString(String privateKeyPEM) throws GeneralSecurityException
     {
         if (privateKeyPEM == null || privateKeyPEM.isEmpty())
         {
-            throw new IllegalArgumentException("Public key certificate cannot be null or empty");
+            throw new IllegalArgumentException("Private key cannot be null or empty");
         }
 
-        privateKeyPEM = privateKeyPEM.replace("-----BEGIN PRIVATE KEY-----\n", "");
-        privateKeyPEM = privateKeyPEM.replace("-----END PRIVATE KEY-----", "");
-        byte[] encoded = Base64.decodeBase64(privateKeyPEM.getBytes(StandardCharsets.UTF_8));
-        KeyFactory kf = KeyFactory.getInstance(PRIVATE_KEY_ALGORITHM);
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
-        return (RSAPrivateKey) kf.generatePrivate(keySpec);
+        if (privateKeyPEM.contains("BEGIN PRIVATE KEY"))
+        {
+            // If it is an RSA private key
+            privateKeyPEM = privateKeyPEM.replace("-----BEGIN PRIVATE KEY-----\n", "");
+            privateKeyPEM = privateKeyPEM.replace("-----END PRIVATE KEY-----", "");
+            byte[] encoded = Base64.decodeBase64(privateKeyPEM.getBytes(StandardCharsets.UTF_8));
+            KeyFactory kf = KeyFactory.getInstance(RSA_PRIVATE_KEY_ALGORITHM);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+            return kf.generatePrivate(keySpec);
+        }
+        else if (privateKeyPEM.contains("BEGIN EC PRIVATE KEY"))
+        {
+            // If it is an ECC private key
+            privateKeyPEM = privateKeyPEM.replace("-----BEGIN EC PRIVATE KEY-----\n", "");
+            privateKeyPEM = privateKeyPEM.replace("-----END EC PRIVATE KEY-----", "");
+            byte[] encoded = Base64.decodeBase64(privateKeyPEM.getBytes(StandardCharsets.UTF_8));
+            KeyFactory kf = KeyFactory.getInstance(ECC_PRIVATE_KEY_ALGORITHM);
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
+            return kf.generatePrivate(keySpec);
+        }
+        else
+        {
+            throw new IllegalArgumentException("Malformed private key");
+        }
     }
 
     private static X509Certificate[] parsePublicCertificateString(String pemString) throws GeneralSecurityException, IOException

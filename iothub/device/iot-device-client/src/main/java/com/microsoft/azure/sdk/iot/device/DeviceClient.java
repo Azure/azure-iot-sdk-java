@@ -276,9 +276,31 @@ public final class DeviceClient extends InternalClient
         return this.isMultiplexed;
     }
 
-    // TODO docs, timeouts?
+    /**
+     * <p>
+     * Send a certificate signing request to IoT hub and receive the signed certificates back.
+     * </p>
+     * <p>
+     * This is a multi-step process:
+     *  - This client sends the certificate signing request to IoT hub
+     *  - IoT hub will quickly send a response message that describes if the request was accepted or not
+     *  - If accepted, IoT hub will go through the certificate signing process. Once completed, IoT hub will send another message back to this client with the signed certificates.
+     *
+     *  The user-provided callback will be notified when each of these steps has finished.
+     * </p>
+     * <p>
+     * To instead be notified via futures, see {@link #sendCertificateSigningRequest(IotHubCertificateSigningRequest)}
+     * </p>
+     * @param request The certificate signing request to make of IoT hub.
+     * @param callback The callback that will notify you for each important step in this process.
+     */
     public void sendCertificateSigningRequest(IotHubCertificateSigningRequest request, IotHubCertificateSigningResponseCallback callback)
     {
+        if (this.config.getProtocol() != IotHubClientProtocol.MQTT && this.config.getProtocol() != IotHubClientProtocol.MQTT_WS)
+        {
+            throw new UnsupportedOperationException("Certificate signing is only supported over MQTT or MQTT_WS");
+        }
+
         // This one message signals to lower layers to both subscribe to MQTT response topic (if not already subscribed)
         // and to send the CSR. This is a bit different from how methods/twins work but vastly simplifies the user
         // experience here (compared to having a separate method for subscribing to CSR response topic).
@@ -291,9 +313,26 @@ public final class DeviceClient extends InternalClient
         this.getDeviceIO().sendEventAsync(certificateSigningRequest, null, null, this.config.getDeviceId());
     }
 
+    /**
+     * <p>
+     * Send a certificate signing request to IoT hub and receive the signed certificates back.
+     * </p>
+     * <p>
+     * This is a multi-step process:
+     *  - This client sends the certificate signing request to IoT hub
+     *  - IoT hub will quickly send a response message that describes if the request was accepted or not
+     *  - If accepted, IoT hub will go through the certificate signing process. Once completed, IoT hub will send another message back to this client with the signed certificates.
+     *
+     *  Each future in the returned collection will be completed when each corresponding step has finished.
+     * </p>
+     * <p>
+     * To instead be notified via callback, see {@link #sendCertificateSigningRequest(IotHubCertificateSigningRequest,IotHubCertificateSigningResponseCallback)}
+     * </p>
+     * @param request The certificate signing request to make of IoT hub.
+     * @return A collection of the futures that will complete once each corresponding step in this process has completed.
+     */
     public IotHubCertificateSigningResponseFutures sendCertificateSigningRequest(IotHubCertificateSigningRequest request)
     {
-        //TODO do we care that Futures support cancellation? Hub doesn't support the scenario
         IotHubCertificateSigningResponseFutures responses = new IotHubCertificateSigningResponseFutures();
         CompletableFuture<IotHubCertificateSigningRequestAccepted> acceptedFuture = new CompletableFuture<>();
         CompletableFuture<IotHubCertificateSigningResponse> responseFuture = new CompletableFuture<>();

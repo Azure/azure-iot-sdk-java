@@ -24,9 +24,10 @@ import java.util.concurrent.ExecutionException;
 
 public class Main
 {
+    // The path to write all created certificates to
+    private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "~/SampleCertificates";
     private static final String DPS_ID_SCOPE = "<>";
     private static final String DPS_REGISTRATION_ID = "<>";
-    private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "<>";
     private static final String DPS_SYMMETRIC_KEY = "<>";
 
     public static void main(String[] args)

@@ -66,7 +66,7 @@ class MqttCertificateSigning extends Mqtt
         this.publish("$iothub/credentials/POST/issueCertificate/?$rid=" + message.getRequestId(), message);
         inProgressRequestIdMap.put(message.getRequestId(), signingCallback);
 
-        //TODO listening for response messages should work like how getTwin works. Listen on callback thread, not here.
+        // IoT hub will respond to this request by sending a few response messages over the subscribed topic.
     }
 
     @Override
