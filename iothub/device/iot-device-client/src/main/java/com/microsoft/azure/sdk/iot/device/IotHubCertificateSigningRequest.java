@@ -5,15 +5,9 @@ package com.microsoft.azure.sdk.iot.device;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import lombok.Setter;
 
-/**
- * The request payload to send to IoT Hub to notify it when a file upload is completed, whether successful or not.
- * Must set whether the file upload was a success or not, and must set the correlation Id, but all other fields are optional.
- */
-public class CertificateSigningRequest
+public class IotHubCertificateSigningRequest
 {
     /**
      * Required. The device ID the certificate will be issued for.
@@ -39,23 +33,21 @@ public class CertificateSigningRequest
     private String replace = null;
 
     /**
-     *
      * @param id The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequestData The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      */
-    public CertificateSigningRequest(String id, String certificateSigningRequestData)
+    public IotHubCertificateSigningRequest(String id, String certificateSigningRequestData)
     {
         this(id, certificateSigningRequestData, null);
     }
 
     /**
-     *
      * @param id The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequestData The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      * @param replace the request ID to replace, or "*" to replace any active request. For use if a
      * previous certificate signing request has failed and you want to start over.
      */
-    public CertificateSigningRequest(String id, String certificateSigningRequestData, String replace)
+    public IotHubCertificateSigningRequest(String id, String certificateSigningRequestData, String replace)
     {
         if (id == null || id.isEmpty())
         {
@@ -79,7 +71,7 @@ public class CertificateSigningRequest
     }
 
     @SuppressWarnings("unused") // used by gson
-    CertificateSigningRequest()
+    IotHubCertificateSigningRequest()
     {
     }
 }

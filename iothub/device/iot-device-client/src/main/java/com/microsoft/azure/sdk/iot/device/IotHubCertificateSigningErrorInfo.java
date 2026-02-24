@@ -9,7 +9,7 @@ import lombok.Getter;
 
 import java.util.Date;
 
-public class CertificateSigningErrorInfo {
+public class IotHubCertificateSigningErrorInfo {
 /* Example:
 {
   "correlationId": "8819e8d8-1324-4a9c-acde-ce0318e93f31",
@@ -45,15 +45,15 @@ alternatively, in the case of an "operation already in progress" error:
     @Getter
     private transient Date operationExpires;
 
-    public CertificateSigningErrorInfo(String json) throws IllegalArgumentException
+    public IotHubCertificateSigningErrorInfo(String json) throws IllegalArgumentException
     {
         Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
-        CertificateSigningErrorInfo deserialized;
+        IotHubCertificateSigningErrorInfo deserialized;
 
         ParserUtility.validateStringUTF8(json);
         try
         {
-            deserialized = gson.fromJson(json, CertificateSigningErrorInfo.class);
+            deserialized = gson.fromJson(json, IotHubCertificateSigningErrorInfo.class);
         }
         catch (JsonSyntaxException malformed)
         {
@@ -69,7 +69,7 @@ alternatively, in the case of an "operation already in progress" error:
     }
 
     @SuppressWarnings("unused") // used by gson
-    CertificateSigningErrorInfo()
+    IotHubCertificateSigningErrorInfo()
     {
     }
 }

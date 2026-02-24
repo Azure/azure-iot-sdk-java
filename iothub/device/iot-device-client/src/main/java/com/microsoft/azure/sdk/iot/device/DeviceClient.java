@@ -275,14 +275,14 @@ public final class DeviceClient extends InternalClient
     }
 
     // TODO docs, timeouts?
-    public void sendCertificateSigningRequest(CertificateSigningRequest request, CertificateSigningResponseCallback callback)
+    public void sendCertificateSigningRequest(IotHubCertificateSigningRequest request, IotHubCertificateSigningResponseCallback callback)
     {
         // This one message signals to lower layers to both subscribe to MQTT response topic (if not already subscribed)
         // and to send the CSR. This is a bit different from how methods/twins work but vastly simplifies the user
         // experience here (compared to having a separate method for subscribing to CSR response topic).
         IotHubTransportMessage certificateSigningRequest = new IotHubTransportMessage(request.toJson());
         certificateSigningRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_CERTIFICATE_SIGNING_REQUEST);
-        certificateSigningRequest.setCertificateSigningResponseCallback(callback);
+        certificateSigningRequest.setIotHubCertificateSigningResponseCallback(callback);
         certificateSigningRequest.setMessageType(MessageType.CERTIFICATE_SIGNING_REQUEST);
         certificateSigningRequest.setRequestId(UUID.randomUUID().toString());
 

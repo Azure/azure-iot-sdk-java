@@ -38,7 +38,7 @@ public class IotHubTransportMessage extends Message
 
     @Getter
     @Setter
-    private CertificateSigningResponseCallback certificateSigningResponseCallback;
+    private IotHubCertificateSigningResponseCallback iotHubCertificateSigningResponseCallback;
 
     /**
      * Constructor with binary data and message type

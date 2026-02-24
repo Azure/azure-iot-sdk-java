@@ -1,6 +1,6 @@
 package com.microsoft.azure.sdk.iot.device;
 
-public enum CertificateSigningErrorCode
+public enum IotHubCertificateSigningErrorCode
 {
     InvalidProtocolVersion,
     OperationNotAvailableInCurrentTier,
@@ -17,7 +17,7 @@ public enum CertificateSigningErrorCode
     ServiceUnavailable,
     Unknown;
 
-    public static CertificateSigningErrorCode GetValue(int code)
+    public static IotHubCertificateSigningErrorCode GetValue(int code)
     {
         switch (code)
         {

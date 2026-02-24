@@ -1,8 +1,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.samples;
 
-import com.microsoft.azure.sdk.iot.device.ClientOptions;
-import com.microsoft.azure.sdk.iot.device.DeviceClient;
-import com.microsoft.azure.sdk.iot.device.IotHubClientProtocol;
+import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
@@ -20,6 +18,8 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.util.Base64;
 import java.util.List;
+import java.util.Observable;
+import java.util.concurrent.Future;
 
 public class Main
 {
@@ -37,11 +37,13 @@ public class Main
         ProvisioningDeviceClientTransportProtocol dpsProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
         //ProvisioningDeviceClientTransportProtocol dpsProtocol = ProvisioningDeviceClientTransportProtocol.MQTT_WS;
 
-        CertificateSigningRequest certificateSigningRequest =
+        CertificateSigningRequestGenerator csrGenerator =
                 //new CertificateSigningRequest("RSA", registrationId);
-                new CertificateSigningRequest("ECDSA", registrationId);
+                new CertificateSigningRequestGenerator("ECDSA", registrationId);
 
-        String privateKeyPem = getPrivateKeyString(certificateSigningRequest.privateKey);
+        CertificateSigningRequest dpsCsr = csrGenerator.GenerateNewCertificateSigningRequest();
+
+        String privateKeyPem = getPrivateKeyString(dpsCsr.getPrivateKey());
         WriteToFile(savedCertificatesPath, "privateKey.pem", privateKeyPem);
 
         SecurityProvider securityProvider = CreateSecurityProviderX509();
@@ -54,7 +56,7 @@ public class Main
                 securityProvider);
 
         AdditionalData provisioningAdditionalData = new AdditionalData();
-        provisioningAdditionalData.setClientCertificateSigningRequest(certificateSigningRequest.base64EncodedPKCS10);
+        provisioningAdditionalData.setClientCertificateSigningRequest(dpsCsr.getBase64EncodedPKCS10());
         ProvisioningDeviceClientRegistrationResult provisioningResult = provisioningDeviceClient.registerDeviceSync(provisioningAdditionalData);
 
         if (provisioningResult.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
@@ -77,10 +79,39 @@ public class Main
 
         SSLContext deviceClientSslContext = SSLContextBuilder.buildSSLContext(leafCertificatePem, privateKeyPem);
 
+        String deviceId = provisioningResult.getDeviceId();
+        String iotHubUri = provisioningResult.getIothubUri();
+
         ClientOptions clientOptions = ClientOptions.builder().sslContext(deviceClientSslContext).build();
-        String derivedConnectionString = String.format("HostName=%s;DeviceId=%;x509=true", provisioningResult.getIothubUri(), provisioningResult.getDeviceId());
+        String derivedConnectionString = String.format("HostName=%s;DeviceId=%s;x509=true", iotHubUri, deviceId);
         DeviceClient client = new DeviceClient(derivedConnectionString, iotHubProtocol, clientOptions);
 
+        CertificateSigningRequest renewalCsr = csrGenerator.GenerateNewCertificateSigningRequest();
+
+        IotHubCertificateSigningRequest iothubCsr =
+                new IotHubCertificateSigningRequest(deviceId, renewalCsr.getBase64EncodedPKCS10(), "*");
+
+        Future<>
+        client.sendCertificateSigningRequest(iothubCsr, new IotHubCertificateSigningResponseCallback()
+        {
+            @Override
+            public void onCertificateSigningRequestAccepted(IotHubCertificateSigningRequestAccepted accepted)
+            {
+
+            }
+
+            @Override
+            public void onCertificateSigningComplete(IotHubCertificateSigningResponse response)
+            {
+
+            }
+
+            @Override
+            public void onCertificateSigningError(IotHubCertificateSigningError error)
+            {
+
+            }
+        });
     }
 
     private static SecurityProviderX509 CreateSecurityProviderX509()

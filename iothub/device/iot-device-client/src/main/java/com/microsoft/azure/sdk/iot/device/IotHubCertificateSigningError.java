@@ -9,7 +9,7 @@ import lombok.Getter;
 
 import java.util.Date;
 
-public class CertificateSigningError
+public class IotHubCertificateSigningError
 {
 /* Example:
 {
@@ -28,7 +28,7 @@ public class CertificateSigningError
     private String errorCodeString;
 
     @Getter
-    private transient CertificateSigningErrorCode errorCode;
+    private transient IotHubCertificateSigningErrorCode errorCode;
 
     @SerializedName("message")
     @Getter
@@ -46,17 +46,17 @@ public class CertificateSigningError
 
     @SerializedName("info")
     @Getter
-    private CertificateSigningErrorInfo info;
+    private IotHubCertificateSigningErrorInfo info;
 
-    public CertificateSigningError(String json) throws IllegalArgumentException
+    public IotHubCertificateSigningError(String json) throws IllegalArgumentException
     {
         Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
-        CertificateSigningError deserialized;
+        IotHubCertificateSigningError deserialized;
 
         ParserUtility.validateStringUTF8(json);
         try
         {
-            deserialized = gson.fromJson(json, CertificateSigningError.class);
+            deserialized = gson.fromJson(json, IotHubCertificateSigningError.class);
         }
         catch (JsonSyntaxException malformed)
         {
@@ -64,7 +64,7 @@ public class CertificateSigningError
         }
 
         this.errorCodeString = deserialized.errorCodeString;
-        this.errorCode = CertificateSigningErrorCode.GetValue(Integer.parseInt(this.errorCodeString));
+        this.errorCode = IotHubCertificateSigningErrorCode.GetValue(Integer.parseInt(this.errorCodeString));
         this.trackingId = deserialized.trackingId;
         this.message = deserialized.message;
         this.timestampUtcString = deserialized.timestampUtcString;
@@ -73,7 +73,7 @@ public class CertificateSigningError
     }
 
     @SuppressWarnings("unused") // used by gson
-    CertificateSigningError()
+    IotHubCertificateSigningError()
     {
     }
 }

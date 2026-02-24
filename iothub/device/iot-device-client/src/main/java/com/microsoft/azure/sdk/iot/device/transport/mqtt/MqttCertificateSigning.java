@@ -22,7 +22,7 @@ class MqttCertificateSigning extends Mqtt
 {
     private final String certificateSigningResponseTopic = "$iothub/credentials/res/#";
     private boolean isStarted = false;
-    private Map<String, CertificateSigningResponseCallback> inProgressRequestIdMap = new HashMap<>();
+    private Map<String, IotHubCertificateSigningResponseCallback> inProgressRequestIdMap = new HashMap<>();
     private static final String REQ_ID = "?$rid=";
 
     public MqttCertificateSigning(
@@ -56,7 +56,7 @@ class MqttCertificateSigning extends Mqtt
 
     public void send(IotHubTransportMessage message) throws TransportException
     {
-        CertificateSigningResponseCallback signingCallback = message.getCertificateSigningResponseCallback();
+        IotHubCertificateSigningResponseCallback signingCallback = message.getIotHubCertificateSigningResponseCallback();
 
         // Service will ack this immediately, then later publish a message to the response topic
         this.publish("$iothub/credentials/POST/issueCertificate/?$rid=" + message.getRequestId(), message);
@@ -96,14 +96,14 @@ class MqttCertificateSigning extends Mqtt
                             String requestId = getRequestId(topicTokens[5]);
                             if (this.inProgressRequestIdMap.containsKey(requestId))
                             {
-                                CertificateSigningResponseCallback certificateSigningResponseCallback = this.inProgressRequestIdMap.get(requestId);
+                                IotHubCertificateSigningResponseCallback iotHubCertificateSigningResponseCallback = this.inProgressRequestIdMap.get(requestId);
 
                                 if (status.equals("202"))
                                 {
                                     try
                                     {
-                                        CertificateSigningRequestAccepted accepted = new CertificateSigningRequestAccepted(new String(payload, StandardCharsets.UTF_8));
-                                        certificateSigningResponseCallback.onCertificateSigningRequestAccepted(accepted);
+                                        IotHubCertificateSigningRequestAccepted accepted = new IotHubCertificateSigningRequestAccepted(new String(payload, StandardCharsets.UTF_8));
+                                        iotHubCertificateSigningResponseCallback.onCertificateSigningRequestAccepted(accepted);
                                     }
                                     catch (IllegalArgumentException e)
                                     {
@@ -114,8 +114,8 @@ class MqttCertificateSigning extends Mqtt
                                 {
                                     try
                                     {
-                                        CertificateSigningResponse response = new CertificateSigningResponse(new String(payload, StandardCharsets.UTF_8));
-                                        certificateSigningResponseCallback.onCertificateSigningComplete(response);
+                                        IotHubCertificateSigningResponse response = new IotHubCertificateSigningResponse(new String(payload, StandardCharsets.UTF_8));
+                                        iotHubCertificateSigningResponseCallback.onCertificateSigningComplete(response);
                                     }
                                     catch (IllegalArgumentException e)
                                     {
@@ -126,8 +126,8 @@ class MqttCertificateSigning extends Mqtt
                                 {
                                     try
                                     {
-                                        CertificateSigningError error = new CertificateSigningError(new String(payload, StandardCharsets.UTF_8));
-                                        certificateSigningResponseCallback.onCertificateSigningError(error);
+                                        IotHubCertificateSigningError error = new IotHubCertificateSigningError(new String(payload, StandardCharsets.UTF_8));
+                                        iotHubCertificateSigningResponseCallback.onCertificateSigningError(error);
                                     }
                                     catch (IllegalArgumentException e)
                                     {
