@@ -1,31 +1,33 @@
 package com.microsoft.azure.sdk.iot.provisioning.samples;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.certificatesigning.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
-import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderX509;
-import com.microsoft.azure.sdk.iot.provisioning.security.hsm.SecurityProviderX509Cert;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.util.Base64;
 import java.util.List;
-import java.util.Observable;
-import java.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
 
 public class Main
 {
-    private static String idScope = "<Your DPS instance's id scope>";
-    private static String registrationId = "<>";
-    private static String savedCertificatesPath = "<>";
+    private static final String DPS_ID_SCOPE = "<>";
+    private static final String DPS_REGISTRATION_ID = "<>";
+    private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "<>";
+    private static final String DPS_SYMMETRIC_KEY = "<>";
 
     public static void main(String[] args)
             throws IOException, URISyntaxException, InterruptedException, IotHubClientException, GeneralSecurityException, ProvisioningDeviceClientException, ProvisioningDeviceClientException
@@ -39,19 +41,18 @@ public class Main
 
         CertificateSigningRequestGenerator csrGenerator =
                 //new CertificateSigningRequest("RSA", registrationId);
-                new CertificateSigningRequestGenerator("ECDSA", registrationId);
+                new CertificateSigningRequestGenerator("ECDSA", DPS_REGISTRATION_ID);
 
         CertificateSigningRequest dpsCsr = csrGenerator.GenerateNewCertificateSigningRequest();
 
         String privateKeyPem = getPrivateKeyString(dpsCsr.getPrivateKey());
-        WriteToFile(savedCertificatesPath, "privateKey.pem", privateKeyPem);
+        WriteToFile(SAMPLE_CERTIFICATES_OUTPUT_PATH, "privateKey.pem", privateKeyPem);
 
-        SecurityProvider securityProvider = CreateSecurityProviderX509();
-        //SecurityProvider securityProvider = CreateSecurityProviderSymmetricKey();
+        SecurityProvider securityProvider = CreateSecurityProvider();
 
         ProvisioningDeviceClient provisioningDeviceClient = ProvisioningDeviceClient.create(
                 "global.azure-devices-provisioning.net",
-                idScope,
+                DPS_ID_SCOPE,
                 dpsProtocol,
                 securityProvider);
 
@@ -73,7 +74,7 @@ public class Main
         }
 
         String issuedClientCertificatesPem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain());
-        WriteToFile(savedCertificatesPath, "clientCertificates.pem", issuedClientCertificatesPem);
+        WriteToFile(SAMPLE_CERTIFICATES_OUTPUT_PATH, "clientCertificates.pem", issuedClientCertificatesPem);
 
         String leafCertificatePem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain().get(0));
 
@@ -86,42 +87,58 @@ public class Main
         String derivedConnectionString = String.format("HostName=%s;DeviceId=%s;x509=true", iotHubUri, deviceId);
         DeviceClient client = new DeviceClient(derivedConnectionString, iotHubProtocol, clientOptions);
 
+        client.open(false);
+
+        client.sendEvent(new Message("Hello from the CSR sample!"));
+
         CertificateSigningRequest renewalCsr = csrGenerator.GenerateNewCertificateSigningRequest();
 
         IotHubCertificateSigningRequest iothubCsr =
                 new IotHubCertificateSigningRequest(deviceId, renewalCsr.getBase64EncodedPKCS10(), "*");
 
-        Future<>
-        client.sendCertificateSigningRequest(iothubCsr, new IotHubCertificateSigningResponseCallback()
+        IotHubCertificateSigningResponseFutures csrResponseFutures = client.sendCertificateSigningRequest(iothubCsr);
+
+        IotHubCertificateSigningResponse response;
+        IotHubCertificateSigningRequestAccepted accepted;
+
+        try
         {
-            @Override
-            public void onCertificateSigningRequestAccepted(IotHubCertificateSigningRequestAccepted accepted)
-            {
+            accepted = csrResponseFutures.getOnCertificateSigningRequestAccepted().get();
+            System.out.println("The certificate signing request was accepted by Iot Hub. Operation will expire at: " + accepted.getOperationExpires());
+            response = csrResponseFutures.getOnCertificateSigningCompleted().get();
+            System.out.println("Iot Hub completed the certificate signing request.");
+        }
+        catch (ExecutionException e)
+        {
+            //TODO I believe this should always be the case, but double check this
+            IotHubCertificateSigningException ex = (IotHubCertificateSigningException) e.getCause();
+            System.out.println("Encountered an issue while renewing the certificates: " + ex.getMessage());
+            return;
+        }
 
-            }
+        String renewedClientCertificatesPem = ConvertToPem(response.getCertificates());
+        WriteToFile(SAMPLE_CERTIFICATES_OUTPUT_PATH, "clientCertificates.pem", renewedClientCertificatesPem);
 
-            @Override
-            public void onCertificateSigningComplete(IotHubCertificateSigningResponse response)
-            {
+        String renewedLeafCertificatePem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain().get(0));
 
-            }
+        client.close();
 
-            @Override
-            public void onCertificateSigningError(IotHubCertificateSigningError error)
-            {
+        SSLContext renewedDeviceClientSslContext = SSLContextBuilder.buildSSLContext(renewedLeafCertificatePem, privateKeyPem);
+        ClientOptions renewedClientOptions = ClientOptions.builder().sslContext(renewedDeviceClientSslContext).build();
+        client = new DeviceClient(derivedConnectionString, iotHubProtocol, renewedClientOptions);
 
-            }
-        });
+        client.open(true);
+
+        client.sendEvent(new Message("Hello from the CSR sample!"));
+
+        client.close();
     }
 
-    private static SecurityProviderX509 CreateSecurityProviderX509()
+    // This sample can use any combination of individual enrollment vs enrollment group and TPM vs Symmetric Key vs x509 auth.
+    // For simpicity in demonstrating the CSR feature, though, this sample will use Symmetric Key + individual enrollment.
+    private static SecurityProviderSymmetricKey CreateSecurityProvider()
     {
-        return new SecurityProviderX509Cert(todo);
-    }
-
-    private static SecurityProviderSymmetricKey CreateSecurityProviderSymmetricKey()
-    {
-        return new SecurityProviderSymmetricKey(todo);
+        return new SecurityProviderSymmetricKey(DPS_SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), DPS_REGISTRATION_ID);
     }
 
     private static String getPrivateKeyString(PrivateKey privateKey) throws IOException
@@ -159,6 +176,7 @@ public class Main
 
     private static void WriteToFile(String path, String filename, String contents) throws IOException
     {
+        Files.deleteIfExists(Path.of(path, filename));
         BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + filename));
         writer.write(contents);
         writer.close();

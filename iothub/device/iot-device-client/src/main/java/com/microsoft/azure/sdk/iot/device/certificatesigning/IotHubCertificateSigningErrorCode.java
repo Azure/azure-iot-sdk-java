@@ -1,4 +1,4 @@
-package com.microsoft.azure.sdk.iot.device;
+package com.microsoft.azure.sdk.iot.device.certificatesigning;
 
 public enum IotHubCertificateSigningErrorCode
 {

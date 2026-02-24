@@ -4,6 +4,10 @@
 package com.microsoft.azure.sdk.iot.device.transport.mqtt;
 
 import com.microsoft.azure.sdk.iot.device.*;
+import com.microsoft.azure.sdk.iot.device.certificatesigning.IotHubCertificateSigningError;
+import com.microsoft.azure.sdk.iot.device.certificatesigning.IotHubCertificateSigningRequestAccepted;
+import com.microsoft.azure.sdk.iot.device.certificatesigning.IotHubCertificateSigningResponse;
+import com.microsoft.azure.sdk.iot.device.certificatesigning.IotHubCertificateSigningResponseCallback;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.TransportException;
 import lombok.extern.slf4j.Slf4j;

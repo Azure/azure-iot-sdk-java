@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.certificatesigning.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * <p>
@@ -287,6 +289,41 @@ public final class DeviceClient extends InternalClient
         certificateSigningRequest.setRequestId(UUID.randomUUID().toString());
 
         this.getDeviceIO().sendEventAsync(certificateSigningRequest, null, null, this.config.getDeviceId());
+    }
+
+    public IotHubCertificateSigningResponseFutures sendCertificateSigningRequest(IotHubCertificateSigningRequest request)
+    {
+        //TODO do we care that Futures support cancellation? Hub doesn't support the scenario
+        IotHubCertificateSigningResponseFutures responses = new IotHubCertificateSigningResponseFutures();
+        CompletableFuture<IotHubCertificateSigningRequestAccepted> acceptedFuture = new CompletableFuture<>();
+        CompletableFuture<IotHubCertificateSigningResponse> responseFuture = new CompletableFuture<>();
+
+        responses.setOnCertificateSigningRequestAccepted(acceptedFuture);
+        responses.setOnCertificateSigningCompleted(responseFuture);
+
+        this.sendCertificateSigningRequest(request, new IotHubCertificateSigningResponseCallback()
+        {
+            @Override
+            public void onCertificateSigningRequestAccepted(IotHubCertificateSigningRequestAccepted accepted)
+            {
+                acceptedFuture.complete(accepted);
+            }
+
+            @Override
+            public void onCertificateSigningComplete(IotHubCertificateSigningResponse response)
+            {
+                responseFuture.complete(response);
+            }
+
+            @Override
+            public void onCertificateSigningError(IotHubCertificateSigningError error)
+            {
+                acceptedFuture.completeExceptionally(new IotHubCertificateSigningException(error.getMessage(), error));
+                responseFuture.completeExceptionally(new IotHubCertificateSigningException(error.getMessage(), error));
+            }
+        });
+
+        return responses;
     }
 
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client

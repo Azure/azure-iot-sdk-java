@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device;
+package com.microsoft.azure.sdk.iot.device.certificatesigning;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -34,7 +34,7 @@ public class IotHubCertificateSigningResponse
      */
     @SerializedName("correlationId")
     @Getter
-    private List<String> correlationId;
+    private String correlationId;
 
     public IotHubCertificateSigningResponse(String json) throws IllegalArgumentException
     {

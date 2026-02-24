@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-package com.microsoft.azure.sdk.iot.device;
+package com.microsoft.azure.sdk.iot.device.certificatesigning;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -20,7 +20,7 @@ public class IotHubCertificateSigningRequest
      * The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      */
     @SerializedName("csr")
-    private String certificateSigningRequestData = null;
+    private String certificateSigningRequest = null;
 
     /**
      * Optional. Request ID to replace, or "*" to replace any active request.
@@ -34,36 +34,36 @@ public class IotHubCertificateSigningRequest
 
     /**
      * @param id The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
-     * @param certificateSigningRequestData The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
+     * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      */
-    public IotHubCertificateSigningRequest(String id, String certificateSigningRequestData)
+    public IotHubCertificateSigningRequest(String id, String certificateSigningRequest)
     {
-        this(id, certificateSigningRequestData, null);
+        this(id, certificateSigningRequest, null);
     }
 
     /**
      * @param id The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
-     * @param certificateSigningRequestData The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
+     * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      * @param replace the request ID to replace, or "*" to replace any active request. For use if a
      * previous certificate signing request has failed and you want to start over.
      */
-    public IotHubCertificateSigningRequest(String id, String certificateSigningRequestData, String replace)
+    public IotHubCertificateSigningRequest(String id, String certificateSigningRequest, String replace)
     {
         if (id == null || id.isEmpty())
         {
             throw new IllegalArgumentException("Id must be non-null and not empty");
         }
 
-        if (certificateSigningRequestData == null || certificateSigningRequestData.isEmpty())
+        if (certificateSigningRequest == null || certificateSigningRequest.isEmpty())
         {
             throw new IllegalArgumentException("certificateSigningRequestData must be non-null and not empty");
         }
 
         this.id = id;
-        this.certificateSigningRequestData = certificateSigningRequestData;
+        this.certificateSigningRequest = certificateSigningRequest;
     }
 
-    String toJson()
+    public String toJson()
     {
         Gson gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
 
