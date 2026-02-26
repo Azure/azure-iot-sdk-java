@@ -63,8 +63,8 @@ class MqttCertificateSigning extends Mqtt
         IotHubCertificateSigningResponseCallback signingCallback = message.getIotHubCertificateSigningResponseCallback();
 
         // Service will ack this immediately, then later publish a message to the response topic
-        this.publish("$iothub/credentials/POST/issueCertificate/?$rid=" + message.getRequestId(), message);
         inProgressRequestIdMap.put(message.getRequestId(), signingCallback);
+        this.publish("$iothub/credentials/POST/issueCertificate/?$rid=" + message.getRequestId(), message);
 
         // IoT hub will respond to this request by sending a few response messages over the subscribed topic.
     }

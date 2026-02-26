@@ -40,13 +40,15 @@ public class Main
         ProvisioningDeviceClientTransportProtocol dpsProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
         //ProvisioningDeviceClientTransportProtocol dpsProtocol = ProvisioningDeviceClientTransportProtocol.MQTT_WS;
 
+        CertificateType certificateType = CertificateType.ECC;
+        //CertificateType certificateType = CertificateType.RSA;
         CertificateSigningRequestGenerator csrGenerator =
-                //new CertificateSigningRequest("RSA", registrationId);
-                new CertificateSigningRequestGenerator("ECDSA", DPS_REGISTRATION_ID);
+                //new CertificateSigningRequest(CertificateType.RSA, registrationId);
+                new CertificateSigningRequestGenerator(certificateType, PROVISIONED_DEVICE_ID);
 
         CertificateSigningRequest dpsCsr = csrGenerator.GenerateNewCertificateSigningRequest();
 
-        String privateKeyPem = getPrivateKeyString(dpsCsr.getPrivateKey());
+        String privateKeyPem = getPrivateKeyString(dpsCsr.getPrivateKey(), certificateType);
         WriteToFile(SAMPLE_CERTIFICATES_OUTPUT_PATH, "privateKey.pem", privateKeyPem);
 
         SecurityProvider securityProvider = CreateSecurityProvider();
@@ -81,6 +83,8 @@ public class Main
 
         SSLContext deviceClientSslContext = SSLContextBuilder.buildSSLContext(leafCertificatePem, privateKeyPem);
 
+        System.out.println("Provisioning finished successfully. Opening device client connection with the newly signed certificates.");
+
         String deviceId = provisioningResult.getDeviceId();
         String iotHubUri = provisioningResult.getIothubUri();
 
@@ -92,11 +96,14 @@ public class Main
 
         client.sendEvent(new Message("Hello from the CSR sample!"));
 
+
+        System.out.println("Creating new CSR to send to IoT hub.");
         CertificateSigningRequest renewalCsr = csrGenerator.GenerateNewCertificateSigningRequest();
 
         IotHubCertificateSigningRequest iothubCsr =
                 new IotHubCertificateSigningRequest(deviceId, renewalCsr.getBase64EncodedPKCS10(), "*");
 
+        System.out.println("Sending new CSR to IoT hub.");
         IotHubCertificateSigningResponseFutures csrResponseFutures = client.sendCertificateSigningRequest(iothubCsr);
 
         IotHubCertificateSigningResponse response;
@@ -137,18 +144,39 @@ public class Main
 
     // This sample can use any combination of individual enrollment vs enrollment group and TPM vs Symmetric Key vs x509 auth.
     // For simpicity in demonstrating the CSR feature, though, this sample will use Symmetric Key + individual enrollment.
-    private static SecurityProviderSymmetricKey CreateSecurityProvider()
+    private static SecurityProviderSymmetricKey CreateSecurityProvider() throws NoSuchAlgorithmException, InvalidKeyException
     {
-        return new SecurityProviderSymmetricKey(DPS_SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8), DPS_REGISTRATION_ID);
+        byte[] derivedSymmetricKey =
+                SecurityProviderSymmetricKey
+                        .ComputeDerivedSymmetricKey(
+                                ENROLLMENT_GROUP_SYMMETRIC_KEY.getBytes(StandardCharsets.UTF_8),
+                                PROVISIONED_DEVICE_ID);
+
+        return new SecurityProviderSymmetricKey(derivedSymmetricKey, PROVISIONED_DEVICE_ID);
     }
 
-    private static String getPrivateKeyString(PrivateKey privateKey) throws IOException
+    private static String getPrivateKeyString(PrivateKey privateKey, CertificateType certificateType) throws IOException
     {
         StringBuilder privateKeyStringBuilder = new StringBuilder();
-        privateKeyStringBuilder.append("-----BEGIN PRIVATE KEY-----");
+        if (certificateType == CertificateType.RSA)
+        {
+            privateKeyStringBuilder.append("-----BEGIN PRIVATE KEY-----\r\n");
+        }
+        else if (certificateType == CertificateType.ECC)
+        {
+            privateKeyStringBuilder.append("-----BEGIN EC PRIVATE KEY-----\r\n");
+        }
         String privateKeyBase64Encoded = Base64.getEncoder().encodeToString(privateKey.getEncoded());
         privateKeyStringBuilder.append(privateKeyBase64Encoded);
-        privateKeyStringBuilder.append("-----END PRIVATE KEY-----");
+        privateKeyStringBuilder.append("\r\n");
+        if (certificateType == CertificateType.RSA)
+        {
+            privateKeyStringBuilder.append("-----END PRIVATE KEY-----\r\n");
+        }
+        else if (certificateType == CertificateType.ECC)
+        {
+            privateKeyStringBuilder.append("-----END EC PRIVATE KEY-----\r\n");
+        }
         return privateKeyStringBuilder.toString();
     }
 
@@ -157,9 +185,10 @@ public class Main
         StringBuilder pemBuilder = new StringBuilder();
         for (String issuedClientCertificate : issuedClientCertificates)
         {
-            pemBuilder.append("-----BEGIN CERTIFICATE-----");
+            pemBuilder.append("-----BEGIN CERTIFICATE-----\r\n");
             pemBuilder.append(issuedClientCertificate);
-            pemBuilder.append("-----END CERTIFICATE-----");
+            pemBuilder.append("\r\n");
+            pemBuilder.append("-----END CERTIFICATE-----\r\n");
         }
 
         return pemBuilder.toString();
@@ -168,9 +197,10 @@ public class Main
     private static String ConvertToPem(String issuedLeafCertificate)
     {
         StringBuilder pemBuilder = new StringBuilder();
-        pemBuilder.append("-----BEGIN CERTIFICATE-----");
+        pemBuilder.append("-----BEGIN CERTIFICATE-----\r\n");
         pemBuilder.append(issuedLeafCertificate);
-        pemBuilder.append("-----END CERTIFICATE-----");
+        pemBuilder.append("\r\n");
+        pemBuilder.append("-----END CERTIFICATE-----\r\n");
 
         return pemBuilder.toString();
     }

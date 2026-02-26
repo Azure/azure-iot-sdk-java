@@ -252,7 +252,7 @@ public class ContractAPIHttpTest
                 result = mockedTpmRegistrationResultParser;
                 mockedTpmRegistrationResultParser.getAuthenticationKey();
                 result = encodeBase64String("some auth key".getBytes(StandardCharsets.UTF_8));
-                new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
+                new DeviceRegistrationParser(anyString, anyString, anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();
                 result = "some json";
@@ -444,7 +444,7 @@ public class ContractAPIHttpTest
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
                 result = new ProvisioningDeviceHubException("test Exception");
                 mockedHttpResponse.getStatus();
-                new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
+                new DeviceRegistrationParser(anyString, anyString, anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();
                 result = "some json";
@@ -492,7 +492,7 @@ public class ContractAPIHttpTest
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
                 mockedHttpResponse.getStatus();
                 result = 200;
-                new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
+                new DeviceRegistrationParser(anyString, anyString, anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();
                 result = "some json";
@@ -582,7 +582,7 @@ public class ContractAPIHttpTest
                 result = null;
                 mockedDeviceRegistrationParser.toJson();
                 result = "TEST JSON";
-                new DeviceRegistrationParser(anyString, anyString);
+                new DeviceRegistrationParser(anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();
                 result = "some json";
@@ -687,7 +687,7 @@ public class ContractAPIHttpTest
                 result = null;
                 ProvisioningDeviceClientExceptionManager.verifyHttpResponse(mockedHttpResponse);
                 result = new ProvisioningDeviceHubException("test Exception");
-                new DeviceRegistrationParser(anyString, anyString);
+                new DeviceRegistrationParser(anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();
                 result = "some json";
@@ -740,7 +740,7 @@ public class ContractAPIHttpTest
                 result = mockedHttpResponse;
                 mockedHttpResponse.getStatus();
                 result = 400;
-                new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
+                new DeviceRegistrationParser(anyString, anyString, anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();
                 result = "some json";
@@ -799,7 +799,7 @@ public class ContractAPIHttpTest
 
                 mockedHttpResponse.getStatus();
                 result = 400;
-                new DeviceRegistrationParser(anyString, anyString, anyString, anyString);
+                new DeviceRegistrationParser(anyString, anyString, anyString, anyString, anyString);
                 result = mockedDeviceRegistrationParser;
                 mockedDeviceRegistrationParser.toJson();
                 result = "some json";

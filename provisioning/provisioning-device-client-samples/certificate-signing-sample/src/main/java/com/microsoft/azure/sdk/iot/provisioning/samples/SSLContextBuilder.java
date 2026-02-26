@@ -116,8 +116,8 @@ public class SSLContextBuilder
         if (privateKeyPEM.contains("BEGIN PRIVATE KEY"))
         {
             // If it is an RSA private key
-            privateKeyPEM = privateKeyPEM.replace("-----BEGIN PRIVATE KEY-----\n", "");
-            privateKeyPEM = privateKeyPEM.replace("-----END PRIVATE KEY-----", "");
+            privateKeyPEM = privateKeyPEM.replace("-----BEGIN PRIVATE KEY-----\r\n", "");
+            privateKeyPEM = privateKeyPEM.replace("-----END PRIVATE KEY-----\r\n", "");
             byte[] encoded = Base64.decodeBase64(privateKeyPEM.getBytes(StandardCharsets.UTF_8));
             KeyFactory kf = KeyFactory.getInstance(RSA_PRIVATE_KEY_ALGORITHM);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);
@@ -126,8 +126,8 @@ public class SSLContextBuilder
         else if (privateKeyPEM.contains("BEGIN EC PRIVATE KEY"))
         {
             // If it is an ECC private key
-            privateKeyPEM = privateKeyPEM.replace("-----BEGIN EC PRIVATE KEY-----\n", "");
-            privateKeyPEM = privateKeyPEM.replace("-----END EC PRIVATE KEY-----", "");
+            privateKeyPEM = privateKeyPEM.replace("-----BEGIN EC PRIVATE KEY-----\r\n", "");
+            privateKeyPEM = privateKeyPEM.replace("-----END EC PRIVATE KEY-----\r\n", "");
             byte[] encoded = Base64.decodeBase64(privateKeyPEM.getBytes(StandardCharsets.UTF_8));
             KeyFactory kf = KeyFactory.getInstance(ECC_PRIVATE_KEY_ALGORITHM);
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(encoded);

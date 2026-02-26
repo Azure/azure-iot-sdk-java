@@ -1,5 +1,6 @@
 package com.microsoft.azure.sdk.iot.provisioning.samples;
 
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import sun.security.pkcs10.PKCS10;
 import sun.security.x509.X500Name;
 
@@ -11,6 +12,9 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.spec.RSAKeyGenParameterSpec;
 import java.util.Base64;
 
+import static com.microsoft.azure.sdk.iot.provisioning.samples.CertificateType.ECC;
+import static com.microsoft.azure.sdk.iot.provisioning.samples.CertificateType.RSA;
+
 public class CertificateSigningRequestGenerator
 {
     private final Signature signature;
@@ -18,26 +22,30 @@ public class CertificateSigningRequestGenerator
     private final String commonName;
 
     /**
-     * @param algorithm "RSA" or "ECDSA"
+     * @param certificateType RSA or ECC
      * @param commonName The common name of the certificate signing request. For this sample's purposes,
      * this value should equal the registration Id being used in DPS.
      */
-    public CertificateSigningRequestGenerator(String algorithm, String commonName) throws CertificateException, NoSuchAlgorithmException, IOException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException
+    public CertificateSigningRequestGenerator(CertificateType certificateType, String commonName) throws CertificateException, NoSuchAlgorithmException, IOException, SignatureException, InvalidKeyException, InvalidAlgorithmParameterException
     {
-        this.keyGen = KeyPairGenerator.getInstance(algorithm);
-        if (algorithm.equalsIgnoreCase("RSA"))
+        BouncyCastleProvider prov = new BouncyCastleProvider();
+        Security.addProvider(prov);
+
+        if (certificateType == RSA)
         {
+            this.keyGen = KeyPairGenerator.getInstance("RSA", prov);
             this.signature = Signature.getInstance("SHA256withRSA");
             this.keyGen.initialize(new RSAKeyGenParameterSpec(4096, RSAKeyGenParameterSpec.F4));
         }
-        else if (algorithm.equalsIgnoreCase("ECC"))
+        else if (certificateType == ECC)
         {
+            this.keyGen = KeyPairGenerator.getInstance("EC", prov);
             this.signature = Signature.getInstance("SHA256withECDSA");
             this.keyGen.initialize(new ECGenParameterSpec("prime256v1"));
         }
         else
         {
-            throw new IllegalArgumentException("Unrecognized encryption algorithm: " + algorithm);
+            throw new IllegalArgumentException("Unrecognized certificate type");
         }
 
         this.commonName = commonName;

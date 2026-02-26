@@ -84,6 +84,7 @@ public class RequestData
         this.sasToken = sasToken;
         this.payload = payload;
         this.isX509 = false;
+        this.certificateSigningRequest = certificateSigningRequest;
     }
 
     /**
@@ -101,6 +102,24 @@ public class RequestData
         this.isX509 = isX509;
         this.payload = payload;
         this.certificateSigningRequest = certificateSigningRequest;
+    }
+
+    /**
+     * Constructor for Request data
+     * @param registrationId Registration ID value. Can be {@code null};
+     * @param operationId Operation ID value. Can be {@code null};
+     * @param sslContext SSL context value. Can be {@code null};
+     * @param sasToken SasToken value. Can be {@code null};
+     * @param payload Payload value. Can be {@code null}
+     */
+    RequestData(String registrationId, String operationId, SSLContext sslContext, String sasToken, String payload)
+    {
+        this.registrationId = registrationId;
+        this.operationId = operationId;
+        this.sslContext = sslContext;
+        this.sasToken = sasToken;
+        this.payload = payload;
+        this.isX509 = false;
     }
 
     /**

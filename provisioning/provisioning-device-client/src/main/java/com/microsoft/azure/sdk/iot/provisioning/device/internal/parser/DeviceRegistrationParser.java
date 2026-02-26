@@ -58,7 +58,7 @@ public class DeviceRegistrationParser
      */
     public DeviceRegistrationParser(String registrationId, String customPayload, String certificateSigningRequest) throws IllegalArgumentException
     {
-        this(registrationId, customPayload, null, null, null);
+        this(registrationId, customPayload, certificateSigningRequest, null, null);
     }
 
     /**
