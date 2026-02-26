@@ -288,6 +288,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             this.deviceMessaging.setMqttAsyncClient(mqttAsyncClient);
             this.deviceTwin.setMqttAsyncClient(mqttAsyncClient);
             this.directMethod.setMqttAsyncClient(mqttAsyncClient);
+            this.certificateSigning.setMqttAsyncClient(mqttAsyncClient);
 
             this.deviceMessaging.start();
             this.state = IotHubConnectionStatus.CONNECTED;

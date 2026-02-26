@@ -33,6 +33,8 @@ public class IotHubCertificateSigningRequest
     private String replace = null;
 
     /**
+     * Create a certificate signing request that will fail if any certificate signing requests for this device are already in progress.
+     *
      * @param id The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      */
@@ -42,6 +44,9 @@ public class IotHubCertificateSigningRequest
     }
 
     /**
+     * Create a certificate signing request that will be accepted by IoT hub depending on the provided "replace" value and depending on
+     * if any certificate signing requests for this device are already in progress.
+     *
      * @param id The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      * @param replace the request ID to replace, or "*" to replace any active request. For use if a
@@ -61,6 +66,7 @@ public class IotHubCertificateSigningRequest
 
         this.id = id;
         this.certificateSigningRequest = certificateSigningRequest;
+        this.replace = replace;
     }
 
     public String toJson()

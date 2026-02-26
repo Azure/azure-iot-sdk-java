@@ -17,6 +17,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Base64;
 import java.util.List;
@@ -31,7 +33,7 @@ public class Main
     private static final String DPS_SYMMETRIC_KEY = "<>";
 
     public static void main(String[] args)
-            throws IOException, URISyntaxException, InterruptedException, IotHubClientException, GeneralSecurityException, ProvisioningDeviceClientException, ProvisioningDeviceClientException
+            throws IOException, URISyntaxException, InterruptedException, IotHubClientException, GeneralSecurityException, ProvisioningDeviceClientException
     {
         // Certificate signing feature is currently only supported over MQTT/MQTT_WS
         IotHubClientProtocol iotHubProtocol = IotHubClientProtocol.MQTT;
@@ -92,7 +94,9 @@ public class Main
         String derivedConnectionString = String.format("HostName=%s;DeviceId=%s;x509=true", iotHubUri, deviceId);
         DeviceClient client = new DeviceClient(derivedConnectionString, iotHubProtocol, clientOptions);
 
-        client.open(false);
+        //TODO there is some delay between provisioning result and IoT hub accepting those credentials? This sometimes
+        // hits an unauthorized error
+        client.open(true);
 
         client.sendEvent(new Message("Hello from the CSR sample!"));
 
