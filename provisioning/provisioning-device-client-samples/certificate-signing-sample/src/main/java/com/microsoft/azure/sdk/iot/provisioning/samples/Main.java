@@ -44,8 +44,9 @@ public class Main
 
         CertificateType certificateType = CertificateType.ECC;
         //CertificateType certificateType = CertificateType.RSA;
+
         CertificateSigningRequestGenerator csrGenerator =
-                //new CertificateSigningRequest(CertificateType.RSA, registrationId);
+                //new CertificateSigningRequest(CertificateType.RSA, PROVISIONED_DEVICE_ID);
                 new CertificateSigningRequestGenerator(certificateType, PROVISIONED_DEVICE_ID);
 
         CertificateSigningRequest dpsCsr = csrGenerator.GenerateNewCertificateSigningRequest();
