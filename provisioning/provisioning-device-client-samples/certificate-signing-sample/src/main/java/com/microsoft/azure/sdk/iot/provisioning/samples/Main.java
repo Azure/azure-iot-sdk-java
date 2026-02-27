@@ -86,6 +86,7 @@ public class Main
 
         SSLContext deviceClientSslContext = SSLContextBuilder.buildSSLContext(leafCertificatePem, privateKeyPem);
 
+        provisioningDeviceClient.close();
         System.out.println("Provisioning finished successfully. Opening device client connection with the newly signed certificates.");
 
         String deviceId = provisioningResult.getDeviceId();
@@ -145,6 +146,8 @@ public class Main
         client.sendEvent(new Message("Hello from the CSR sample!"));
 
         client.close();
+
+        System.out.println("Done.");
     }
 
     // This sample can use any combination of individual enrollment vs enrollment group and TPM vs Symmetric Key vs x509 auth.

@@ -374,7 +374,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             log.trace("Sending MQTT device twin message ({})", message);
             this.deviceTwin.send((IotHubTransportMessage) message);
         }
-        else if (message.getMessageType() == CERTIFICATE_SIGNING_REQUEST && message instanceof IotHubTransportMessage)
+        else if (message.getMessageType() == CERTIFICATE_SIGNING && message instanceof IotHubTransportMessage)
         {
             this.certificateSigning.start();
             log.trace("Sending MQTT certificate signing request message ({})", message);

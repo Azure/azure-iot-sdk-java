@@ -96,8 +96,8 @@ class MqttCertificateSigning extends Mqtt
                         String[] topicTokens = topic.split(Pattern.quote("/"));
                         if (topicTokens.length == 5)
                         {
-                            String status = topicTokens[4];
-                            String requestId = getRequestId(topicTokens[5]);
+                            String status = topicTokens[3];
+                            String requestId = getRequestId(topicTokens[4]);
                             if (this.inProgressRequestIdMap.containsKey(requestId))
                             {
                                 IotHubCertificateSigningResponseCallback iotHubCertificateSigningResponseCallback = this.inProgressRequestIdMap.get(requestId);
@@ -108,6 +108,10 @@ class MqttCertificateSigning extends Mqtt
                                     {
                                         IotHubCertificateSigningRequestAccepted accepted = new IotHubCertificateSigningRequestAccepted(new String(payload, StandardCharsets.UTF_8));
                                         iotHubCertificateSigningResponseCallback.onCertificateSigningRequestAccepted(accepted);
+                                        IotHubTransportMessage transportMessage = new IotHubTransportMessage(new byte[0], MessageType.CERTIFICATE_SIGNING);
+                                        transportMessage.setMessageType(MessageType.CERTIFICATE_SIGNING);
+                                        transportMessage.setQualityOfService(mqttMessage.getQos());
+                                        return transportMessage;
                                     }
                                     catch (IllegalArgumentException e)
                                     {
@@ -118,8 +122,12 @@ class MqttCertificateSigning extends Mqtt
                                 {
                                     try
                                     {
+                                        this.inProgressRequestIdMap.remove(requestId);
                                         IotHubCertificateSigningResponse response = new IotHubCertificateSigningResponse(new String(payload, StandardCharsets.UTF_8));
                                         iotHubCertificateSigningResponseCallback.onCertificateSigningComplete(response);
+                                        IotHubTransportMessage transportMessage = new IotHubTransportMessage(new byte[0], MessageType.CERTIFICATE_SIGNING);
+                                        transportMessage.setQualityOfService(mqttMessage.getQos());
+                                        return transportMessage;
                                     }
                                     catch (IllegalArgumentException e)
                                     {
@@ -130,24 +138,33 @@ class MqttCertificateSigning extends Mqtt
                                 {
                                     try
                                     {
+                                        this.inProgressRequestIdMap.remove(requestId);
                                         IotHubCertificateSigningError error = new IotHubCertificateSigningError(new String(payload, StandardCharsets.UTF_8));
                                         iotHubCertificateSigningResponseCallback.onCertificateSigningError(error);
+                                        IotHubTransportMessage transportMessage = new IotHubTransportMessage(new byte[0], MessageType.CERTIFICATE_SIGNING);
+                                        transportMessage.setQualityOfService(mqttMessage.getQos());
+                                        return transportMessage;
                                     }
                                     catch (IllegalArgumentException e)
                                     {
                                         log.error("Received certificate signing error message with malformed payload. Ignoring it.");
+                                        IotHubTransportMessage transportMessage = new IotHubTransportMessage(new byte[0], MessageType.CERTIFICATE_SIGNING);
+                                        transportMessage.setQualityOfService(mqttMessage.getQos());
+                                        return transportMessage;
                                     }
                                 }
                             }
                             else
                             {
                                 log.warn("Received certificate signing response message for an unknown request Id. Ignoring it.");
+                                IotHubTransportMessage transportMessage = new IotHubTransportMessage(new byte[0], MessageType.CERTIFICATE_SIGNING);
+                                transportMessage.setQualityOfService(mqttMessage.getQos());
+                                return transportMessage;
                             }
                         }
                         else
                         {
                             log.warn("Received MQTT message on certificate signing response topic with an unexpected topic pattern. Ignoring it.");
-                            //TODO ack it? Are they always QoS0
                         }
                     }
                 }
