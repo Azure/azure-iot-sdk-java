@@ -2,7 +2,11 @@ package com.microsoft.azure.sdk.iot.device.certificatesigning;
 
 public enum IotHubCertificateSigningErrorCode
 {
+    /**
+     * This error code should never happen since this SDK hardcodes the protocol version to a valid version
+     */
     InvalidProtocolVersion,
+
     OperationNotAvailableInCurrentTier,
     PreconditionFailed,
     CredentialManagementPreconditionFailed,

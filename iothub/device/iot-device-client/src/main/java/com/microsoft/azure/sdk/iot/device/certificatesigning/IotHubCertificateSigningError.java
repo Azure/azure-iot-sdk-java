@@ -9,6 +9,9 @@ import lombok.Getter;
 
 import java.util.Date;
 
+/**
+ * The error reported by IoT hub if certificate signing fails.
+ */
 public class IotHubCertificateSigningError
 {
 /* Example:
@@ -27,13 +30,22 @@ public class IotHubCertificateSigningError
     @SerializedName("errorCode")
     private String errorCodeString;
 
+    /**
+     * The error code that explains why the operation failed.
+     */
     @Getter
     private transient IotHubCertificateSigningErrorCode errorCode;
 
+    /**
+     * The human readable error message
+     */
     @SerializedName("message")
     @Getter
     private String message;
 
+    /**
+     * The tracking Id associated with this failure. If you request support for this failure, please include this tracking Id.
+     */
     @SerializedName("trackingId")
     @Getter
     private String trackingId;
@@ -41,9 +53,15 @@ public class IotHubCertificateSigningError
     @SerializedName("timestampUtc")
     private String timestampUtcString;
 
+    /**
+     * The UTC time at which this error happened.
+     */
     @Getter
     private transient Date timestampUtc;
 
+    /**
+     * Further information about this error.
+     */
     @SerializedName("info")
     @Getter
     private IotHubCertificateSigningErrorInfo info;

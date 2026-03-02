@@ -13,10 +13,13 @@ import lombok.Getter;
 import java.util.Date;
 
 /**
- * The information provided from IoT Hub that can be used with the Azure Storage SDK to upload a file from your device, including authentication.
+ * The information provided from IoT Hub when it accepts a certificate signing request.
  */
 public class IotHubCertificateSigningRequestAccepted
 {
+    /**
+     * The correlation Id for this certificate signing request flow. For diagnostic purposes only.
+     */
     @SerializedName("correlationId")
     @Getter
     private String correlationId;
@@ -24,6 +27,9 @@ public class IotHubCertificateSigningRequestAccepted
     @SerializedName("operationExpires")
     private String operationExpiresString;
 
+    /**
+     * The UTC time at which this accepted certificate signing request will have expired if IoT Hub does not send any further updates.
+     */
     @Getter
     private transient Date operationExpires;
 

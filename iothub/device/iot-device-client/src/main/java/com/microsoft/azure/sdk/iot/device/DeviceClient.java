@@ -309,7 +309,7 @@ public final class DeviceClient extends InternalClient
         certificateSigningRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_CERTIFICATE_SIGNING_REQUEST);
         certificateSigningRequest.setIotHubCertificateSigningResponseCallback(callback);
         certificateSigningRequest.setMessageType(MessageType.CERTIFICATE_SIGNING);
-        certificateSigningRequest.setRequestId(UUID.randomUUID().toString());
+        certificateSigningRequest.setRequestId(certificateSigningRequest.getRequestId());
 
         this.getDeviceIO().sendEventAsync(certificateSigningRequest, null, null, this.config.getDeviceId());
     }

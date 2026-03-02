@@ -6,6 +6,9 @@ package com.microsoft.azure.sdk.iot.device.certificatesigning;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import lombok.Getter;
+
+import java.util.UUID;
 
 public class IotHubCertificateSigningRequest
 {
@@ -31,6 +34,12 @@ public class IotHubCertificateSigningRequest
      */
     @SerializedName("replace")
     private String replace = null;
+
+    /**
+     * The randomly generated request Id associated with this certificate signing request.
+     */
+    @Getter
+    private final transient String requestId = UUID.randomUUID().toString();
 
     /**
      * Create a certificate signing request that will fail if any certificate signing requests for this device are already in progress.
