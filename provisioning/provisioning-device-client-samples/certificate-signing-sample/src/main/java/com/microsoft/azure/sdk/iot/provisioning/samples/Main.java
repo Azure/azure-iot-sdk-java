@@ -96,8 +96,6 @@ public class Main
         String derivedConnectionString = String.format("HostName=%s;DeviceId=%s;x509=true", iotHubUri, deviceId);
         DeviceClient client = new DeviceClient(derivedConnectionString, iotHubProtocol, clientOptions);
 
-        //TODO there is some delay between provisioning result and IoT hub accepting those credentials? This sometimes
-        // hits an unauthorized error
         client.open(true);
 
         client.sendEvent(new Message("Hello from the CSR sample!"));
