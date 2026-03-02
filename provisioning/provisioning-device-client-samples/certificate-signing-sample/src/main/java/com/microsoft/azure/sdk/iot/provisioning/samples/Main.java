@@ -108,7 +108,7 @@ public class Main
                 new IotHubCertificateSigningRequest(deviceId, renewalCsr.getBase64EncodedPKCS10(), "*");
 
         System.out.println("Sending new CSR to IoT hub.");
-        IotHubCertificateSigningResponseFutures csrResponseFutures = client.sendCertificateSigningRequest(iothubCsr);
+        IotHubCertificateSigningResponseFutures csrResponseFutures = client.sendCertificateSigningRequestAsync(iothubCsr);
 
         IotHubCertificateSigningResponse response;
         IotHubCertificateSigningRequestAccepted accepted;
@@ -133,6 +133,8 @@ public class Main
 
         String renewedLeafCertificatePem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain().get(0));
 
+        System.out.println("Closing the connection to IoT hub and reconnecting with the newly signed certificates instead...");
+
         client.close();
 
         SSLContext renewedDeviceClientSslContext = SSLContextBuilder.buildSSLContext(renewedLeafCertificatePem, privateKeyPem);
@@ -140,6 +142,8 @@ public class Main
         client = new DeviceClient(derivedConnectionString, iotHubProtocol, renewedClientOptions);
 
         client.open(true);
+
+        System.out.println("Successfully opened the connection with the newly signed certificates!");
 
         client.sendEvent(new Message("Hello from the CSR sample!"));
 

@@ -14,7 +14,6 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -289,12 +288,12 @@ public final class DeviceClient extends InternalClient
      *  The user-provided callback will be notified when each of these steps has finished.
      * </p>
      * <p>
-     * To instead be notified via futures, see {@link #sendCertificateSigningRequest(IotHubCertificateSigningRequest)}
+     * To instead be notified via futures, see {@link #sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest)}
      * </p>
      * @param certificateSigningRequest The certificate signing certificateSigningRequest to make of IoT hub.
      * @param callback The callback that will notify you for each important step in this process.
      */
-    public void sendCertificateSigningRequest(IotHubCertificateSigningRequest certificateSigningRequest, IotHubCertificateSigningResponseCallback callback)
+    public void sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest certificateSigningRequest, IotHubCertificateSigningResponseCallback callback)
     {
         if (this.config.getProtocol() != IotHubClientProtocol.MQTT && this.config.getProtocol() != IotHubClientProtocol.MQTT_WS)
         {
@@ -326,12 +325,12 @@ public final class DeviceClient extends InternalClient
      *  Each future in the returned collection will be completed when each corresponding step has finished.
      * </p>
      * <p>
-     * To instead be notified via callback, see {@link #sendCertificateSigningRequest(IotHubCertificateSigningRequest,IotHubCertificateSigningResponseCallback)}
+     * To instead be notified via callback, see {@link #sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest,IotHubCertificateSigningResponseCallback)}
      * </p>
      * @param certificateSigningRequest The certificate signing certificateSigningRequest to make of IoT hub.
      * @return A collection of the futures that will complete once each corresponding step in this process has completed.
      */
-    public IotHubCertificateSigningResponseFutures sendCertificateSigningRequest(IotHubCertificateSigningRequest certificateSigningRequest)
+    public IotHubCertificateSigningResponseFutures sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest certificateSigningRequest)
     {
         IotHubCertificateSigningResponseFutures responses = new IotHubCertificateSigningResponseFutures();
         CompletableFuture<IotHubCertificateSigningRequestAccepted> acceptedFuture = new CompletableFuture<>();
@@ -340,7 +339,7 @@ public final class DeviceClient extends InternalClient
         responses.setOnCertificateSigningRequestAccepted(acceptedFuture);
         responses.setOnCertificateSigningCompleted(responseFuture);
 
-        this.sendCertificateSigningRequest(certificateSigningRequest, new IotHubCertificateSigningResponseCallback()
+        this.sendCertificateSigningRequestAsync(certificateSigningRequest, new IotHubCertificateSigningResponseCallback()
         {
             @Override
             public void onCertificateSigningRequestAccepted(IotHubCertificateSigningRequestAccepted accepted)
