@@ -278,12 +278,12 @@ public final class DeviceClient extends InternalClient
 
     /**
      * <p>
-     * Send a certificate signing request to IoT hub and receive the signed certificates back.
+     * Send a certificate signing certificateSigningRequest to IoT hub and receive the signed certificates back.
      * </p>
      * <p>
      * This is a multi-step process:
-     *  - This client sends the certificate signing request to IoT hub
-     *  - IoT hub will quickly send a response message that describes if the request was accepted or not
+     *  - This client sends the certificate signing certificateSigningRequest to IoT hub
+     *  - IoT hub will quickly send a response message that describes if the certificateSigningRequest was accepted or not
      *  - If accepted, IoT hub will go through the certificate signing process. Once completed, IoT hub will send another message back to this client with the signed certificates.
      *
      *  The user-provided callback will be notified when each of these steps has finished.
@@ -291,10 +291,10 @@ public final class DeviceClient extends InternalClient
      * <p>
      * To instead be notified via futures, see {@link #sendCertificateSigningRequest(IotHubCertificateSigningRequest)}
      * </p>
-     * @param request The certificate signing request to make of IoT hub.
+     * @param certificateSigningRequest The certificate signing certificateSigningRequest to make of IoT hub.
      * @param callback The callback that will notify you for each important step in this process.
      */
-    public void sendCertificateSigningRequest(IotHubCertificateSigningRequest request, IotHubCertificateSigningResponseCallback callback)
+    public void sendCertificateSigningRequest(IotHubCertificateSigningRequest certificateSigningRequest, IotHubCertificateSigningResponseCallback callback)
     {
         if (this.config.getProtocol() != IotHubClientProtocol.MQTT && this.config.getProtocol() != IotHubClientProtocol.MQTT_WS)
         {
@@ -304,23 +304,23 @@ public final class DeviceClient extends InternalClient
         // This one message signals to lower layers to both subscribe to MQTT response topic (if not already subscribed)
         // and to send the CSR. This is a bit different from how methods/twins work but vastly simplifies the user
         // experience here (compared to having a separate method for subscribing to CSR response topic).
-        IotHubTransportMessage certificateSigningRequest = new IotHubTransportMessage(request.toJson());
-        certificateSigningRequest.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_CERTIFICATE_SIGNING_REQUEST);
-        certificateSigningRequest.setIotHubCertificateSigningResponseCallback(callback);
-        certificateSigningRequest.setMessageType(MessageType.CERTIFICATE_SIGNING);
-        certificateSigningRequest.setRequestId(certificateSigningRequest.getRequestId());
+        IotHubTransportMessage message = new IotHubTransportMessage(certificateSigningRequest.toJson());
+        message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_CERTIFICATE_SIGNING_REQUEST);
+        message.setIotHubCertificateSigningResponseCallback(callback);
+        message.setMessageType(MessageType.CERTIFICATE_SIGNING);
+        message.setRequestId(certificateSigningRequest.getRequestId());
 
-        this.getDeviceIO().sendEventAsync(certificateSigningRequest, null, null, this.config.getDeviceId());
+        this.getDeviceIO().sendEventAsync(message, null, null, this.config.getDeviceId());
     }
 
     /**
      * <p>
-     * Send a certificate signing request to IoT hub and receive the signed certificates back.
+     * Send a certificate signing certificateSigningRequest to IoT hub and receive the signed certificates back.
      * </p>
      * <p>
      * This is a multi-step process:
-     *  - This client sends the certificate signing request to IoT hub
-     *  - IoT hub will quickly send a response message that describes if the request was accepted or not
+     *  - This client sends the certificate signing certificateSigningRequest to IoT hub
+     *  - IoT hub will quickly send a response message that describes if the certificateSigningRequest was accepted or not
      *  - If accepted, IoT hub will go through the certificate signing process. Once completed, IoT hub will send another message back to this client with the signed certificates.
      *
      *  Each future in the returned collection will be completed when each corresponding step has finished.
@@ -328,10 +328,10 @@ public final class DeviceClient extends InternalClient
      * <p>
      * To instead be notified via callback, see {@link #sendCertificateSigningRequest(IotHubCertificateSigningRequest,IotHubCertificateSigningResponseCallback)}
      * </p>
-     * @param request The certificate signing request to make of IoT hub.
+     * @param certificateSigningRequest The certificate signing certificateSigningRequest to make of IoT hub.
      * @return A collection of the futures that will complete once each corresponding step in this process has completed.
      */
-    public IotHubCertificateSigningResponseFutures sendCertificateSigningRequest(IotHubCertificateSigningRequest request)
+    public IotHubCertificateSigningResponseFutures sendCertificateSigningRequest(IotHubCertificateSigningRequest certificateSigningRequest)
     {
         IotHubCertificateSigningResponseFutures responses = new IotHubCertificateSigningResponseFutures();
         CompletableFuture<IotHubCertificateSigningRequestAccepted> acceptedFuture = new CompletableFuture<>();
@@ -340,7 +340,7 @@ public final class DeviceClient extends InternalClient
         responses.setOnCertificateSigningRequestAccepted(acceptedFuture);
         responses.setOnCertificateSigningCompleted(responseFuture);
 
-        this.sendCertificateSigningRequest(request, new IotHubCertificateSigningResponseCallback()
+        this.sendCertificateSigningRequest(certificateSigningRequest, new IotHubCertificateSigningResponseCallback()
         {
             @Override
             public void onCertificateSigningRequestAccepted(IotHubCertificateSigningRequestAccepted accepted)
