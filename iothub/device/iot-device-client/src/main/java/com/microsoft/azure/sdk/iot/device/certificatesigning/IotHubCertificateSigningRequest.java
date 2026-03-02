@@ -39,7 +39,7 @@ public class IotHubCertificateSigningRequest
      * The randomly generated request Id associated with this certificate signing request.
      */
     @Getter
-    private final transient String requestId = UUID.randomUUID().toString();
+    private final transient String requestId;
 
     /**
      * Create a certificate signing request that will fail if any certificate signing requests for this device are already in progress.
@@ -76,6 +76,7 @@ public class IotHubCertificateSigningRequest
         this.id = id;
         this.certificateSigningRequest = certificateSigningRequest;
         this.replace = replace;
+        this.requestId = UUID.randomUUID().toString();
     }
 
     public String toJson()
@@ -88,5 +89,6 @@ public class IotHubCertificateSigningRequest
     @SuppressWarnings("unused") // used by gson
     IotHubCertificateSigningRequest()
     {
+        this.requestId = UUID.randomUUID().toString();
     }
 }

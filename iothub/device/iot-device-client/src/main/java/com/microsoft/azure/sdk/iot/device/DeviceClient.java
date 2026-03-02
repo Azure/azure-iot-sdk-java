@@ -296,7 +296,6 @@ public final class DeviceClient extends InternalClient
      */
     public void sendCertificateSigningRequest(IotHubCertificateSigningRequest request, IotHubCertificateSigningResponseCallback callback)
     {
-        //TODO return requestId in both APIs!
         if (this.config.getProtocol() != IotHubClientProtocol.MQTT && this.config.getProtocol() != IotHubClientProtocol.MQTT_WS)
         {
             throw new UnsupportedOperationException("Certificate signing is only supported over MQTT or MQTT_WS");
