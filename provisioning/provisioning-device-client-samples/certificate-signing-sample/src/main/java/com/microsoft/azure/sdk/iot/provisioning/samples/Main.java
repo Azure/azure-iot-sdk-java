@@ -33,7 +33,7 @@ public class Main
     private static final String DPS_ID_SCOPE = "<>";
     private static final String ENROLLMENT_GROUP_SYMMETRIC_KEY = "";
     private static final String PROVISIONED_DEVICE_ID = "myCsrProvisionedDevice";
-    private static final CertificateType certificateType = CertificateType.ECC; // ECC vs RSA
+    private static final CertificateType certificateType = CertificateType.RSA; // ECC vs RSA
 
     // Certificate signing feature is currently only supported over MQTT/MQTT_WS
     private static final IotHubClientProtocol iotHubProtocol = IotHubClientProtocol.MQTT;
