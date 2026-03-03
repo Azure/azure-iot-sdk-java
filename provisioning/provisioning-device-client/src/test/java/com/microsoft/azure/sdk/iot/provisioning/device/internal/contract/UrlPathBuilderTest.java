@@ -27,7 +27,7 @@ public class UrlPathBuilderTest
     private static final String TEST_HOST_NAME = "testHostName";
     private static final String TEST_REGISTRATION_ID = "testRegistrationId";
     private static final String TEST_OPERATION_ID = "testOperationId";
-    private static final String SERVICE_API_VERSION = "2019-03-31";
+    private static final String SERVICE_API_VERSION = "2025-07-01-preview";
 
     //SRS_UrlPathBuilder_25_001: [ Constructor shall save scope id.]
     @Test
