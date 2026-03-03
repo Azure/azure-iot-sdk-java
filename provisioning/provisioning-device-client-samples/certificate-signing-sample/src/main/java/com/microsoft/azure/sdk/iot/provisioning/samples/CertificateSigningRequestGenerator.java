@@ -1,8 +1,21 @@
 package com.microsoft.azure.sdk.iot.provisioning.samples;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import sun.security.pkcs10.PKCS10;
-import sun.security.x509.X500Name;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.Security;
+import org.bouncycastle.asn1.pkcs.CertificationRequest;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+
+import java.security.spec.*;
 
 import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
@@ -17,7 +30,7 @@ import static com.microsoft.azure.sdk.iot.provisioning.samples.CertificateType.R
 
 public class CertificateSigningRequestGenerator
 {
-    private final Signature signature;
+    private final String signature;
     private final KeyPairGenerator keyGen;
     private final String commonName;
 
@@ -34,13 +47,13 @@ public class CertificateSigningRequestGenerator
         if (certificateType == RSA)
         {
             this.keyGen = KeyPairGenerator.getInstance("RSA", prov);
-            this.signature = Signature.getInstance("SHA256withRSA");
+            this.signature = "SHA256withRSA";
             this.keyGen.initialize(new RSAKeyGenParameterSpec(4096, RSAKeyGenParameterSpec.F4));
         }
         else if (certificateType == ECC)
         {
             this.keyGen = KeyPairGenerator.getInstance("EC", prov);
-            this.signature = Signature.getInstance("SHA256withECDSA");
+            this.signature = "SHA256withECDSA";
             this.keyGen.initialize(new ECGenParameterSpec("prime256v1"));
         }
         else
@@ -51,24 +64,18 @@ public class CertificateSigningRequestGenerator
         this.commonName = commonName;
     }
 
-    public CertificateSigningRequest GenerateNewCertificateSigningRequest() throws InvalidKeyException, IOException, CertificateException, SignatureException
+    public CertificateSigningRequest GenerateNewCertificateSigningRequest() throws InvalidKeyException, IOException, CertificateException, SignatureException, OperatorCreationException
     {
         KeyPair keypair = this.keyGen.generateKeyPair();
         PublicKey publicKey = keypair.getPublic();
         PrivateKey privateKey = keypair.getPrivate();
 
-        // generate PKCS10 certificate request
-        PKCS10 pkcs10 = new PKCS10(publicKey);
+        org.bouncycastle.asn1.x500.X500Name name = new X500Name("CN=" + this.commonName);
+        PKCS10CertificationRequestBuilder reqBuilder = new JcaPKCS10CertificationRequestBuilder(name, publicKey);
+        JcaContentSignerBuilder signerBuilder = new JcaContentSignerBuilder(this.signature);
+        PKCS10CertificationRequest csr = reqBuilder.build(signerBuilder.build(privateKey));
 
-        this.signature.initSign(privateKey);
-        X500Principal principal = new X500Principal( "CN=" + this.commonName);
-        X500Name x500name;
-        x500name= new X500Name(principal.getEncoded());
-        pkcs10.encodeAndSign(x500name, this.signature);
-        this.signature.initSign(privateKey);
-
-        byte[] encodedPKCS10 = pkcs10.getEncoded();
-        String base64EncodedPKCS10 = Base64.getEncoder().encodeToString(encodedPKCS10);
+        String base64EncodedPKCS10 = Base64.getEncoder().encodeToString(csr.getEncoded());
         return new CertificateSigningRequest(publicKey, privateKey, base64EncodedPKCS10);
     }
 }

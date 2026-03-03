@@ -5,8 +5,10 @@ import com.microsoft.azure.sdk.iot.device.certificatesigning.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
+import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
+import org.bouncycastle.operator.OperatorCreationException;
 
 import javax.net.ssl.SSLContext;
 import java.io.BufferedWriter;
@@ -33,7 +35,7 @@ public class Main
     private static final String PROVISIONED_DEVICE_ID = "myCsrProvisionedDevice";
 
     public static void main(String[] args)
-            throws IOException, URISyntaxException, InterruptedException, IotHubClientException, GeneralSecurityException, ProvisioningDeviceClientException
+            throws IOException, URISyntaxException, InterruptedException, IotHubClientException, GeneralSecurityException, ProvisioningDeviceClientException, OperatorCreationException
     {
         // Certificate signing feature is currently only supported over MQTT/MQTT_WS
         IotHubClientProtocol iotHubProtocol = IotHubClientProtocol.MQTT;
@@ -64,7 +66,19 @@ public class Main
 
         AdditionalData provisioningAdditionalData = new AdditionalData();
         provisioningAdditionalData.setClientCertificateSigningRequest(dpsCsr.getBase64EncodedPKCS10());
-        ProvisioningDeviceClientRegistrationResult provisioningResult = provisioningDeviceClient.registerDeviceSync(provisioningAdditionalData);
+
+        //TODO what kinds of exceptions do we expect here if the csr was gibberish, for example?
+        ProvisioningDeviceClientRegistrationResult provisioningResult;
+        try
+        {
+            provisioningResult = provisioningDeviceClient.registerDeviceSync(provisioningAdditionalData);
+        }
+        catch (ProvisioningDeviceHubException e)
+        {
+            System.out.println("Provisioning failed with error: " + e.getMessage());
+            provisioningDeviceClient.close();
+            return;
+        }
 
         if (provisioningResult.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
         {
