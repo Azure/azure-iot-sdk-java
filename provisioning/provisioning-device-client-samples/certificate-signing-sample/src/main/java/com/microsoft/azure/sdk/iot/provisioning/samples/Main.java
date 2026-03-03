@@ -225,6 +225,7 @@ public class Main
 
     private static void WriteToFile(String path, String filename, String contents) throws IOException
     {
+        Files.deleteIfExists(Paths.get(path, filename));
         BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + filename));
         writer.write(contents);
         writer.close();
