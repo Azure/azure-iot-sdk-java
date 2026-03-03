@@ -13,7 +13,7 @@ import lombok.Getter;
 import java.util.List;
 
 /**
- * The information provided from IoT Hub that can be used with the Azure Storage SDK to upload a file from your device, including authentication.
+ * The response message from IoT hub containing the signed certificates.
  */
 public class IotHubCertificateSigningResponse
 {
