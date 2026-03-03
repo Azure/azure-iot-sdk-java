@@ -433,7 +433,7 @@ public class ContractAPIMqttTest
                 mockedMqttConnection.isMqttConnected();
                 result = true;
 
-                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, null);
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class, String.class}, TEST_REGISTRATION_ID, null, null);
                 result = mockedDeviceRegistrationParser;
 
                 mockedDeviceRegistrationParser.toJson();
@@ -503,7 +503,7 @@ public class ContractAPIMqttTest
                 mockedRequestData.getPayload();
                 result = TEST_PAYLOAD;
 
-                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, TEST_PAYLOAD);
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class, String.class}, TEST_REGISTRATION_ID, TEST_PAYLOAD, null);
                 result = mockedDeviceRegistrationParser;
 
                 mockedDeviceRegistrationParser.toJson();
@@ -600,7 +600,7 @@ public class ContractAPIMqttTest
                 mockedRequestData.getSslContext();
                 result = mockedSslContext;
 
-                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class}, TEST_REGISTRATION_ID, null);
+                Deencapsulation.newInstance(DeviceRegistrationParser.class, new Class[] {String.class, String.class, String.class}, TEST_REGISTRATION_ID, null, null);
                 result = mockedDeviceRegistrationParser;
 
                 mockedDeviceRegistrationParser.toJson();
