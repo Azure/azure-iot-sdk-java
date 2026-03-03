@@ -33,22 +33,16 @@ public class Main
     private static final String DPS_ID_SCOPE = "<>";
     private static final String DPS_SYMMETRIC_KEY = "<>";
     private static final String PROVISIONED_DEVICE_ID = "myCsrProvisionedDevice";
+    private static final CertificateType certificateType = CertificateType.ECC; // ECC vs RSA
+
+    // Certificate signing feature is currently only supported over MQTT/MQTT_WS
+    private static final IotHubClientProtocol iotHubProtocol = IotHubClientProtocol.MQTT;
+    private static final ProvisioningDeviceClientTransportProtocol dpsProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
 
     public static void main(String[] args)
             throws IOException, URISyntaxException, InterruptedException, IotHubClientException, GeneralSecurityException, ProvisioningDeviceClientException, OperatorCreationException
     {
-        // Certificate signing feature is currently only supported over MQTT/MQTT_WS
-        IotHubClientProtocol iotHubProtocol = IotHubClientProtocol.MQTT;
-        //IotHubClientProtocol iotHubProtocol = IotHubClientProtocol.MQTT_WS;
-
-        ProvisioningDeviceClientTransportProtocol dpsProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
-        //ProvisioningDeviceClientTransportProtocol dpsProtocol = ProvisioningDeviceClientTransportProtocol.MQTT_WS;
-
-        CertificateType certificateType = CertificateType.ECC;
-        //CertificateType certificateType = CertificateType.RSA;
-
         CertificateSigningRequestGenerator csrGenerator =
-                //new CertificateSigningRequest(CertificateType.RSA, PROVISIONED_DEVICE_ID);
                 new CertificateSigningRequestGenerator(certificateType, PROVISIONED_DEVICE_ID);
 
         CertificateSigningRequest dpsCsr = csrGenerator.GenerateNewCertificateSigningRequest();
