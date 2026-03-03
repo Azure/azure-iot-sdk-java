@@ -15,14 +15,17 @@ import com.google.gson.annotations.SerializedName;
 @SuppressWarnings("unused") // A number of private fields are unused but may be filled in by serialization
 public class DeviceRegistrationParser
 {
-    @SerializedName("registrationId")
+    private static final String REGISTRATION_ID = "registrationId";
+    @SerializedName(REGISTRATION_ID)
     private String registrationId;
 
+    private static final String TPM = "tpm";
     @SuppressWarnings("FieldCanBeLocal")
-    @SerializedName("tpm")
+    @SerializedName(TPM)
     private TpmAttestation tpmAttestation;
 
-    @SerializedName("payload")
+    private static final String CUSTOM_PAYLOAD = "payload";
+    @SerializedName(CUSTOM_PAYLOAD)
     private String customPayload = null;
 
     @SerializedName("csr")
@@ -56,21 +59,12 @@ public class DeviceRegistrationParser
      * @param customPayload Custom Payload being sent to the DPS service. Can be a {@code null} or empty value.
      * @throws IllegalArgumentException If the provided registration id was {@code null} or empty.
      */
-    public DeviceRegistrationParser(String registrationId, String customPayload, String certificateSigningRequest) throws IllegalArgumentException
+    public DeviceRegistrationParser(String registrationId, String customPayload) throws IllegalArgumentException
     {
-        this(registrationId, customPayload, certificateSigningRequest, null, null);
+        this(registrationId, customPayload, null);
     }
 
-    /**
-     * Constructor for Device Registration for TPM flow
-     * @param registrationId Registration Id to be sent to the service. Cannot be a {@code null} or empty value.
-     * @param customPayload Custom Payload being sent to the DPS service. Can be a {@code null} or empty value.
-     * @param certificateSigningRequest The certificate signing request to be sent. Can be a {@code null} or empty value.
-     * @param endorsementKey endorsement key to be sent to the service. Cannot be a {@code null} or empty value.
-     * @param storageRootKey Storage Root Key to be sent to the service. Can be a {@code null} value.
-     * @throws IllegalArgumentException is thrown if any of the input parameters are invalid.
-     */
-    public DeviceRegistrationParser(String registrationId, String customPayload, String certificateSigningRequest, String endorsementKey, String storageRootKey) throws IllegalArgumentException
+    public DeviceRegistrationParser(String registrationId, String customPayload, String certificateSigningRequest) throws IllegalArgumentException
     {
         if (registrationId == null || registrationId.isEmpty())
         {
@@ -84,39 +78,69 @@ public class DeviceRegistrationParser
         }
 
         this.certificateSigningRequest = certificateSigningRequest;
+    }
 
-        if (endorsementKey != null && !endorsementKey.isEmpty())
+    /**
+     * Constructor for Device Registration for TPM flow
+     * @param registrationId Registration Id to be sent to the service. Cannot be a {@code null} or empty value.
+     * @param endorsementKey endorsement key to be sent to the service. Cannot be a {@code null} or empty value.
+     * @param storageRootKey Storage Root Key to be sent to the service. Can be a {@code null} value.
+     * @param customPayload Custom Payload being sent to the DPS service. Can be a {@code null} or empty value.
+     * @throws IllegalArgumentException is thrown if any of the input parameters are invalid.
+     */
+    public DeviceRegistrationParser(String registrationId, String customPayload, String endorsementKey, String storageRootKey) throws IllegalArgumentException
+    {
+        this(registrationId, customPayload, null, endorsementKey, storageRootKey);
+    }
+
+    public DeviceRegistrationParser(String registrationId, String customPayload, String certificateSigningRequest, String endorsementKey, String storageRootKey) throws IllegalArgumentException
+    {
+        if (registrationId == null || registrationId.isEmpty())
         {
-            this.tpmAttestation = new TpmAttestation(endorsementKey, storageRootKey);
+            throw new IllegalArgumentException("Registration Id cannot be null or empty");
         }
+
+        if (endorsementKey == null || endorsementKey.isEmpty())
+        {
+            throw new IllegalArgumentException("endorsementKey cannot be null or empty");
+        }
+
+        this.certificateSigningRequest = certificateSigningRequest;
+        this.registrationId = registrationId;
+        if (customPayload != null && !customPayload.isEmpty())
+        {
+            this.customPayload = customPayload;
+        }
+        this.tpmAttestation = new TpmAttestation(endorsementKey, storageRootKey);
     }
 
     /**
      * Generates JSON output for this class.
      * Expected format :
      * For TPM :
-         * <pre>
+     * <pre>
      *     {@code
      *     "{\"registrationId\":\"[RegistrationID value]\"," +
-            "\"tpm\":{" +
-            "\"endorsementKey\":\"[Endorsement Key value]\"," +
-            "\"storageRootKey\":\"[Storage root key value]\"" +
-            "}
-            "\"payload\":\"[Custom Data]\""
-            }"
+    "\"tpm\":{" +
+    "\"endorsementKey\":\"[Endorsement Key value]\"," +
+    "\"storageRootKey\":\"[Storage root key value]\"" +
+    "}
+    "\"payload\":\"[Custom Data]\""
+    }"
      *     }
-         * </pre>
+     * </pre>
      * For X509:
      * <pre>
      *     {@code
      *     "{\"registrationId\":\"[RegistrationID value]\"," +
-            }"
+    }"
      *     }
      * </pre>
      * @return A string that is JSON formatted.
      */
     public String toJson()
     {
+        //SRS_DeviceRegistration_25_007: [ This method shall create the expected Json with the provided Registration Id, EndorsementKey and StorageRootKey. ]
         Gson gson = new GsonBuilder().disableHtmlEscaping().create();
         return gson.toJson(this);
     }

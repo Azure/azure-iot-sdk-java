@@ -189,7 +189,7 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
             this.amqpSaslHandler.setSasToken(requestData.getSasToken());
         }
 
-        byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), null).toJson().getBytes(StandardCharsets.UTF_8);
+        byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes(StandardCharsets.UTF_8);
 
         // SRS_ContractAPIAmqp_07_005: [This method shall send an AMQP message with the property of iotdps-register.]
         this.provisioningAmqpOperations.sendRegisterMessage(responseCallback, callbackContext, payload);
