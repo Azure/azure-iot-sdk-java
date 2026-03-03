@@ -31,7 +31,7 @@ public class Main
     // The path to write all created certificates to
     private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "~/SampleCertificates";
     private static final String DPS_ID_SCOPE = "<>";
-    private static final String DPS_SYMMETRIC_KEY = "<>";
+    private static final String ENROLLMENT_GROUP_SYMMETRIC_KEY = "";
     private static final String PROVISIONED_DEVICE_ID = "myCsrProvisionedDevice";
     private static final CertificateType certificateType = CertificateType.ECC; // ECC vs RSA
 
