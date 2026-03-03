@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -225,7 +225,6 @@ public class Main
 
     private static void WriteToFile(String path, String filename, String contents) throws IOException
     {
-        Files.deleteIfExists(Path.of(path, filename));
         BufferedWriter writer = new BufferedWriter(new FileWriter(path + "/" + filename));
         writer.write(contents);
         writer.close();

@@ -93,6 +93,18 @@ public class RequestData
      * @param sslContext SSL context value. Can be {@code null}
      * @param isX509 True if X509 flow, false otherwise
      * @param payload Payload value. Can be {@code null}
+     */
+    RequestData(String registrationId, SSLContext sslContext, boolean isX509, String payload)
+    {
+        this(registrationId, sslContext, isX509, payload, null);
+    }
+
+    /**
+     * Constructor for Request data
+     * @param registrationId Registration ID value. Can be {@code null}
+     * @param sslContext SSL context value. Can be {@code null}
+     * @param isX509 True if X509 flow, false otherwise
+     * @param payload Payload value. Can be {@code null}
      * @param certificateSigningRequest The optional certificate signing request. May be null or empty.
      */
     RequestData(String registrationId, SSLContext sslContext, boolean isX509, String payload, String certificateSigningRequest)
