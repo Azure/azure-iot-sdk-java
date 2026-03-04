@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
 public class Main
 {
     // The path to write all created certificates to
-    private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "";
+    private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "./";
     private static final String DPS_ID_SCOPE = "";
     private static final String ENROLLMENT_GROUP_SYMMETRIC_KEY = "";
     private static final String PROVISIONED_DEVICE_ID = "myCsrProvisionedDevice";
@@ -226,7 +226,7 @@ public class Main
     private static void WriteToFile(String path, String filename, String contents) throws IOException
     {
         Files.deleteIfExists(Paths.get(path, filename));
-        FileWriter fileWriter = new FileWriter(path + "/" + filename);
+        FileWriter fileWriter = new FileWriter(path + filename);
         BufferedWriter writer = new BufferedWriter(fileWriter);
         writer.write(contents);
         writer.close();
