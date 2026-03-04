@@ -11,9 +11,7 @@ import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetr
 import org.bouncycastle.operator.OperatorCreationException;
 
 import javax.net.ssl.SSLContext;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -226,9 +224,10 @@ public class Main
     private static void WriteToFile(String path, String filename, String contents) throws IOException
     {
         Files.deleteIfExists(Paths.get(path, filename));
-        FileWriter fileWriter = new FileWriter(path + filename);
-        BufferedWriter writer = new BufferedWriter(fileWriter);
-        writer.write(contents);
-        writer.close();
+        try (BufferedWriter writer = new BufferedWriter(
+                new OutputStreamWriter(new FileOutputStream(path + filename), StandardCharsets.UTF_8)))
+        {
+            writer.write(contents);
+        }
     }
 }
