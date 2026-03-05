@@ -11,6 +11,8 @@ import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientR
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientStatus;
 import com.microsoft.azure.sdk.iot.provisioning.device.ProvisioningDeviceClientSubstatus;
 
+import java.util.List;
+
 class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
 {
     /**
@@ -57,5 +59,10 @@ class RegistrationResult extends ProvisioningDeviceClientRegistrationResult
     void setLastUpdatesDateTimeUtc(String lastUpdatesDateTimeUtc)
     {
         this.lastUpdatesDateTimeUtc = lastUpdatesDateTimeUtc;
+    }
+
+    void setIssuedCertificateChain(List<String> issuedCertificateChain)
+    {
+        this.issuedClientCertificateChain = issuedCertificateChain;
     }
 }

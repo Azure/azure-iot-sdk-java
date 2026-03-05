@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TransportUtils
 {
-    public static final String IOTHUB_API_VERSION = "2020-09-30";
+    public static final String IOTHUB_API_VERSION = "2025-08-01-preview";
 
     private static final String JAVA_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.iot-device-client";
     public static final String CLIENT_VERSION = getPackageVersion();
