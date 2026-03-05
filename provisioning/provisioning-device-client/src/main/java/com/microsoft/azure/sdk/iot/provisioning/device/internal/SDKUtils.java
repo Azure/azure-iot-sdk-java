@@ -19,7 +19,11 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SDKUtils
 {
-    private static final String SERVICE_API_VERSION = "2025-07-01-preview";
+    // There appears to be a bug when using AMQP to do device provisioning on android that only repros when using
+    // this new API version. For now, we'll just continue using the old API version for non-MQTT operations but
+    // this still needs some investigation.
+    private static final String SERVICE_API_VERSION_MQTT = "2025-07-01-preview";
+    private static final String SERVICE_API_VERSION = "2019-03-31";
     public static final String PROVISIONING_DEVICE_CLIENT_IDENTIFIER = "com.microsoft.azure.sdk.iot.dps.dps-device-client/";
     public static final String PROVISIONING_DEVICE_CLIENT_VERSION = getPackageVersion();
 
@@ -28,6 +32,11 @@ public class SDKUtils
     private static final String PROCESSOR_ARCHITECTURE = System.getProperty("os.arch");
 
     public static String getServiceApiVersion()
+    {
+        return SERVICE_API_VERSION;
+    }
+
+    public static String getMqttServiceApiVersion()
     {
         return SERVICE_API_VERSION;
     }

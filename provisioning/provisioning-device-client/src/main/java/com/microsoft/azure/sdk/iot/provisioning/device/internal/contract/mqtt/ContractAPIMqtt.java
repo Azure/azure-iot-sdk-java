@@ -178,7 +178,7 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
         {
             try
             {
-                String username = String.format(MQTT_USERNAME_FMT, this.idScope, registrationId, SDKUtils.getServiceApiVersion(), SDKUtils.getServiceApiVersion());
+                String username = String.format(MQTT_USERNAME_FMT, this.idScope, registrationId, SDKUtils.getMqttServiceApiVersion(), SDKUtils.getServiceApiVersion());
                 this.mqttConnection = new MqttConnection(this.hostname, registrationId, username, requestData.getSasToken(), sslContext, this, this.useWebSockets);
                 this.mqttConnection.connect();
 
