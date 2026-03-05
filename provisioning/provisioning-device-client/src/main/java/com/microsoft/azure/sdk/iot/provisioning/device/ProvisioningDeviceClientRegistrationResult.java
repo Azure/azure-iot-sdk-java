@@ -10,9 +10,6 @@ package com.microsoft.azure.sdk.iot.provisioning.device;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Collection;
-import java.util.List;
-
 @NoArgsConstructor
 public class ProvisioningDeviceClientRegistrationResult
 {
@@ -45,17 +42,4 @@ public class ProvisioningDeviceClientRegistrationResult
 
     @Getter
     protected String provisioningPayload;
-
-    /**
-     * <p>
-     * the issued client certificate chain in response to a certificate signing request.
-     * This list will be null if no certificate signing request was provided during registration.
-     * </p>
-     * <p>
-     * The certificate chain is returned as an array of base64-encoded certificates.
-     * The first element is the device/leaf certificate, followed by intermediate CA certificates.
-     * </p>
-     */
-    @Getter
-    protected List<String> issuedClientCertificateChain;
 }

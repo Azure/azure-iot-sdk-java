@@ -294,7 +294,7 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
 
             if (this.securityProvider instanceof SecurityProviderX509)
             {
-                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, true, this.provisioningDeviceClientConfig.getPayload(), this.provisioningDeviceClientConfig.getCertificateSigningRequest());
+                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, true, this.provisioningDeviceClientConfig.getPayload());
                 log.info("Authenticating with device provisioning service using x509 certificates");
                 return this.authenticateWithX509(requestData);
             }
@@ -314,7 +314,7 @@ class RegisterTask implements Callable<RegistrationOperationStatusParser>
             }
             else if (this.securityProvider instanceof SecurityProviderSymmetricKey)
             {
-                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, null, this.provisioningDeviceClientConfig.getPayload(), this.provisioningDeviceClientConfig.getCertificateSigningRequest());
+                RequestData requestData = new RequestData(securityProvider.getRegistrationId(),  sslContext, null, this.provisioningDeviceClientConfig.getPayload());
 
                 log.info("Authenticating with device provisioning service using symmetric key");
                 return this.authenticateWithSasToken(requestData);

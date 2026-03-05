@@ -57,8 +57,8 @@ public class DeviceRegistrationParserTest
         final String sRKey = "testStorageRootKey";
         final String expectedJson = "{\"registrationId\":\"testID\"," +
                 "\"tpm\":{" +
-                "\"endorsementKey\":\"testEndorsementKey\"," +
-                "\"storageRootKey\":\"testStorageRootKey\"" +
+                    "\"endorsementKey\":\"testEndorsementKey\"," +
+                    "\"storageRootKey\":\"testStorageRootKey\"" +
                 "}}";
 
         DeviceRegistrationParser deviceRegistrationParser = new DeviceRegistrationParser(regID, "", eKey, sRKey);

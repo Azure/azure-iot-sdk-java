@@ -66,6 +66,7 @@ class StatusTask implements Callable<RegistrationOperationStatusParser>
             String operationId,
             Authorization authorization) throws ProvisioningDeviceClientException
     {
+        //SRS_StatusTask_25_002: [ Constructor shall throw ProvisioningDeviceClientException if operationId , securityProvider, authorization or provisioningDeviceClientContract is null. ]
         if (provisioningDeviceClientContract == null)
         {
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("provisioningDeviceClientContract cannot be null"));
@@ -91,6 +92,7 @@ class StatusTask implements Callable<RegistrationOperationStatusParser>
             throw new ProvisioningDeviceClientException(new IllegalArgumentException("authorization cannot be null"));
         }
 
+        //SRS_StatusTask_25_001: [ Constructor shall save operationId , securityProvider, provisioningDeviceClientContract and authorization. ]
         this.securityProvider = securityProvider;
         this.provisioningDeviceClientContract = provisioningDeviceClientContract;
         this.provisioningDeviceClientConfig = provisioningDeviceClientConfig;
@@ -102,12 +104,14 @@ class StatusTask implements Callable<RegistrationOperationStatusParser>
     {
         try
         {
+            //SRS_StatusTask_25_003: [ This method shall throw ProvisioningDeviceClientException if registration id is null or empty. ]
             String registrationId = this.securityProvider.getRegistrationId();
             if (registrationId == null || registrationId.isEmpty())
             {
                 throw new ProvisioningDeviceSecurityException("registrationId cannot be null or empty");
             }
 
+            //SRS_StatusTask_25_004: [ This method shall retrieve the SSL context from Authorization and throw ProvisioningDeviceClientException if it is null. ]
             SSLContext sslContext = authorization.getSslContext();
             if (sslContext == null)
             {
@@ -115,6 +119,7 @@ class StatusTask implements Callable<RegistrationOperationStatusParser>
             }
 
             RequestData requestData = new RequestData( registrationId, operationId, authorization.getSslContext(), authorization.getSasToken(), null);
+            //SRS_StatusTask_25_005: [ This method shall trigger getRegistrationState on the contract API and wait for response and return it. ]
             ResponseData responseData = new ResponseData();
             provisioningDeviceClientContract.getRegistrationStatus(requestData, new ResponseCallbackImpl(), responseData);
             if (responseData.getResponseData() == null || responseData.getContractState() != ContractState.DPS_REGISTRATION_RECEIVED)
