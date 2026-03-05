@@ -224,6 +224,7 @@ public class ProvisioningTask implements Callable<Object>
                     registrationInfo.setCreatedDateTimeUtc(registrationStatus.getCreatedDateTimeUtc());
                     registrationInfo.setLastUpdatesDateTimeUtc(registrationStatus.getLastUpdatesDateTimeUtc());
                     registrationInfo.setETag(registrationStatus.getETag());
+                    registrationInfo.setIssuedCertificateChain(registrationStatus.getIssuedCertificateChain());
 
                     if (this.securityProvider instanceof SecurityProviderTpm)
                     {
@@ -300,7 +301,7 @@ public class ProvisioningTask implements Callable<Object>
         {
             //SRS_ProvisioningTask_25_015: [ This method shall invoke open call on the contract.]
             log.info("Opening the connection to device provisioning service...");
-            provisioningDeviceClientContract.open(new RequestData(securityProvider.getRegistrationId(), securityProvider.getSSLContext(), securityProvider instanceof SecurityProviderX509, provisioningDeviceClientConfig.getPayload()));
+            provisioningDeviceClientContract.open(new RequestData(securityProvider.getRegistrationId(), securityProvider.getSSLContext(), securityProvider instanceof SecurityProviderX509, provisioningDeviceClientConfig.getPayload(), provisioningDeviceClientConfig.getCertificateSigningRequest()));
             //SRS_ProvisioningTask_25_007: [ This method shall invoke Register task and status task to execute the state machine of the service as per below rules.]
             /*
             Service State Machine Rules

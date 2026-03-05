@@ -11,6 +11,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 
+import java.util.List;
+
 /**
  * Class that represents the REST API format for DeviceRegistrationResult
  * Format : https://docs.microsoft.com/en-us/rest/api/iot-dps/RuntimeRegistration/RegisterDevice#definitions_deviceregistrationresult
@@ -18,70 +20,61 @@ import lombok.Getter;
 @SuppressWarnings("unused") // A number of private fields are unused but may be filled in by serialization
 public class DeviceRegistrationResultParser
 {
-    private static final String REGISTRATION_ID = "registrationId";
-    @SerializedName(REGISTRATION_ID)
+    @SerializedName("registrationId")
     @Getter
     private String registrationId;
 
-    private static final String CREATED_DATE_TIME_UTC = "createdDateTimeUtc";
-    @SerializedName(CREATED_DATE_TIME_UTC)
+    @SerializedName("createdDateTimeUtc")
     @Getter
     private String createdDateTimeUtc;
 
-    private static final String ASSIGNED_HUB = "assignedHub";
-    @SerializedName(ASSIGNED_HUB)
+    @SerializedName("assignedHub")
     @Getter
     private String assignedHub;
 
-    private static final String DEVICE_ID = "deviceId";
-    @SerializedName(DEVICE_ID)
+    @SerializedName("deviceId")
     @Getter
     private String deviceId;
 
-    private static final String STATUS = "status";
-    @SerializedName(STATUS)
+    @SerializedName("status")
     @Getter
     private String status;
 
-    private static final String SUBSTATUS = "substatus";
-    @SerializedName(SUBSTATUS)
+    @SerializedName("substatus")
     @Getter
     private String substatus;
 
-    private static final String ETAG = "etag";
-    @SerializedName(ETAG)
+    @SerializedName("etag")
     @Getter
     private String eTag;
 
-    private static final String LAST_UPDATES_DATE_TIME_UTC = "lastUpdatedDateTimeUtc";
-    @SerializedName(LAST_UPDATES_DATE_TIME_UTC)
+    @SerializedName("lastUpdatedDateTimeUtc")
     @Getter
     private String lastUpdatesDateTimeUtc;
 
-    private static final String ERROR_CODE = "errorCode";
-    @SerializedName(ERROR_CODE)
+    @SerializedName("errorCode")
     @Getter
     private Integer errorCode;
 
-    private static final String ERROR_MESSAGE = "errorMessage";
-    @SerializedName(ERROR_MESSAGE)
+    @SerializedName("errorMessage")
     @Getter
     private String errorMessage;
 
-    private static final String TPM = "tpm";
-    @SerializedName(TPM)
+    @SerializedName("tpm")
     @Getter
     private TpmRegistrationResultParser tpm;
 
-    private static final String X509 = "x509";
-    @SerializedName(X509)
+    @SerializedName("x509")
     @Getter
     private X509RegistrationResultParser x509;
 
-    private static final String PAYLOAD = "payload";
-    @SerializedName(PAYLOAD)
+    @SerializedName("payload")
     @Getter
     private JsonObject jsonPayload;
+
+    @SerializedName("issuedCertificateChain")
+    @Getter
+    private List<String> issuedCertificateChain;
 
     //empty constructor for Gson
     DeviceRegistrationResultParser()

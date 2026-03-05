@@ -45,6 +45,10 @@ public class RequestData
     @Setter(AccessLevel.PACKAGE)
     private String payload;
 
+    @Getter
+    @Setter(AccessLevel.PACKAGE)
+    private String certificateSigningRequest;
+
     /**
      * Constructor for Request data
      * @param endorsementKey Endorsement key value. Can be {@code null}
@@ -56,7 +60,6 @@ public class RequestData
      */
     RequestData(byte[] endorsementKey, byte[] storageRootKey, String registrationId, SSLContext sslContext, String sasToken, String payload)
     {
-        //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
         this.endorsementKey = endorsementKey;
         this.storageRootKey = storageRootKey;
         this.registrationId = registrationId;
@@ -75,12 +78,25 @@ public class RequestData
      */
     RequestData(String registrationId, SSLContext sslContext, String sasToken, String payload)
     {
-        //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
+        this(registrationId, sslContext, sasToken, payload, null);
+    }
+
+    /**
+     * Constructor for Request data
+     * @param registrationId Registration ID value. Can be {@code null}
+     * @param sslContext SSL context value. Can be {@code null}
+     * @param sasToken SasToken value. Can be {@code null}
+     * @param payload Payload value. Can be {@code null}
+     * @param certificateSigningRequest The optional certificate signing request. May be null or empty.
+     */
+    RequestData(String registrationId, SSLContext sslContext, String sasToken, String payload, String certificateSigningRequest)
+    {
         this.registrationId = registrationId;
         this.sslContext = sslContext;
         this.sasToken = sasToken;
         this.payload = payload;
         this.isX509 = false;
+        this.certificateSigningRequest = certificateSigningRequest;
     }
 
     /**
@@ -92,11 +108,24 @@ public class RequestData
      */
     RequestData(String registrationId, SSLContext sslContext, boolean isX509, String payload)
     {
-        //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
+        this(registrationId, sslContext, isX509, payload, null);
+    }
+
+    /**
+     * Constructor for Request data
+     * @param registrationId Registration ID value. Can be {@code null}
+     * @param sslContext SSL context value. Can be {@code null}
+     * @param isX509 True if X509 flow, false otherwise
+     * @param payload Payload value. Can be {@code null}
+     * @param certificateSigningRequest The optional certificate signing request. May be null or empty.
+     */
+    RequestData(String registrationId, SSLContext sslContext, boolean isX509, String payload, String certificateSigningRequest)
+    {
         this.registrationId = registrationId;
         this.sslContext = sslContext;
         this.isX509 = isX509;
         this.payload = payload;
+        this.certificateSigningRequest = certificateSigningRequest;
     }
 
     /**
@@ -109,7 +138,6 @@ public class RequestData
      */
     RequestData(String registrationId, String operationId, SSLContext sslContext, String sasToken, String payload)
     {
-        //SRS_RequestData_25_001: [ Constructor shall save all the parameters and ignore the null parameters. ]
         this.registrationId = registrationId;
         this.operationId = operationId;
         this.sslContext = sslContext;
@@ -124,7 +152,6 @@ public class RequestData
      */
     public boolean isX509()
     {
-        //SRS_RequestData_25_015: [ This method shall return true is it is X509, false otherwise. ]
         return isX509;
     }
 }

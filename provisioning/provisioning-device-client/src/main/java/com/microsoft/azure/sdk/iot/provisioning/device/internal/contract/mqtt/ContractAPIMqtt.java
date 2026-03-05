@@ -66,7 +66,6 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
      */
     public ContractAPIMqtt(ProvisioningDeviceClientConfig provisioningDeviceClientConfig) throws ProvisioningDeviceClientException
     {
-        // SRS_ContractAPIMqtt_07_024: [ If provisioningDeviceClientConfig is null, this method shall throw ProvisioningDeviceClientException. ]
         if (provisioningDeviceClientConfig == null)
         {
             throw new ProvisioningDeviceClientException("ProvisioningDeviceClientConfig cannot be NULL.");
@@ -95,7 +94,6 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
 
         try
         {
-            // SRS_ProvisioningAmqpOperations_07_011: [This method shall wait for the response of this message for MAX_WAIT_TO_SEND_MSG and call the responseCallback with the reply.]
             synchronized (this.receiveLock)
             {
                 this.receiveLock.waitLock(MAX_WAIT_TO_SEND_MSG);
@@ -113,7 +111,6 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
         }
         catch (InterruptedException e)
         {
-            // SRS_ProvisioningAmqpOperations_07_012: [This method shall throw ProvisioningDeviceClientException if any failure is encountered.]
             throw new ProvisioningDeviceClientException("Provisioning service failed to reply is allotted time.");
         }
 
@@ -225,7 +222,6 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
      */
     public synchronized void authenticateWithProvisioningService(RequestData requestData, ResponseCallback responseCallback, Object callbackContext) throws ProvisioningDeviceClientException
     {
-        //SRS_ContractAPIAmqp_07_003: [If responseCallback is null, this method shall throw ProvisioningDeviceClientException.]
         if (responseCallback == null)
         {
             throw new ProvisioningDeviceClientException("responseCallback cannot be null");
@@ -236,13 +232,9 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
             String sasToken = requestData.getSasToken();
             if (sasToken == null || sasToken.isEmpty())
             {
-                //SRS_ContractAPIAmqp_34_021: [If the requestData is not x509, but the provided requestData does not contain a sas token, this function shall
-                // throw a ProvisioningDeviceConnectionException.]
                 throw new ProvisioningDeviceConnectionException(new IllegalArgumentException("RequestData's sas token cannot be null or empty"));
             }
 
-            //SRS_ContractAPIAmqp_34_020: [If the requestData is not x509, this function shall assume SymmetricKey authentication, and shall open the connection with
-            // the provided request data containing a sas token.]
             open(requestData);
         }
 
@@ -255,10 +247,8 @@ public class ContractAPIMqtt extends ProvisioningDeviceClientContract implements
         {
             String topic = String.format(MQTT_REGISTER_MESSAGE_FMT, this.packetId++);
 
-            //SRS_ContractAPIMqtt_07_026: [ This method shall build the required Json input using parser. ]
-            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload()).toJson().getBytes(StandardCharsets.UTF_8);
+            byte[] payload = new DeviceRegistrationParser(requestData.getRegistrationId(), requestData.getPayload(), requestData.getCertificateSigningRequest()).toJson().getBytes(StandardCharsets.UTF_8);
 
-            // SRS_ContractAPIMqtt_07_005: [This method shall send an MQTT message with the property of iotdps-register.]
             this.executeProvisioningMessage(topic, payload, responseCallback, callbackContext);
         }
         catch (IOException ex)

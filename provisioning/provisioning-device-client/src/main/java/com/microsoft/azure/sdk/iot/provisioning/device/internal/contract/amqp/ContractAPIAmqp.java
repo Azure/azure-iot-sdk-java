@@ -65,6 +65,11 @@ public class ContractAPIAmqp extends ProvisioningDeviceClientContract
             throw new ProvisioningDeviceClientException("The hostName cannot be null or empty.");
         }
 
+        if (provisioningDeviceClientConfig.getCertificateSigningRequest() != null && !provisioningDeviceClientConfig.getCertificateSigningRequest().isEmpty())
+        {
+            throw new UnsupportedOperationException("Including a certificate signing request with a provisioning request is not supported over AMQP or AMQP_WS");
+        }
+
         this.hostName = hostName;
 
         this.useWebSockets = provisioningDeviceClientConfig.isUsingWebSocket();
