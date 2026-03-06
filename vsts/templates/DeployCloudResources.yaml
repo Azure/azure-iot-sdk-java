@@ -14,8 +14,13 @@ steps:
       $characters = 'abcdefghijklmnopqrstuvwxyz'.ToCharArray()
       $CloudResourceUniqueSuffix = -join ($characters | Get-Random -Count $uniqueSuffixLength)
 
+      # Create a unique deployment name
+      $randomSuffix = -join ((65..90) + (97..122) | Get-Random -Count 5 | ForEach-Object { [char]$_ })
+
       $resourceGroupName = 'javasdkgate'+$CloudResourceUniqueSuffix
+      $deploymentName = "JavaSDKE2eInfra-$randomSuffix"
 
       Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$resourceGroupName"
+      Write-Host "##vso[task.setvariable variable=DEPLOYMENT_NAME;isOutput=true]$deploymentName"
 
-      $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup $resourceGroupName
+      $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup $resourceGroupName -DeploymentName $deploymentName
