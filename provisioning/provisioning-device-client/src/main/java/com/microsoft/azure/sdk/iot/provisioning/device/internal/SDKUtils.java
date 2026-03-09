@@ -38,7 +38,7 @@ public class SDKUtils
 
     public static String getMqttServiceApiVersion()
     {
-        return SERVICE_API_VERSION;
+        return SERVICE_API_VERSION_MQTT;
     }
 
     public static String getUserAgentString()
