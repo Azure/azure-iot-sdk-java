@@ -48,6 +48,84 @@ public class Main
         String privateKeyPem = getPrivateKeyString(dpsCsr.getPrivateKey(), certificateType);
         WriteToFile(SAMPLE_CERTIFICATES_OUTPUT_PATH, "privateKey.pem", privateKeyPem);
 
+        ProvisioningDeviceClientRegistrationResult provisioningResult = provisionDevice(dpsCsr.getBase64EncodedPKCS10());
+
+        String leafCertificatePem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain().get(0));
+
+        SSLContext deviceClientSslContext = SSLContextBuilder.buildSSLContext(leafCertificatePem, privateKeyPem);
+
+        System.out.println("Opening device client connection with the newly signed certificates.");
+
+        String deviceId = provisioningResult.getDeviceId();
+        String iotHubUri = provisioningResult.getIothubUri();
+
+        ClientOptions clientOptions = ClientOptions.builder().sslContext(deviceClientSslContext).build();
+        String derivedConnectionString = String.format("HostName=%s;DeviceId=%s;x509=true", iotHubUri, deviceId);
+        DeviceClient hubClient = new DeviceClient(derivedConnectionString, iotHubProtocol, clientOptions);
+
+        try
+        {
+            hubClient.open(true);
+
+            hubClient.sendEvent(new Message("Hello from the CSR sample!"));
+
+            System.out.println("Creating new CSR to send to IoT hub.");
+            CertificateSigningRequest renewalCsr = csrGenerator.GenerateNewCertificateSigningRequest();
+
+            IotHubCertificateSigningRequest iothubCsr =
+                    new IotHubCertificateSigningRequest(deviceId, renewalCsr.getBase64EncodedPKCS10(), "*");
+
+            System.out.println("Sending new CSR to IoT hub.");
+            IotHubCertificateSigningResponseFutures csrResponseFutures = hubClient.sendCertificateSigningRequestAsync(iothubCsr);
+
+            IotHubCertificateSigningResponse response;
+            IotHubCertificateSigningRequestAccepted accepted;
+
+            try
+            {
+                accepted = csrResponseFutures.getOnCertificateSigningRequestAccepted().get();
+                System.out.println("The certificate signing request was accepted by Iot Hub. Operation will expire at: " + accepted.getOperationExpires());
+
+                response = csrResponseFutures.getOnCertificateSigningCompleted().get();
+                System.out.println("Iot Hub completed the certificate signing request.");
+            }
+            catch (ExecutionException e)
+            {
+                //TODO I believe this should always be the case, but double check this
+                IotHubCertificateSigningException ex = (IotHubCertificateSigningException) e.getCause();
+                System.out.println("Encountered an issue while renewing the certificates: " + ex.getMessage());
+                return;
+            }
+
+            String renewedClientCertificatesPem = ConvertToPem(response.getCertificates());
+            WriteToFile(SAMPLE_CERTIFICATES_OUTPUT_PATH, "clientCertificates.pem", renewedClientCertificatesPem);
+
+            String renewedLeafCertificatePem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain().get(0));
+
+            System.out.println("Closing the connection to IoT hub and reconnecting with the newly signed certificates instead...");
+
+            hubClient.close();
+
+            SSLContext renewedDeviceClientSslContext = SSLContextBuilder.buildSSLContext(renewedLeafCertificatePem, privateKeyPem);
+            ClientOptions renewedClientOptions = ClientOptions.builder().sslContext(renewedDeviceClientSslContext).build();
+            hubClient = new DeviceClient(derivedConnectionString, iotHubProtocol, renewedClientOptions);
+
+            hubClient.open(true);
+
+            System.out.println("Successfully opened the connection with the newly signed certificates!");
+
+            hubClient.sendEvent(new Message("Hello from the CSR sample!"));
+        }
+        finally
+        {
+            hubClient.close();
+        }
+
+        System.out.println("Done.");
+    }
+
+    private static ProvisioningDeviceClientRegistrationResult provisionDevice(String csr) throws ProvisioningDeviceClientException, InterruptedException, IOException, NoSuchAlgorithmException, InvalidKeyException
+    {
         SecurityProvider securityProvider = CreateSecurityProvider();
 
         ProvisioningDeviceClient provisioningDeviceClient = ProvisioningDeviceClient.create(
@@ -56,106 +134,37 @@ public class Main
                 dpsProtocol,
                 securityProvider);
 
-        AdditionalData provisioningAdditionalData = new AdditionalData();
-        provisioningAdditionalData.setClientCertificateSigningRequest(dpsCsr.getBase64EncodedPKCS10());
-
-        //TODO what kinds of exceptions do we expect here if the csr was gibberish, for example?
-        ProvisioningDeviceClientRegistrationResult provisioningResult;
         try
         {
-            provisioningResult = provisioningDeviceClient.registerDeviceSync(provisioningAdditionalData);
+            AdditionalData provisioningAdditionalData = new AdditionalData();
+            provisioningAdditionalData.setClientCertificateSigningRequest(csr);
+
+            ProvisioningDeviceClientRegistrationResult provisioningResult = provisioningDeviceClient.registerDeviceSync(provisioningAdditionalData);
+
+            if (provisioningResult.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
+            {
+                System.out.println("Provisioning failed with status: " + provisioningResult.getProvisioningDeviceClientStatus());
+                System.exit(-1);
+            }
+
+            if (provisioningResult.getIssuedClientCertificateChain() == null
+                    || provisioningResult.getIssuedClientCertificateChain().isEmpty())
+            {
+                System.out.println("Provisioning did not yield any issued client certificates. Did you include the certificate signing request in the provisioning request?");
+                System.exit(-1);
+            }
+
+            String issuedClientCertificatesPem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain());
+            WriteToFile(SAMPLE_CERTIFICATES_OUTPUT_PATH, "clientCertificates.pem", issuedClientCertificatesPem);
+
+            System.out.println("Provisioning finished successfully.");
+
+            return provisioningResult;
         }
-        catch (ProvisioningDeviceHubException e)
+        finally
         {
-            System.out.println("Provisioning failed with error: " + e.getMessage());
             provisioningDeviceClient.close();
-            return;
         }
-
-        if (provisioningResult.getProvisioningDeviceClientStatus() != ProvisioningDeviceClientStatus.PROVISIONING_DEVICE_STATUS_ASSIGNED)
-        {
-            System.out.println("Provisioning failed with status: " + provisioningResult.getProvisioningDeviceClientStatus());
-            return;
-        }
-
-        if (provisioningResult.getIssuedClientCertificateChain() == null
-                || provisioningResult.getIssuedClientCertificateChain().isEmpty())
-        {
-            System.out.println("Provisioning did not yield any issued client certificates. Did you include the certificate signing request in the provisioning request?");
-            return;
-        }
-
-        String issuedClientCertificatesPem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain());
-        WriteToFile(SAMPLE_CERTIFICATES_OUTPUT_PATH, "clientCertificates.pem", issuedClientCertificatesPem);
-
-        String leafCertificatePem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain().get(0));
-
-        SSLContext deviceClientSslContext = SSLContextBuilder.buildSSLContext(leafCertificatePem, privateKeyPem);
-
-        provisioningDeviceClient.close();
-        System.out.println("Provisioning finished successfully. Opening device client connection with the newly signed certificates.");
-
-        String deviceId = provisioningResult.getDeviceId();
-        String iotHubUri = provisioningResult.getIothubUri();
-
-        ClientOptions clientOptions = ClientOptions.builder().sslContext(deviceClientSslContext).build();
-        String derivedConnectionString = String.format("HostName=%s;DeviceId=%s;x509=true", iotHubUri, deviceId);
-        DeviceClient client = new DeviceClient(derivedConnectionString, iotHubProtocol, clientOptions);
-
-        client.open(true);
-
-        client.sendEvent(new Message("Hello from the CSR sample!"));
-
-
-        System.out.println("Creating new CSR to send to IoT hub.");
-        CertificateSigningRequest renewalCsr = csrGenerator.GenerateNewCertificateSigningRequest();
-
-        IotHubCertificateSigningRequest iothubCsr =
-                new IotHubCertificateSigningRequest(deviceId, renewalCsr.getBase64EncodedPKCS10(), "*");
-
-        System.out.println("Sending new CSR to IoT hub.");
-        IotHubCertificateSigningResponseFutures csrResponseFutures = client.sendCertificateSigningRequestAsync(iothubCsr);
-
-        IotHubCertificateSigningResponse response;
-        IotHubCertificateSigningRequestAccepted accepted;
-
-        try
-        {
-            accepted = csrResponseFutures.getOnCertificateSigningRequestAccepted().get();
-            System.out.println("The certificate signing request was accepted by Iot Hub. Operation will expire at: " + accepted.getOperationExpires());
-            response = csrResponseFutures.getOnCertificateSigningCompleted().get();
-            System.out.println("Iot Hub completed the certificate signing request.");
-        }
-        catch (ExecutionException e)
-        {
-            //TODO I believe this should always be the case, but double check this
-            IotHubCertificateSigningException ex = (IotHubCertificateSigningException) e.getCause();
-            System.out.println("Encountered an issue while renewing the certificates: " + ex.getMessage());
-            return;
-        }
-
-        String renewedClientCertificatesPem = ConvertToPem(response.getCertificates());
-        WriteToFile(SAMPLE_CERTIFICATES_OUTPUT_PATH, "clientCertificates.pem", renewedClientCertificatesPem);
-
-        String renewedLeafCertificatePem = ConvertToPem(provisioningResult.getIssuedClientCertificateChain().get(0));
-
-        System.out.println("Closing the connection to IoT hub and reconnecting with the newly signed certificates instead...");
-
-        client.close();
-
-        SSLContext renewedDeviceClientSslContext = SSLContextBuilder.buildSSLContext(renewedLeafCertificatePem, privateKeyPem);
-        ClientOptions renewedClientOptions = ClientOptions.builder().sslContext(renewedDeviceClientSslContext).build();
-        client = new DeviceClient(derivedConnectionString, iotHubProtocol, renewedClientOptions);
-
-        client.open(true);
-
-        System.out.println("Successfully opened the connection with the newly signed certificates!");
-
-        client.sendEvent(new Message("Hello from the CSR sample!"));
-
-        client.close();
-
-        System.out.println("Done.");
     }
 
     // This sample can use any combination of individual enrollment vs enrollment group and TPM vs Symmetric Key vs x509 auth.
