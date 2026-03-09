@@ -468,17 +468,17 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
             }
             else
             {
-                transportMessage = deviceMessaging.receive();
+                transportMessage = certificateSigning.receive();
                 if (transportMessage != null)
                 {
-                    log.trace("Received MQTT device messaging message ({})", transportMessage);
+                    log.trace("Received MQTT certificate signing message ({})", transportMessage);
                 }
                 else
                 {
-                    transportMessage = certificateSigning.receive();
+                    transportMessage = deviceMessaging.receive();
                     if (transportMessage != null)
                     {
-                        log.trace("Received MQTT certificate signing message ({})", transportMessage);
+                        log.trace("Received MQTT device messaging message ({})", transportMessage);
                     }
                 }
             }
