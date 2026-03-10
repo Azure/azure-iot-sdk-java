@@ -11,10 +11,11 @@ public class IotHubCertificateSigningException extends Exception
      * The error reported by IoT hub that caused the certificate signing to fail.
      */
     @Getter
-    private IotHubCertificateSigningError error;
+    private final IotHubCertificateSigningError error;
 
     public IotHubCertificateSigningException(String message, IotHubCertificateSigningError error)
     {
         super(message);
+        this.error = error;
     }
 }
