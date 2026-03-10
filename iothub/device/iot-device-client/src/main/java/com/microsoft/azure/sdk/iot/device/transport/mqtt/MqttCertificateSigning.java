@@ -47,7 +47,6 @@ class MqttCertificateSigning extends Mqtt
 
     public void start() throws TransportException
     {
-        // TODO how well does this handle resumed sessions/lost sessions?
         if (!this.isStarted)
         {
             this.subscribe(certificateSigningResponseTopicFilter);
