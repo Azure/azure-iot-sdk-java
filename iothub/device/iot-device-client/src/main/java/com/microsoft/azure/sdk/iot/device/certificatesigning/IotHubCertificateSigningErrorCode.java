@@ -27,8 +27,16 @@ public enum IotHubCertificateSigningErrorCode
         {
             case 400001:
                 return InvalidProtocolVersion;
+            case 400040:
+                return CredentialOperationFailed;
             case 403010:
                 return OperationNotAvailableInCurrentTier;
+            case 404001:
+                return DeviceNotFound;
+            case 409004:
+                return CredentialOperationPending;
+            case 409005:
+                return CredentialOperationActive;
             case 412001:
                 return PreconditionFailed;
             case 412005:
@@ -37,14 +45,6 @@ public enum IotHubCertificateSigningErrorCode
                 return ThrottleBacklogLimitExceeded;
             case 429003:
                 return ThrottlingBacklogTimeout;
-            case 409004:
-                return CredentialOperationPending;
-            case 409005:
-                return CredentialOperationActive;
-            case 400040:
-                return CredentialOperationFailed;
-            case 404001:
-                return DeviceNotFound;
             case 503102:
                 return DeviceUnavailable;
             case 500001:
