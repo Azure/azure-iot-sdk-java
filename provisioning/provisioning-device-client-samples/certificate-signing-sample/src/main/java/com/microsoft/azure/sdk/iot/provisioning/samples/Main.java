@@ -90,7 +90,8 @@ public class Main
             }
             catch (ExecutionException e)
             {
-                //TODO I believe this should always be the case, but double check this
+                // Java futures nest the real exception. The IotHubCertificateSigningException contains details on why
+                // this certificate signing request failed/was rejected.
                 IotHubCertificateSigningException ex = (IotHubCertificateSigningException) e.getCause();
                 System.out.println("Encountered an issue while renewing the certificates: " + ex.getMessage());
                 return;

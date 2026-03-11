@@ -24,7 +24,8 @@ public class IotHubCertificateSigningResponseFutures
      * This future will complete once IoT hub has accepted the certificate signing request.
      * </p>
      * <p>
-     * If IoT hub instead responds with an error, this future will complete exceptionally with a {@link IotHubCertificateSigningException}.
+     * If IoT hub instead responds with an error, this future will complete exceptionally with a
+     * {@link java.util.concurrent.ExecutionException} that holds a nested {@link IotHubCertificateSigningException}.
      * </p>
      */
     public Future<IotHubCertificateSigningRequestAccepted> OnCertificateSigningRequestAccepted()
@@ -37,7 +38,8 @@ public class IotHubCertificateSigningResponseFutures
      * This future will complete once IoT hub has finished signing the certificates and has sent them back to this client.
      * </p>
      * <p>
-     * If IoT hub instead responds with an error, this future will complete exceptionally with a {@link IotHubCertificateSigningException}.
+     * If IoT hub instead responds with an error, this future will complete exceptionally with a
+     * {@link java.util.concurrent.ExecutionException} that holds a nested {@link IotHubCertificateSigningException}.
      * </p>
      */
     public Future<IotHubCertificateSigningResponse> OnCertificateSigningRequestCompleted()
