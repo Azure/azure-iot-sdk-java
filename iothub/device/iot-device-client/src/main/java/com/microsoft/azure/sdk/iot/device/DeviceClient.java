@@ -3,14 +3,18 @@
 
 package com.microsoft.azure.sdk.iot.device;
 
+import com.microsoft.azure.sdk.iot.device.certificatesigning.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
+import com.microsoft.azure.sdk.iot.device.transport.IotHubTransportMessage;
 import com.microsoft.azure.sdk.iot.device.transport.RetryPolicy;
 import com.microsoft.azure.sdk.iot.device.transport.TransportUtils;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsTransportManager;
+import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * <p>
@@ -269,6 +273,95 @@ public final class DeviceClient extends InternalClient
     public boolean isMultiplexed()
     {
         return this.isMultiplexed;
+    }
+
+    /**
+     * <p>
+     * Send a certificate signing certificateSigningRequest to IoT hub and receive the signed certificates back.
+     * </p>
+     * <p>
+     * This is a multi-step process:
+     *  - This client sends the certificate signing certificateSigningRequest to IoT hub
+     *  - IoT hub will quickly send a response message that describes if the certificateSigningRequest was accepted or not
+     *  - If accepted, IoT hub will go through the certificate signing process. Once completed, IoT hub will send another message back to this client with the signed certificates.
+     *
+     *  The user-provided callback will be notified when each of these steps has finished.
+     * </p>
+     * <p>
+     * To instead be notified via futures, see {@link #sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest)}
+     * </p>
+     * @param certificateSigningRequest The certificate signing certificateSigningRequest to make of IoT hub.
+     * @param callback The callback that will notify you for each important step in this process.
+     */
+    public void sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest certificateSigningRequest, IotHubCertificateSigningResponseCallback callback)
+    {
+        if (this.config.getProtocol() != IotHubClientProtocol.MQTT && this.config.getProtocol() != IotHubClientProtocol.MQTT_WS)
+        {
+            throw new UnsupportedOperationException("Certificate signing is only supported over MQTT or MQTT_WS");
+        }
+
+        // This one message signals to lower layers to both subscribe to MQTT response topic (if not already subscribed)
+        // and to send the CSR. This is a bit different from how methods/twins work but vastly simplifies the user
+        // experience here (compared to having a separate method for subscribing to CSR response topic).
+        IotHubTransportMessage message = new IotHubTransportMessage(certificateSigningRequest.toJson());
+        message.setDeviceOperationType(DeviceOperations.DEVICE_OPERATION_CERTIFICATE_SIGNING_REQUEST);
+        message.setIotHubCertificateSigningResponseCallback(callback);
+        message.setMessageType(MessageType.CERTIFICATE_SIGNING);
+        message.setRequestId(certificateSigningRequest.getRequestId());
+
+        this.getDeviceIO().sendEventAsync(message, null, null, this.config.getDeviceId());
+    }
+
+    /**
+     * <p>
+     * Send a certificate signing certificateSigningRequest to IoT hub and receive the signed certificates back.
+     * </p>
+     * <p>
+     * This is a multi-step process:
+     *  - This client sends the certificate signing certificateSigningRequest to IoT hub
+     *  - IoT hub will quickly send a response message that describes if the certificateSigningRequest was accepted or not
+     *  - If accepted, IoT hub will go through the certificate signing process. Once completed, IoT hub will send another message back to this client with the signed certificates.
+     *
+     *  Each future in the returned collection will be completed when each corresponding step has finished.
+     * </p>
+     * <p>
+     * To instead be notified via callback, see {@link #sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest,IotHubCertificateSigningResponseCallback)}
+     * </p>
+     * @param certificateSigningRequest The certificate signing certificateSigningRequest to make of IoT hub.
+     * @return A collection of the futures that will complete once each corresponding step in this process has completed.
+     */
+    public IotHubCertificateSigningResponseFutures sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest certificateSigningRequest)
+    {
+        IotHubCertificateSigningResponseFutures responses = new IotHubCertificateSigningResponseFutures();
+        CompletableFuture<IotHubCertificateSigningRequestAccepted> acceptedFuture = new CompletableFuture<>();
+        CompletableFuture<IotHubCertificateSigningResponse> responseFuture = new CompletableFuture<>();
+
+        responses.setOnCertificateSigningRequestAccepted(acceptedFuture);
+        responses.setOnCertificateSigningCompleted(responseFuture);
+
+        this.sendCertificateSigningRequestAsync(certificateSigningRequest, new IotHubCertificateSigningResponseCallback()
+        {
+            @Override
+            public void onCertificateSigningRequestAccepted(IotHubCertificateSigningRequestAccepted accepted)
+            {
+                acceptedFuture.complete(accepted);
+            }
+
+            @Override
+            public void onCertificateSigningComplete(IotHubCertificateSigningResponse response)
+            {
+                responseFuture.complete(response);
+            }
+
+            @Override
+            public void onCertificateSigningError(IotHubCertificateSigningError error)
+            {
+                acceptedFuture.completeExceptionally(new IotHubCertificateSigningException(error.getMessage(), error));
+                responseFuture.completeExceptionally(new IotHubCertificateSigningException(error.getMessage(), error));
+            }
+        });
+
+        return responses;
     }
 
     // Used by multiplexing clients to signal to this client what kind of multiplexing client is using this device client

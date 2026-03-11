@@ -28,6 +28,9 @@ public class DeviceRegistrationParser
     @SerializedName(CUSTOM_PAYLOAD)
     private String customPayload = null;
 
+    @SerializedName("csr")
+    private String certificateSigningRequest = null;
+
     /**
      * Inner class describing TPM Attestation i.e it holds EndorsementKey and StorageRootKey
      */
@@ -58,18 +61,23 @@ public class DeviceRegistrationParser
      */
     public DeviceRegistrationParser(String registrationId, String customPayload) throws IllegalArgumentException
     {
-        //SRS_DeviceRegistration_25_001: [ The constructor shall throw IllegalArgumentException if Registration Id is null or empty. ]
+        this(registrationId, customPayload, null);
+    }
+
+    public DeviceRegistrationParser(String registrationId, String customPayload, String certificateSigningRequest) throws IllegalArgumentException
+    {
         if (registrationId == null || registrationId.isEmpty())
         {
             throw new IllegalArgumentException("Registration Id cannot be null or empty");
         }
 
-        //SRS_DeviceRegistration_25_002: [ The constructor shall save the provided Registration Id. ]
         this.registrationId = registrationId;
         if (customPayload != null && !customPayload.isEmpty())
         {
             this.customPayload = customPayload;
         }
+
+        this.certificateSigningRequest = certificateSigningRequest;
     }
 
     /**
@@ -82,19 +90,22 @@ public class DeviceRegistrationParser
      */
     public DeviceRegistrationParser(String registrationId, String customPayload, String endorsementKey, String storageRootKey) throws IllegalArgumentException
     {
-        //SRS_DeviceRegistration_25_003: [ The constructor shall throw IllegalArgumentException if Registration Id is null or empty. ]
+        this(registrationId, customPayload, null, endorsementKey, storageRootKey);
+    }
+
+    public DeviceRegistrationParser(String registrationId, String customPayload, String certificateSigningRequest, String endorsementKey, String storageRootKey) throws IllegalArgumentException
+    {
         if (registrationId == null || registrationId.isEmpty())
         {
             throw new IllegalArgumentException("Registration Id cannot be null or empty");
         }
 
-        //SRS_DeviceRegistration_25_004: [ The constructor shall throw IllegalArgumentException if EndorsementKey is null or empty. ]
         if (endorsementKey == null || endorsementKey.isEmpty())
         {
             throw new IllegalArgumentException("endorsementKey cannot be null or empty");
         }
 
-        //SRS_DeviceRegistration_25_006: [ The constructor shall save the provided Registration Id, EndorsementKey and StorageRootKey. ]
+        this.certificateSigningRequest = certificateSigningRequest;
         this.registrationId = registrationId;
         if (customPayload != null && !customPayload.isEmpty())
         {
@@ -107,22 +118,22 @@ public class DeviceRegistrationParser
      * Generates JSON output for this class.
      * Expected format :
      * For TPM :
-         * <pre>
+     * <pre>
      *     {@code
      *     "{\"registrationId\":\"[RegistrationID value]\"," +
-            "\"tpm\":{" +
-            "\"endorsementKey\":\"[Endorsement Key value]\"," +
-            "\"storageRootKey\":\"[Storage root key value]\"" +
-            "}
-            "\"payload\":\"[Custom Data]\""
-            }"
+    "\"tpm\":{" +
+    "\"endorsementKey\":\"[Endorsement Key value]\"," +
+    "\"storageRootKey\":\"[Storage root key value]\"" +
+    "}
+    "\"payload\":\"[Custom Data]\""
+    }"
      *     }
-         * </pre>
+     * </pre>
      * For X509:
      * <pre>
      *     {@code
      *     "{\"registrationId\":\"[RegistrationID value]\"," +
-            }"
+    }"
      *     }
      * </pre>
      * @return A string that is JSON formatted.

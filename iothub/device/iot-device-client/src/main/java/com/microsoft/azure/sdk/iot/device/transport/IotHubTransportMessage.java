@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.device.certificatesigning.IotHubCertificateSigningResponseCallback;
 import com.microsoft.azure.sdk.iot.device.twin.DeviceOperations;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.transport.https.HttpsMethod;
@@ -35,6 +36,10 @@ public class IotHubTransportMessage extends Message
     @Getter
     @Setter
     private int qualityOfService;
+
+    @Getter
+    @Setter
+    private IotHubCertificateSigningResponseCallback iotHubCertificateSigningResponseCallback;
 
     /**
      * Constructor with binary data and message type

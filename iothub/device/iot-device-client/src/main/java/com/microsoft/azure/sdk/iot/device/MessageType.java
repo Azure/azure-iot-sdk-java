@@ -11,5 +11,6 @@ public enum MessageType
     UNKNOWN,
     DEVICE_TELEMETRY,
     DEVICE_METHODS,
-    DEVICE_TWIN
+    DEVICE_TWIN,
+    CERTIFICATE_SIGNING
 }
