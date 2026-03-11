@@ -5,7 +5,6 @@ import com.microsoft.azure.sdk.iot.device.certificatesigning.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.provisioning.device.*;
 import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceClientException;
-import com.microsoft.azure.sdk.iot.provisioning.device.internal.exceptions.ProvisioningDeviceHubException;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProvider;
 import com.microsoft.azure.sdk.iot.provisioning.security.SecurityProviderSymmetricKey;
 import org.bouncycastle.operator.OperatorCreationException;
@@ -83,10 +82,10 @@ public class Main
 
             try
             {
-                accepted = csrResponseFutures.getOnCertificateSigningRequestAccepted().get();
+                accepted = csrResponseFutures.OnCertificateSigningRequestAccepted().get();
                 System.out.println("The certificate signing request was accepted by Iot Hub. Operation will expire at: " + accepted.getOperationExpires());
 
-                response = csrResponseFutures.getOnCertificateSigningCompleted().get();
+                response = csrResponseFutures.OnCertificateSigningRequestCompleted().get();
                 System.out.println("Iot Hub completed the certificate signing request.");
             }
             catch (ExecutionException e)
