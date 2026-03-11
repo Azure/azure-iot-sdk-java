@@ -15,20 +15,19 @@ This sample demonstrates the certificate signing features available when provisi
 Simply fill in your specific values for the fields defined at the beginning:
 
 ```java
-private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "~/SampleCertificates";
-private static final String DPS_ID_SCOPE = "<>";
-private static final String DPS_SYMMETRIC_KEY = "<>";
+private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "";
+private static final String DPS_ID_SCOPE = "";
+private static final String ENROLLMENT_GROUP_SYMMETRIC_KEY = "";
 ```
 
-And optionally specify other values (which have defaults):
+And optionally specify other values (which already have defaults):
 
 ```java
-private static final String PROVISIONED_DEVICE_ID = "myCsrProvisionedDevice";
-private static final CertificateType certificateType = CertificateType.RSA; // ECC vs RSA
-
 // Certificate signing feature is currently only supported over MQTT/MQTT_WS
 private static final IotHubClientProtocol iotHubProtocol = IotHubClientProtocol.MQTT;
 private static final ProvisioningDeviceClientTransportProtocol dpsProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
+private static final String PROVISIONED_DEVICE_ID = "myCsrProvisionedDevice";
+private static final CertificateType certificateType = CertificateType.RSA; // ECC vs RSA
 ```
 
 ## DPS feature demonstrated

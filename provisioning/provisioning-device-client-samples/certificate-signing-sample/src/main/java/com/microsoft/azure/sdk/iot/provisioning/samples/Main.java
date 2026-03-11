@@ -26,15 +26,15 @@ import java.util.concurrent.ExecutionException;
 public class Main
 {
     // The path to write all created certificates to
-    private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "./";
+    private static final String SAMPLE_CERTIFICATES_OUTPUT_PATH = "";
     private static final String DPS_ID_SCOPE = "";
     private static final String ENROLLMENT_GROUP_SYMMETRIC_KEY = "";
-    private static final String PROVISIONED_DEVICE_ID = "myCsrProvisionedDevice";
-    private static final CertificateType certificateType = CertificateType.RSA; // ECC vs RSA
 
     // Certificate signing feature is currently only supported over MQTT/MQTT_WS
     private static final IotHubClientProtocol iotHubProtocol = IotHubClientProtocol.MQTT;
     private static final ProvisioningDeviceClientTransportProtocol dpsProtocol = ProvisioningDeviceClientTransportProtocol.MQTT;
+    private static final String PROVISIONED_DEVICE_ID = "myCsrProvisionedDevice";
+    private static final CertificateType certificateType = CertificateType.RSA; // ECC vs RSA
 
     public static void main(String[] args)
             throws IOException, URISyntaxException, InterruptedException, IotHubClientException, GeneralSecurityException, ProvisioningDeviceClientException, OperatorCreationException
