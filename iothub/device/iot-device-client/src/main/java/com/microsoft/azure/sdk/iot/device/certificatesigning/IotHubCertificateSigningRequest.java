@@ -80,7 +80,8 @@ public class IotHubCertificateSigningRequest
      * signing operation, this value should be null.
      * @param requestId The request Id to associate with this certifiate signing request. This value should be unique from
      * any ongoing certificate signing request (for example, a UUID). If null or empty, a random value will be provided for you.
-     * The use case for providing a specific value here is for re-submitting a certificate signing request.
+     * The use case for providing a specific value here is for re-submitting a certificate signing request which should
+     * be done if the client loses connection at any point during the certificate signing request process.
      */
     public IotHubCertificateSigningRequest(String deviceId, String certificateSigningRequest, String replace, String requestId)
     {

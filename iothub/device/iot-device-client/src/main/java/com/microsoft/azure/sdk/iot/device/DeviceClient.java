@@ -277,7 +277,7 @@ public final class DeviceClient extends InternalClient
 
     /**
      * <p>
-     * Send a certificate signing certificateSigningRequest to IoT hub and receive the signed certificates back.
+     * Send a certificate signing request to IoT hub and receive the signed certificates back.
      * </p>
      * <p>
      * This is a multi-step process:
@@ -314,7 +314,7 @@ public final class DeviceClient extends InternalClient
 
     /**
      * <p>
-     * Send a certificate signing certificateSigningRequest to IoT hub and receive the signed certificates back.
+     * Send a certificate signing request to IoT hub and receive the signed certificates back.
      * </p>
      * <p>
      * This is a multi-step process:
@@ -326,6 +326,10 @@ public final class DeviceClient extends InternalClient
      * </p>
      * <p>
      * To instead be notified via callback, see {@link #sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest,IotHubCertificateSigningResponseCallback)}
+     * </p>
+     * <p>
+     *  If this client loses connection at any point during the certificate signing process (which you can check via {@link #setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object)}),
+     *  then you should re-submit the same certificate signing request (including the same request Id) on the new connection.
      * </p>
      * @param certificateSigningRequest The certificate signing certificateSigningRequest to make of IoT hub.
      * @return A collection of the futures that will complete once each corresponding step in this process has completed.
