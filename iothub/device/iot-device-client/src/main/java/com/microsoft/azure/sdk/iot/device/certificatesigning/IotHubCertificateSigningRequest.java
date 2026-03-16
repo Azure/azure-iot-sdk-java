@@ -36,7 +36,8 @@ public class IotHubCertificateSigningRequest
     private String replace = null;
 
     /**
-     * The randomly generated request Id associated with this certificate signing request.
+     * The randomly generated request Id associated with this certificate signing request. Users may assign this value via
+     * {@link #IotHubCertificateSigningRequest(String, String, String, String)}.
      */
     @Getter
     private final transient String requestId;
