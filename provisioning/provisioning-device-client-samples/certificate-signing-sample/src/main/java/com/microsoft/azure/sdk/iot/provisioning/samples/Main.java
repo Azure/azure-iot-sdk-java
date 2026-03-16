@@ -21,6 +21,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class Main
@@ -71,8 +72,9 @@ public class Main
             System.out.println("Creating new CSR to send to IoT hub.");
             CertificateSigningRequest renewalCsr = csrGenerator.GenerateNewCertificateSigningRequest();
 
+            // Create a signing request with a new, unique request Id that will replace any pending certificate signing requests.
             IotHubCertificateSigningRequest iothubCsr =
-                    new IotHubCertificateSigningRequest(deviceId, renewalCsr.getBase64EncodedPKCS10(), "*");
+                    new IotHubCertificateSigningRequest(deviceId, renewalCsr.getBase64EncodedPKCS10(), UUID.randomUUID().toString(), "*");
 
             System.out.println("Sending new CSR to IoT hub.");
             IotHubCertificateSigningResponseFutures csrResponseFutures = hubClient.sendCertificateSigningRequestAsync(iothubCsr);

@@ -290,6 +290,10 @@ public final class DeviceClient extends InternalClient
      * <p>
      * To instead be notified via futures, see {@link #sendCertificateSigningRequestAsync(IotHubCertificateSigningRequest)}
      * </p>
+     * <p>
+     *  If this client loses connection at any point during the certificate signing process (which you can check via {@link #setConnectionStatusChangeCallback(IotHubConnectionStatusChangeCallback, Object)}),
+     *  then you should re-submit the same certificate signing request (including the same request Id) on the new connection.
+     * </p>
      * @param certificateSigningRequest The certificate signing certificateSigningRequest to make of IoT hub.
      * @param callback The callback that will notify you for each important step in this process.
      */

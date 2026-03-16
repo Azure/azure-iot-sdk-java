@@ -59,14 +59,14 @@ public class IotHubCertificateSigningRequest
      *
      * @param deviceId The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
-     * @param replace the request ID to replace, or "*" to replace any active request. For use if a
-     * previous certificate signing request has failed and you want to start over. To not replace any pending certificate
-     * signing operation, this value should be null. The request Id of a previous certificate signing request can be retrieved
-     * with {@link #getRequestId()}.
+     * @param requestId The request Id to associate with this certifiate signing request. This value should be unique from
+     * any ongoing certificate signing request (for example, a UUID). If null or empty, a random value will be provided for you.
+     * The use case for providing a specific value here is for re-submitting a certificate signing request which should
+     * be done if the client loses connection at any point during the certificate signing request process.
      */
-    public IotHubCertificateSigningRequest(String deviceId, String certificateSigningRequest, String replace)
+    public IotHubCertificateSigningRequest(String deviceId, String certificateSigningRequest, String requestId)
     {
-        this(deviceId, certificateSigningRequest, replace, null);
+        this(deviceId, certificateSigningRequest, requestId, null);
     }
 
     /**
@@ -75,15 +75,15 @@ public class IotHubCertificateSigningRequest
      *
      * @param deviceId The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
-     * @param replace the request ID to replace, or "*" to replace any active request. For use if a
-     * previous certificate signing request has failed and you want to start over. To not replace any pending certificate
-     * signing operation, this value should be null.
      * @param requestId The request Id to associate with this certifiate signing request. This value should be unique from
      * any ongoing certificate signing request (for example, a UUID). If null or empty, a random value will be provided for you.
      * The use case for providing a specific value here is for re-submitting a certificate signing request which should
      * be done if the client loses connection at any point during the certificate signing request process.
+     * @param replace the request ID to replace, or "*" to replace any active request. For use if a
+     * previous certificate signing request has failed and you want to start over. To not replace any pending certificate
+     * signing operation, this value should be null.
      */
-    public IotHubCertificateSigningRequest(String deviceId, String certificateSigningRequest, String replace, String requestId)
+    public IotHubCertificateSigningRequest(String deviceId, String certificateSigningRequest, String requestId, String replace)
     {
         if (deviceId == null || deviceId.isEmpty())
         {
