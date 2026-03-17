@@ -60,7 +60,8 @@ public class IotHubCertificateSigningRequest
      * @param deviceId The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      * @param requestId The request Id to associate with this certifiate signing request. This value should be unique from
-     * any ongoing certificate signing request (for example, a UUID). If null or empty, a random value will be provided for you.
+     * any ongoing certificate signing request (for example, a UUID). Ascii alphanumerics and dash allowed string 4 to
+     * 36 characters (inclusive). Must not begin or end with a dash.If null or empty, a random value will be provided for you.
      * The use case for providing a specific value here is for re-submitting a certificate signing request which should
      * be done if the client loses connection at any point during the certificate signing request process.
      */
@@ -76,7 +77,8 @@ public class IotHubCertificateSigningRequest
      * @param deviceId The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      * @param requestId The request Id to associate with this certifiate signing request. This value should be unique from
-     * any ongoing certificate signing request (for example, a UUID). If null or empty, a random value will be provided for you.
+     * any ongoing certificate signing request (for example, a UUID). Ascii alphanumerics and dash allowed string 4 to
+     * 36 characters (inclusive). Must not begin or end with a dash.If null or empty, a random value will be provided for you.
      * The use case for providing a specific value here is for re-submitting a certificate signing request which should
      * be done if the client loses connection at any point during the certificate signing request process.
      * @param replace the request ID to replace, or "*" to replace any active request. For use if a
