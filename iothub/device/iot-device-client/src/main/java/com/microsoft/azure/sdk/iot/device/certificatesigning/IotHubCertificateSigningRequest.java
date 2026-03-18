@@ -17,7 +17,7 @@ public class IotHubCertificateSigningRequest
      * Must match the currently authenticated device ID.
      */
     @SerializedName("id")
-    private String id = null;
+    private String deviceId = null;
 
     /**
      * The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
@@ -36,7 +36,8 @@ public class IotHubCertificateSigningRequest
     private String replace = null;
 
     /**
-     * The randomly generated request Id associated with this certificate signing request.
+     * The randomly generated request Id associated with this certificate signing request. Users may assign this value via
+     * {@link #IotHubCertificateSigningRequest(String, String, String, String)}.
      */
     @Getter
     private final transient String requestId;
@@ -44,26 +45,49 @@ public class IotHubCertificateSigningRequest
     /**
      * Create a certificate signing request that will fail if any certificate signing requests for this device are already in progress.
      *
-     * @param id The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
+     * @param deviceId The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
      */
-    public IotHubCertificateSigningRequest(String id, String certificateSigningRequest)
+    public IotHubCertificateSigningRequest(String deviceId, String certificateSigningRequest)
     {
-        this(id, certificateSigningRequest, null);
+        this(deviceId, certificateSigningRequest, null);
     }
 
     /**
      * Create a certificate signing request that will be accepted by IoT hub depending on the provided "replace" value and depending on
      * if any certificate signing requests for this device are already in progress.
      *
-     * @param id The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
+     * @param deviceId The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
      * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
-     * @param replace the request ID to replace, or "*" to replace any active request. For use if a
-     * previous certificate signing request has failed and you want to start over.
+     * @param requestId The request Id to associate with this certifiate signing request. This value should be unique from
+     * any ongoing certificate signing request (for example, a UUID). Ascii alphanumerics and dash allowed string 4 to
+     * 36 characters (inclusive). Must not begin or end with a dash.If null or empty, a random value will be provided for you.
+     * The use case for providing a specific value here is for re-submitting a certificate signing request which should
+     * be done if the client loses connection at any point during the certificate signing request process.
      */
-    public IotHubCertificateSigningRequest(String id, String certificateSigningRequest, String replace)
+    public IotHubCertificateSigningRequest(String deviceId, String certificateSigningRequest, String requestId)
     {
-        if (id == null || id.isEmpty())
+        this(deviceId, certificateSigningRequest, requestId, null);
+    }
+
+    /**
+     * Create a certificate signing request that will be accepted by IoT hub depending on the provided "replace" value and depending on
+     * if any certificate signing requests for this device are already in progress.
+     *
+     * @param deviceId The device ID the certificate will be issued for. Must match the device Id of the device that will send this request.
+     * @param certificateSigningRequest The Base64-encoded PKCS#10 CSR without PEM headers/footers or newlines.
+     * @param requestId The request Id to associate with this certifiate signing request. This value should be unique from
+     * any ongoing certificate signing request (for example, a UUID). Ascii alphanumerics and dash allowed string 4 to
+     * 36 characters (inclusive). Must not begin or end with a dash.If null or empty, a random value will be provided for you.
+     * The use case for providing a specific value here is for re-submitting a certificate signing request which should
+     * be done if the client loses connection at any point during the certificate signing request process.
+     * @param replace the request ID to replace, or "*" to replace any active request. For use if a
+     * previous certificate signing request has failed and you want to start over. To not replace any pending certificate
+     * signing operation, this value should be null.
+     */
+    public IotHubCertificateSigningRequest(String deviceId, String certificateSigningRequest, String requestId, String replace)
+    {
+        if (deviceId == null || deviceId.isEmpty())
         {
             throw new IllegalArgumentException("Id must be non-null and not empty");
         }
@@ -73,10 +97,18 @@ public class IotHubCertificateSigningRequest
             throw new IllegalArgumentException("certificateSigningRequestData must be non-null and not empty");
         }
 
-        this.id = id;
+        this.deviceId = deviceId;
         this.certificateSigningRequest = certificateSigningRequest;
         this.replace = replace;
-        this.requestId = UUID.randomUUID().toString();
+
+        if (requestId == null || requestId.isEmpty())
+        {
+            this.requestId = UUID.randomUUID().toString();
+        }
+        else
+        {
+            this.requestId = requestId;
+        }
     }
 
     public String toJson()
