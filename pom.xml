@@ -133,7 +133,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http2</artifactId>
-                <version>4.2.9.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.10.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.projectreactor.netty</groupId>
