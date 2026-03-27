@@ -79,41 +79,35 @@ jobs:
         script: |
           mvn clean install -DskipTests -T 2C  --batch-mode -q
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack IoT hub device client"
-      condition: eq(${{ parameters.publishHubDevice }}, 'true')
+    - template: templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/iothub/device/iot-device-client'
+        packagePath: '$(Build.SourcesDirectory)/iothub/device/iot-device-client'
+        condition: ${{ parameters.publishHubDevice }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS device client"
-      condition: eq(${{ parameters.publishDpsDevice }}, 'true')
+    - template: templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-device-client'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-device-client'
+        condition: ${{ parameters.publishDpsDevice }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS service client"
-      condition: eq(${{ parameters.publishDpsService }}, 'true')
+    - template: templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-service-client'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-service-client'
+        condition: ${{ parameters.publishDpsService }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS security provider"
-      condition: eq(${{ parameters.publishDpsSecurity }}, 'true')
+    - template: templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/security/security-provider'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/security/security-provider'
+        condition: ${{ parameters.publishDpsSecurity }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS TPM provider"
-      condition: eq(${{ parameters.publishDpsSecurityTpm }}, 'true')
+    - template: templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/security/tpm-provider'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/security/tpm-provider'
+        condition: ${{ parameters.publishDpsSecurityTpm }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS X509 provider"
-      condition: eq(${{ parameters.publishDpsSecurityX509 }}, 'true')
+    - template: templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/security/x509-provider'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/security/x509-provider'
+        condition: ${{ parameters.publishDpsSecurityX509 }}
 
     - task: AzureCLI@2
       inputs:

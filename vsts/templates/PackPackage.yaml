@@ -5,6 +5,7 @@ parameters:
 steps:
 - task: PowerShell@2
   displayName: Pack java package
+  condition: eq(${{ parameters.condition }}, 'true')
   inputs:
     targetType: 'inline'
     script: |
