@@ -2,7 +2,7 @@ name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Re
 
 parameters:
 - name: branch
-  displayName: The branch of the Azure/azure-iot-sdk-csharp repo to package from
+  displayName: The branch of the Azure/azure-iot-sdk-java repo to package from
   type: string
   default: main
 - name: publishHubDevice
@@ -49,11 +49,24 @@ parameters:
   default: false
 
 jobs:
-  - job: LINUX
-    displayName: Linux
+  - job: Package
+    displayName: Package
     pool:
-      vmImage: ubuntu-20.04
+      vmImage: ubuntu-latest
     steps:
+    - bash: |
+        echo "Publish IoT hub device client package? ${{ parameters.publishHubDevice }}"
+        echo "Publish Dps device client package? ${{ parameters.publishDpsDevice }}"
+        echo "Publish Dps service client package? ${{ parameters.publishDpsService }}"
+        echo "Publish security provider package? ${{ parameters.publishDpsSecurity }}"
+        echo "Publish tpm provider package? ${{ parameters.publishDpsSecurityTpm }}"
+        echo "Publish x509 provider client package? ${{ parameters.publishDpsSecurityX509 }}"
+        if [[ ${{ parameters.publishHubDevice }} -ne "true" && ${{ parameters.publishDpsDevice }} -ne "true" && ${{ parameters.publishDpsService }} -ne "true" && ${{ parameters.publishDpsSecurity }} -ne "true" && ${{ parameters.publishDpsSecurityTpm }} -ne "true" && ${{ parameters.publishDpsSecurityX509 }} -ne "true" ]]; then
+          echo "Must select at least one package to publish"
+          exit 1
+        fi
+      displayName: Validate build params
+
     - task: JavaToolInstaller@0
       inputs:
         versionSpec: 11
