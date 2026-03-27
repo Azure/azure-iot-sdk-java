@@ -79,32 +79,32 @@ jobs:
         script: |
           mvn clean install -DskipTests -T 2C  --batch-mode -q
 
-    - template: templates/PackPackage.yaml
+    - template: ../templates/PackPackage.yaml
       parameters:
         packagePath: '$(Build.SourcesDirectory)/iothub/device/iot-device-client'
         condition: ${{ parameters.publishHubDevice }}
 
-    - template: templates/PackPackage.yaml
+    - template: ../templates/PackPackage.yaml
       parameters:
         packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-device-client'
         condition: ${{ parameters.publishDpsDevice }}
 
-    - template: templates/PackPackage.yaml
+    - template: ../templates/PackPackage.yaml
       parameters:
         packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-service-client'
         condition: ${{ parameters.publishDpsService }}
 
-    - template: templates/PackPackage.yaml
+    - template: ../templates/PackPackage.yaml
       parameters:
         packagePath: '$(Build.SourcesDirectory)/provisioning/security/security-provider'
         condition: ${{ parameters.publishDpsSecurity }}
 
-    - template: templates/PackPackage.yaml
+    - template: ../templates/PackPackage.yaml
       parameters:
         packagePath: '$(Build.SourcesDirectory)/provisioning/security/tpm-provider'
         condition: ${{ parameters.publishDpsSecurityTpm }}
 
-    - template: templates/PackPackage.yaml
+    - template: ../templates/PackPackage.yaml
       parameters:
         packagePath: '$(Build.SourcesDirectory)/provisioning/security/x509-provider'
         condition: ${{ parameters.publishDpsSecurityX509 }}
