@@ -1,6 +1,11 @@
 parameters: 
 - name: packagePath
   type: string
+- name: condition
+  type: string
+  values:
+    - true
+    - false
 
 steps:
 - task: PowerShell@2
