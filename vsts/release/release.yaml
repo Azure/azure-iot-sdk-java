@@ -75,6 +75,7 @@ jobs:
         targetType: 'inline'
         script: |
           mvn clean install -DskipTests -T 2C  --batch-mode -q
+          New-Item -ItemType Directory -Path $(Build.SourcesDirectory)/output
 
     - template: ../templates/PackPackage.yaml
       parameters:
