@@ -1,10 +1,6 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 parameters:
-- name: branch
-  displayName: The branch of the Azure/azure-iot-sdk-java repo to package from
-  type: string
-  default: main
 - name: publishHubDevice
   displayName: Publish the 'com.microsoft.azure.sdk.iot:iot-device-client' package
   type: string

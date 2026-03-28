@@ -18,7 +18,7 @@ steps:
       Copy-Item -Path "${{ parameters.packagePath }}/target/*.jar" -Destination "$(Build.SourcesDirectory)/output" 
 
       # For example, "provisioning-device-client-1.2.3-javadoc"          
-      $baseName = (Get-ChildItem -Path .\target\ -File -Filter "*javadoc.jar")[0].BaseName
+      $baseName = (Get-ChildItem -Path ${{ parameters.packagePath }}\target\ -File -Filter "*javadoc.jar")[0].BaseName
 
       # For example, "provisioning-device-client-1.2.3"
       $nameWithVersion = ($baseName).Substring(0, $baseName - "-javadoc".Length)
