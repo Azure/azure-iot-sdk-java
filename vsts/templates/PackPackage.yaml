@@ -22,7 +22,8 @@ steps:
 
       # For example, "provisioning-device-client-1.2.3"
       $nameWithVersion = ($baseName).Substring(0, ($baseName.Length - "-javadoc".Length))
+      $destination = "$(Build.SourcesDirectory)/output/$(nameWithVersion).pom"
 
       # Copy the flattened pom.xml because the non-flattened pom.xml has references to pom.xml files that we don't ship and the
       # flattened pom.xml resolves all of those references.
-      Copy-Item -Path "${{ parameters.packagePath }}/flattened-pom.xml" -Destination "$(Build.SourcesDirectory)/output/$(nameWithVersion).pom" 
+      Copy-Item -Path "${{ parameters.packagePath }}/flattened-pom.xml" -Destination $destination 
