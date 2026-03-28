@@ -70,6 +70,7 @@ jobs:
         jdkSourceOption: 'PreInstalled'
 
     - task: PowerShell@2
+      displayName: Mvn install
       inputs:
         targetType: 'inline'
         script: |
