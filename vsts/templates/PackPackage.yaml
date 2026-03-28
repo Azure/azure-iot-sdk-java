@@ -26,4 +26,4 @@ steps:
 
       # Copy the flattened pom.xml because the non-flattened pom.xml has references to pom.xml files that we don't ship and the
       # flattened pom.xml resolves all of those references.
-      Copy-Item -Path "${{ parameters.packagePath }}/flattened-pom.xml" -Destination $destination 
+      Copy-Item -Path "${{ parameters.packagePath }}/.flattened-pom.xml" -Destination $destination 
