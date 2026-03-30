@@ -108,6 +108,7 @@ jobs:
         condition: ${{ parameters.publishDpsSecurityX509 }}
 
     - task: AzureCLI@2
+      displayName: "Upload packages to Azure storage"
       inputs:
         azureSubscription: 'azuresdkpartnerdrops'
         scriptType: 'bash'
