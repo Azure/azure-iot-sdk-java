@@ -1,10 +1,6 @@
 name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 parameters:
-- name: branch
-  displayName: The branch of the Azure/azure-iot-sdk-csharp repo to package from
-  type: string
-  default: main
 - name: publishHubDevice
   displayName: Publish the 'com.microsoft.azure.sdk.iot:iot-device-client' package
   type: string
@@ -49,11 +45,24 @@ parameters:
   default: false
 
 jobs:
-  - job: LINUX
-    displayName: Linux
+  - job: Package
+    displayName: Package
     pool:
-      vmImage: ubuntu-20.04
+      vmImage: ubuntu-latest
     steps:
+    - bash: |
+        echo "Publish IoT hub device client package? ${{ parameters.publishHubDevice }}"
+        echo "Publish Dps device client package? ${{ parameters.publishDpsDevice }}"
+        echo "Publish Dps service client package? ${{ parameters.publishDpsService }}"
+        echo "Publish security provider package? ${{ parameters.publishDpsSecurity }}"
+        echo "Publish tpm provider package? ${{ parameters.publishDpsSecurityTpm }}"
+        echo "Publish x509 provider client package? ${{ parameters.publishDpsSecurityX509 }}"
+        if [[ ${{ parameters.publishHubDevice }} -ne "true" && ${{ parameters.publishDpsDevice }} -ne "true" && ${{ parameters.publishDpsService }} -ne "true" && ${{ parameters.publishDpsSecurity }} -ne "true" && ${{ parameters.publishDpsSecurityTpm }} -ne "true" && ${{ parameters.publishDpsSecurityX509 }} -ne "true" ]]; then
+          echo "Must select at least one package to publish"
+          exit 1
+        fi
+      displayName: Validate build params
+
     - task: JavaToolInstaller@0
       inputs:
         versionSpec: 11
@@ -61,48 +70,45 @@ jobs:
         jdkSourceOption: 'PreInstalled'
 
     - task: PowerShell@2
+      displayName: Mvn install
       inputs:
         targetType: 'inline'
         script: |
           mvn clean install -DskipTests -T 2C  --batch-mode -q
+          New-Item -ItemType Directory -Path $(Build.SourcesDirectory)/output
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack IoT hub device client"
-      condition: eq(${{ parameters.publishHubDevice }}, 'true')
+    - template: ../templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/iothub/device/iot-device-client'
+        packagePath: '$(Build.SourcesDirectory)/iothub/device/iot-device-client'
+        condition: ${{ parameters.publishHubDevice }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS device client"
-      condition: eq(${{ parameters.publishDpsDevice }}, 'true')
+    - template: ../templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-device-client'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-device-client'
+        condition: ${{ parameters.publishDpsDevice }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS service client"
-      condition: eq(${{ parameters.publishDpsService }}, 'true')
+    - template: ../templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-service-client'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-service-client'
+        condition: ${{ parameters.publishDpsService }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS security provider"
-      condition: eq(${{ parameters.publishDpsSecurity }}, 'true')
+    - template: ../templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/security/security-provider'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/security/security-provider'
+        condition: ${{ parameters.publishDpsSecurity }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS TPM provider"
-      condition: eq(${{ parameters.publishDpsSecurityTpm }}, 'true')
+    - template: ../templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/security/tpm-provider'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/security/tpm-provider'
+        condition: ${{ parameters.publishDpsSecurityTpm }}
 
-    - template: templates/DeleteCloudResources.yaml
-      displayName: "Pack DPS X509 provider"
-      condition: eq(${{ parameters.publishDpsSecurityX509 }}, 'true')
+    - template: ../templates/PackPackage.yaml
       parameters:
-        - packagePath: '$(Build.SourcesDirectory)/provisioning/security/x509-provider'
+        packagePath: '$(Build.SourcesDirectory)/provisioning/security/x509-provider'
+        condition: ${{ parameters.publishDpsSecurityX509 }}
 
     - task: AzureCLI@2
+      displayName: "Upload packages to Azure storage"
       inputs:
         azureSubscription: 'azuresdkpartnerdrops'
         scriptType: 'bash'
