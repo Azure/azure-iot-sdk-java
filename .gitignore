@@ -272,3 +272,13 @@ package-list
 **/glass.png
 
 **/workspace.xml
+
+#Java 17 files
+ASSEMBLY_EXCEPTION
+ADDITIONAL_LICENSE_INFO
+jquery.md
+jqueryUI.md
+options
+LICENSE
+packages
+javadoc.bat
