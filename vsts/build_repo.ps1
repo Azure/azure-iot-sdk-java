@@ -16,6 +16,7 @@ else
 # Since they are the current Java LTS versions
 if (($env:JAVA_VERSION).equals("8"))
 {
+    # see here for where this env var comes from: https://github.com/actions/runner-images/blob/main/images/windows/Windows2025-Readme.md#java
     $env:JAVA_HOME=$env:JAVA_HOME_8_X64
 
     if ($isPullRequestBuild.equals("true"))
@@ -36,6 +37,16 @@ elseif (($env:JAVA_VERSION).equals("11"))
 elseif (($env:JAVA_VERSION).equals("17"))
 {
     $env:JAVA_HOME=$env:JAVA_HOME_17_X64
+    mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C -DskipUnitTests `-Dmaven.javadoc.skip=true --batch-mode -q
+}
+elseif (($env:JAVA_VERSION).equals("21"))
+{
+    $env:JAVA_HOME=$env:JAVA_HOME_21_X64
+    mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C -DskipUnitTests `-Dmaven.javadoc.skip=true --batch-mode -q
+}
+elseif (($env:JAVA_VERSION).equals("25"))
+{
+    $env:JAVA_HOME=$env:JAVA_HOME_25_X64
     mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C -DskipUnitTests `-Dmaven.javadoc.skip=true --batch-mode -q
 }
 else
