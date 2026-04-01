@@ -117,6 +117,6 @@ jobs:
     
     - bash: |
         echo "Files uploaded to partner storage directory drops/azure-iot-sdks/java/$(Build.BuildNumber)"
-        echo "Go to https://dev.azure.com/azure-sdk/internal/_build?definitionId=1809&_a=summary and run the pipeline with Relative Path in Partner Drops Blob Container set to azure-iot-operations-sdks/dotnet/$(Build.BuildNumber)"
+        echo "Go to https://dev.azure.com/azure-sdk/internal/_build?definitionId=1809&_a=summary and run the pipeline with Relative Path in Partner Drops Blob Container set to azure-iot-sdks/java/$(Build.BuildNumber)"
       displayName: Next Steps
     
