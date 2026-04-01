@@ -36,7 +36,7 @@ elseif (($env:JAVA_VERSION).equals("11"))
 elseif (($env:JAVA_VERSION).equals("17"))
 {
     $env:JAVA_HOME=$env:JAVA_HOME_17_X64
-    mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" test -T 2C -DskipUnitTests --batch-mode -q
+    mvn -DRUN_PROVISIONING_TESTS="$Env:runProvisioningTests" -DRUN_DIGITAL_TESTS="$Env:runDigitalTwinTests" -DRUN_IOTHUB_TESTS="$Env:runIotHubTests" -DIS_PULL_REQUEST="$isPullRequestBuild" install -T 2C -DskipUnitTests -Dmaven.javadoc.skip=true --batch-mode -q
 }
 else
 {
