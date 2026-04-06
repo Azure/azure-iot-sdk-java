@@ -1,6 +1,6 @@
 steps:
 - task: AzureCLI@2
-  displayName: Delete deployed cloud test resources
+  name: Delete deployed cloud test resources
   condition: always()
   inputs:
     azureSubscription: 'iot hub sdk service connection'
