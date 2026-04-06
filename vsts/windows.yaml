@@ -16,6 +16,12 @@ variables:
     maxParallel: 2
 
 jobs:
+  - job: DeployCloudTestResources
+    pool:
+      vmImage: windows-latest
+    steps:     
+    - template: templates/DeployCloudResources.yaml
+
   - job: Windows
     timeoutInMinutes: 180
     dependsOn: DeployCloudTestResources
@@ -40,8 +46,6 @@ jobs:
       vmImage: windows-latest
     displayName: Windows
     steps:
-      - template: templates/DeployCloudResources.yaml
-
       - task: JavaToolInstaller@0
         inputs:
           versionSpec: $(JAVA_VERSION)
@@ -124,4 +128,15 @@ jobs:
           verbosity: 'Verbose'
           alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
 
-      - template: templates/DeleteCloudResources.yaml
+  - job: TearDownCloudTestResources
+    condition: always()
+    dependsOn:
+      - Windows
+      - DeployCloudTestResources
+    variables:
+      RESOURCE_GROUP_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.RESOURCE_GROUP_NAME'] ]
+      DEPLOYMENT_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DEPLOYMENT_NAME'] ]
+    pool:
+      vmImage: windows-2022
+    steps:
+    - template: templates/DeleteCloudResources.yaml
