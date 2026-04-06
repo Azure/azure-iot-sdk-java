@@ -79,7 +79,7 @@ az deployment group create `
     --name $DeploymentName `
     --output none `
     --only-show-errors `
-    --template-file "$PSScriptRoot\test-resources.json" `
+    --template-file "$PSScriptRoot/test-resources.json" `
     --parameters `
     StorageAccountName=$storageAccountName `
     HubUnitsCount=$iothubUnitsToBeCreated
