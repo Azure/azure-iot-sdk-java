@@ -8,6 +8,6 @@ steps:
     scriptLocation: 'inlineScript'
     inlineScript: |
       Write-Host "Deleting resource group with name "
-      Write-Host $(env:RESOURCE_GROUP_NAME)
-      az deployment group delete --resource-group $(env:RESOURCE_GROUP_NAME) --name $(env:DEPLOYMENT_NAME) --output none --only-show-errors
-      az group delete --name $(env:RESOURCE_GROUP_NAME) --y
+      Write-Host $(RESOURCE_GROUP_NAME)
+      az deployment group delete --resource-group $(RESOURCE_GROUP_NAME) --name $(DEPLOYMENT_NAME) --output none --only-show-errors
+      az group delete --name $(RESOURCE_GROUP_NAME) --y
