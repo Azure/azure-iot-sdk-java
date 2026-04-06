@@ -1,9 +1,10 @@
 steps:
 - task: AzureCLI@2
+  name: Delete deployed cloud test resources
   condition: always()
   inputs:
     azureSubscription: 'iot hub sdk service connection'
-    scriptType: 'ps'
+    scriptType: 'pscore'
     scriptLocation: 'inlineScript'
     inlineScript: |
       Write-Host "Deleting resource group with name "
