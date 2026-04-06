@@ -1,5 +1,6 @@
 steps:
 - task: AzureCLI@2
+  condition: always()
   inputs:
     azureSubscription: 'iot hub sdk service connection'
     scriptType: 'ps'
