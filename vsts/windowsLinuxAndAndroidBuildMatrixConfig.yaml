@@ -1,0 +1,402 @@
+name: $(BuildID)_$(BuildDefinitionName)_$(SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - doc/*
+      - device/iot-device-samples/*
+      - service/iot-service-samples/*
+      - provisioning/provisioning-samples/*
+
+variables:
+    maxParallel: 2
+
+jobs:
+  - job: DeployCloudTestResources
+    pool:
+      vmImage: windows-latest
+    steps:     
+    - task: AzureCLI@2
+      name: deployCloudTestResources
+      inputs:
+        azureSubscription: 'iot hub sdk service connection'
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        pwsh: true
+        inlineScript: |
+          $jsonContent = az account show | ConvertFrom-Json
+          $subscriptionId = $jsonContent.Id
+
+          $uniqueSuffixLength = 5
+          $characters = 'abcdefghijklmnopqrstuvwxyz'.ToCharArray()
+          $CloudResourceUniqueSuffix = -join ($characters | Get-Random -Count $uniqueSuffixLength)
+
+          $resourceGroupName = 'javasdkgate'+$CloudResourceUniqueSuffix
+
+          Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$resourceGroupName"
+
+          $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup $resourceGroupName
+
+  ### Windows ###
+  - job: Windows
+    timeoutInMinutes: 180
+    dependsOn: DeployCloudTestResources
+    variables:
+      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
+      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
+      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
+    strategy:
+      maxParallel: $[variables.maxParallel]
+      matrix:
+        JDK 11: # always run Java 11
+          JAVA_VERSION: 11
+        JDK 8: # only run Java 8 in nightly or CI builds.
+          JAVA_VERSION: 8
+    pool:
+      vmImage: windows-latest
+    displayName: Windows
+    steps:
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: $(JAVA_VERSION)
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          COMMIT_FROM: $(COMMIT_FROM)
+
+      - powershell: ./vsts/start_tpm_windows.ps1
+        displayName: 'Start TPM Simulator'
+        env:
+          COMMIT_FROM: $(COMMIT_FROM)
+
+      - powershell: ./vsts/build_repo.ps1
+        displayName: 'Build and Test'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
+          IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
+          IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES: true
+
+      - task: CopyFiles@2
+        displayName: 'Copy Test Results to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/*.trx
+            **/*.xml
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        continueOnError: true
+
+      - task: CopyFiles@2
+        displayName: 'Copy Build Results to Artifact Staging Directory'
+        condition: always()
+        inputs:
+          flattenFolders: true
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/target/*.jar
+            **/target/*.pom
+            !**/target/*-sources.jar
+            !**/target/*-javadoc.jar
+            !**/target/dice-*
+            !**/target/provisioning-x509-cert-generator*
+            !**/target/*emulator*
+            !**/*sample*/**/target/**
+            !**/*test*/**/target/**
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/buildOutput'
+        continueOnError: true
+
+      - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+        displayName: 'Generate SBOM for Build Artifacts'
+        condition: always()
+        inputs:
+          BuildDropPath: '$(Build.ArtifactStagingDirectory)/buildOutput'
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact Staging Directory'
+        condition: always()
+        continueOnError: true
+
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results'
+        condition: always()
+        inputs:
+          mergeTestResults: true
+          testRunTitle: "Windows JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
+        continueOnError: true
+
+      - task: ComponentGovernanceComponentDetection@0
+        displayName: Component Governance Detection
+        condition: always()
+        inputs:
+          scanType: 'Register'
+          verbosity: 'Verbose'
+          alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
+
+  ### Linux ###
+  - job: Linux
+    dependsOn: DeployCloudTestResources
+    variables:
+      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
+      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
+      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
+    timeoutInMinutes: 180
+    pool:
+      # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
+      vmImage: ubuntu-latest
+    displayName: Linux
+    strategy:
+      maxParallel: $[variables.maxParallel]
+      matrix:
+        JDK 11: # always run Java 11
+          JAVA_VERSION: 11
+        JDK 8: # only run Java 8 in nightly or CI builds.
+          JAVA_VERSION: 8
+    steps:
+      - task: CmdLine@2
+        displayName: 'Print Linux version'
+        inputs:
+          script: 'cat /etc/*release'
+
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: $(JAVA_VERSION)
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'
+
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          COMMIT_FROM: $(COMMIT_FROM)
+
+      - task: Docker@1
+        displayName: 'Start TPM Simulator'
+        inputs:
+          containerregistrytype: 'Container Registry'
+          command: 'Run an image'
+          imageName: aziotbld/testtpm
+          containerName: 'testtpm-instance'
+          ports: |
+            127.0.0.1:2321:2321
+            127.0.0.1:2322:2322
+          restartPolicy: unlessStopped
+
+      - powershell: ./vsts/build_repo.ps1
+        displayName: 'Build and Test'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
+          IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
+          IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES: true
+
+      - task: CopyFiles@2
+        condition: always()
+        displayName: 'Copy Test Results to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: |
+            **/*.trx
+            **/*.xml
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        continueOnError: true
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Artifact Staging Directory'
+        condition: always()
+        continueOnError: true
+
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results'
+        condition: always()
+        inputs:
+          mergeTestResults: true
+          testRunTitle: "Linux JDK $(JAVA_VERSION) (Attempt $(System.JobAttempt))"
+        continueOnError: true
+
+      - task: ComponentGovernanceComponentDetection@0
+        displayName: Component Governance Detection
+        condition: always()
+        inputs:
+          scanType: 'Register'
+          verbosity: 'Verbose'
+          alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
+
+  ### Android, Multi configuration build (Multiple different test groups to cover) ###
+  - job: AndroidBuild
+    dependsOn: DeployCloudTestResources
+    variables:
+      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
+      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
+      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
+    timeoutInMinutes: 30
+    pool:
+      vmImage: ubuntu-latest
+    displayName: Android Build
+    steps:
+      - task: JavaToolInstaller@0
+        inputs:
+          versionSpec: 17
+          jdkArchitectureOption: 'x64'
+          jdkSourceOption: 'PreInstalled'
+          
+      - powershell: ./vsts/echo_versions.ps1
+        displayName: 'Echo Versions'
+        env:
+          COMMIT_FROM: $(COMMIT_FROM)
+          JAVA_VERSION: 8 # Android build doesn't need to run for both JDK 8 and 11
+        condition: always()
+
+      - powershell: ./vsts/build_e2e_tests.ps1
+        displayName: 'E2E Tests Build'
+        condition: always()
+
+      - powershell: ./vsts/gradle_build.ps1
+        displayName: 'Gradle Build'
+        env:
+          JAVA_VERSION: $(JAVA_VERSION)
+          IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
+          IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
+          IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+          RECYCLE_TEST_IDENTITIES: "true"
+        condition: always()
+
+      - task: CopyFiles@2
+        displayName: 'Copy Test Results to Artifact Staging Directory'
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk'
+          Contents: |
+            *.*
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+        continueOnError: true
+        condition: always()
+
+      - task: PublishPipelineArtifact@0
+        displayName: 'Publish APKs to test in next job'
+        inputs:
+          artifactName: 'androidBuildFiles'
+          targetPath: 'iot-e2e-tests/android/app/build/outputs/apk'
+
+      - task: ComponentGovernanceComponentDetection@0
+        displayName: Component Governance Detection
+        inputs:
+          scanType: 'Register'
+          verbosity: 'Verbose'
+          alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
+        condition: always()
+
+  - job: AndroidTest
+    timeoutInMinutes: 50
+    pool:
+      vmImage: 'macOS-latest'
+    strategy:
+      maxParallel: 12
+      matrix:
+        TestGroup1:
+          ANDROID_TEST_GROUP_ID: TestGroup1
+        TestGroup2:
+          ANDROID_TEST_GROUP_ID: TestGroup2
+        TestGroup3:
+          ANDROID_TEST_GROUP_ID: TestGroup3
+        TestGroup4:
+          ANDROID_TEST_GROUP_ID: TestGroup4
+        TestGroup5:
+          ANDROID_TEST_GROUP_ID: TestGroup5
+        TestGroup6:
+          ANDROID_TEST_GROUP_ID: TestGroup6
+        TestGroup7:
+          ANDROID_TEST_GROUP_ID: TestGroup7
+        TestGroup8:
+          ANDROID_TEST_GROUP_ID: TestGroup8
+        TestGroup9:
+          ANDROID_TEST_GROUP_ID: TestGroup9
+        TestGroup10:
+          ANDROID_TEST_GROUP_ID: TestGroup10
+        TestGroup11:
+          ANDROID_TEST_GROUP_ID: TestGroup11
+        TestGroup12:
+          ANDROID_TEST_GROUP_ID: TestGroup12
+
+    displayName: Android Test
+    dependsOn: AndroidBuild
+    steps:
+      - task: PowerShell@2
+        displayName: 'determine if testing needed'
+        condition: always()
+        inputs:
+          targetType: 'filePath'
+          filePath: ./vsts/determine_if_android_test_group_needs_to_run.ps1
+        env:
+          TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
+          IS_BASIC_TIER_HUB: $(IS-BASIC-TIER-HUB)
+          TARGET_BRANCH: $(System.PullRequest.TargetBranch)
+
+      - task: DownloadPipelineArtifact@0
+        displayName: "Download APKs to test from previous job"
+        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        inputs:
+          artifactName: 'androidBuildFiles'
+          targetPath: $(Build.SourcesDirectory)/iot-e2e-tests/android/app/build/outputs/apk
+
+      - task: Bash@3
+        condition: eq(variables['task.android.needToRunTestGroup'], 'yes')
+        displayName: 'Start Android Emulator'
+        timeoutInMinutes: 15
+        continueOnError: false
+        inputs:
+          targetType: 'filePath'
+          filePath: '$(Build.SourcesDirectory)/vsts/StartEmulator.sh'
+
+      - task: Bash@3
+        #only run tests on emulator if tests should be run, and if the emulator boot up was successful
+        condition: and(succeeded(), eq(variables['task.android.needToRunTestGroup'], 'yes'))
+        displayName: 'Run tests on emulator'
+        timeoutInMinutes: 45
+        inputs:
+          targetType: 'filePath'
+          filePath: '$(Build.SourcesDirectory)/vsts/RunTestsOnEmulator.sh'
+        env:
+          TEST_GROUP_ID: $(ANDROID_TEST_GROUP_ID)
+
+      - task : ComponentGovernanceComponentDetection@0
+        displayName : Component Governance Detection
+        inputs :
+          scanType : 'Register'
+          verbosity : 'Verbose'
+          alertWarningLevel : 'Low' # The task will present a warning, but will not cause the build to fail
+        condition : always()
+
+  - job: TearDownCloudTestResources
+    condition: always()
+    dependsOn:
+      - Windows
+      - Linux
+      - AndroidTest
+      - DeployCloudTestResources
+    variables:
+      RESOURCE_GROUP_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.RESOURCE_GROUP_NAME'] ]
+    pool:
+      vmImage: windows-2022
+    steps:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'iot hub sdk service connection'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          Write-Host "Deleting resource group with name "
+          Write-Host $(RESOURCE_GROUP_NAME)
+          az group delete --name $(RESOURCE_GROUP_NAME) --y
+          # don't forget to delete RBAC resources as well
