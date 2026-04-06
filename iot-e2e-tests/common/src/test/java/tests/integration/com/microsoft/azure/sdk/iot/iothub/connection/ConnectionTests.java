@@ -14,8 +14,10 @@ import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
@@ -35,6 +37,7 @@ import static org.junit.Assume.assumeTrue;
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ConnectionTests extends IntegrationTest
 {
     private static String iotHubConnectionString;
