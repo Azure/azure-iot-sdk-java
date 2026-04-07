@@ -37,7 +37,6 @@ import static org.junit.Assume.assumeTrue;
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ConnectionTests extends IntegrationTest
 {
     private static String iotHubConnectionString;
