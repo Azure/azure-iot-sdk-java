@@ -255,7 +255,7 @@ public class ConnectionTests extends IntegrationTest
 
     @IotHubTest
     @StandardTierHubOnlyTest
-    @Test(timeout = 600000) // 1 minute
+    @Test(timeout = 60000) // 1 minute
     public void CanOpenConnectionWithECCCertificates() throws Exception
     {
         // SAS token authenticated devices/modules don't use RSA or ECC certificates
