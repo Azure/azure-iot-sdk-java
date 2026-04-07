@@ -79,7 +79,7 @@ az deployment group create `
     --name $DeploymentName `
     --output none `
     --only-show-errors `
-    --template-file "$PSScriptRoot/test-resources.json" `
+    --template-file "$PSScriptRoot\test-resources.json" `
     --parameters `
     StorageAccountName=$storageAccountName `
     HubUnitsCount=$iothubUnitsToBeCreated
@@ -123,15 +123,15 @@ if ($Region.EndsWith('euap', 'CurrentCultureIgnoreCase'))
 $dpsIdScope = az iot dps show -g $ResourceGroup --name $dpsName --query 'properties.idScope' --output tsv
 
 # Environment variables for IoT Hub E2E tests
-Write-Host "##vso[task.setvariable variable=IOTHUB_CONNECTION_STRING]$iotHubConnectionString"
-Write-Host "##vso[task.setvariable variable=IOTHUB_X509_DEVICE_PFX_CERTIFICATE]$iothubX509DevicePfxBase64"
-Write-Host "##vso[task.setvariable variable=IOTHUB_X509_CHAIN_DEVICE_NAME]$iotHubX509CertChainDeviceCommonName";
-Write-Host "##vso[task.setvariable variable=IOTHUB_X509_CHAIN_DEVICE_PFX_CERTIFICATE]$iothubX509ChainDevicePfxBase64"
-Write-Host "##vso[task.setvariable variable=IOTHUB_USER_ASSIGNED_MSI_RESOURCE_ID]$msiResourceId"
+Write-Host "##vso[task.setvariable variable=IOTHUB_CONNECTION_STRING;isOutput=true]$iotHubConnectionString"
+Write-Host "##vso[task.setvariable variable=IOTHUB_X509_DEVICE_PFX_CERTIFICATE;isOutput=true]$iothubX509DevicePfxBase64"
+Write-Host "##vso[task.setvariable variable=IOTHUB_X509_CHAIN_DEVICE_NAME;isOutput=true]$iotHubX509CertChainDeviceCommonName";
+Write-Host "##vso[task.setvariable variable=IOTHUB_X509_CHAIN_DEVICE_PFX_CERTIFICATE;isOutput=true]$iothubX509ChainDevicePfxBase64"
+Write-Host "##vso[task.setvariable variable=IOTHUB_USER_ASSIGNED_MSI_RESOURCE_ID;isOutput=true]$msiResourceId"
 
 # Environment variables for DPS E2E tests
-Write-Host "##vso[task.setvariable variable=DPS_IDSCOPE]$dpsIdScope"
-Write-Host "##vso[task.setvariable variable=PROVISIONING_CONNECTION_STRING]$dpsConnectionString"
-Write-Host "##vso[task.setvariable variable=DPS_GLOBALDEVICEENDPOINT]$dpsEndpoint"
+Write-Host "##vso[task.setvariable variable=DPS_IDSCOPE;isOutput=true]$dpsIdScope"
+Write-Host "##vso[task.setvariable variable=PROVISIONING_CONNECTION_STRING;isOutput=true]$dpsConnectionString"
+Write-Host "##vso[task.setvariable variable=DPS_GLOBALDEVICEENDPOINT;isOutput=true]$dpsEndpoint"
 
 Write-Host "Done!"

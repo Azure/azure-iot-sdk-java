@@ -16,12 +16,6 @@ variables:
     maxParallel: 2
 
 jobs:
-  - job: DeployCloudTestResources
-    pool:
-      vmImage: windows-latest
-    steps:     
-    - template: templates/DeployCloudResources.yaml
-
   - job: Linux
     timeoutInMinutes: 180
     pool:
@@ -42,6 +36,8 @@ jobs:
         #JDK 8: # only run Java 8 in nightly or CI builds.
           #JAVA_VERSION: 8
     steps:
+      - template: templates/DeployCloudResources.yaml
+
       - task: CmdLine@2
         displayName: 'Print Linux version'
         inputs:
@@ -113,15 +109,4 @@ jobs:
           verbosity: 'Verbose'
           alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
 
-  - job: TearDownCloudTestResources
-    condition: always()
-    dependsOn:
-      - Linux
-      - DeployCloudTestResources
-    variables:
-      RESOURCE_GROUP_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.RESOURCE_GROUP_NAME'] ]
-      DEPLOYMENT_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DEPLOYMENT_NAME'] ]
-    pool:
-      vmImage: windows-2022
-    steps:
-    - template: templates/DeleteCloudResources.yaml
+      - template: templates/DeleteCloudResources.yaml
