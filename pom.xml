@@ -158,17 +158,17 @@
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
-                <version>2.17.1</version>  <!--e2e tests and samples only-->
+                <version>2.25.4</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
-                <version>2.25.3</version>  <!--e2e tests and samples only-->
+                <version>2.25.4</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
-                <version>2.17.1</version>  <!--e2e tests and samples only-->
+                <version>2.25.4</version>  <!--e2e tests and samples only-->
             </dependency>
         </dependencies>
     </dependencyManagement>
