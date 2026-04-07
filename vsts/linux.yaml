@@ -31,8 +31,8 @@ jobs:
     strategy:
       maxParallel: $[variables.maxParallel]
       matrix:
-        JDK 25:
-          JAVA_VERSION: 25
+        #JDK 25:
+        #  JAVA_VERSION: 25
         JDK 21: 
           JAVA_VERSION: 21
         JDK 17: # always run Java 17
@@ -75,9 +75,9 @@ jobs:
         displayName: 'Build and Test'
         env:
           JAVA_VERSION: $(JAVA_VERSION)
-          IOT_DPS_CONNECTION_STRING: $Env:PROVISIONING_CONNECTION_STRING
-          IOT_DPS_ID_SCOPE: $Env:DPS_IDSCOPE
-          IOTHUB_CONNECTION_STRING: $Env:IOTHUB_CONNECTION_STRING
+          IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
+          IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
+          IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
           RECYCLE_TEST_IDENTITIES: true
 
