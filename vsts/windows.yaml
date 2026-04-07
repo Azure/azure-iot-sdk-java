@@ -24,11 +24,6 @@ jobs:
 
   - job: Windows
     timeoutInMinutes: 180
-    dependsOn: DeployCloudTestResources
-    variables:
-      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
-      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
-      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
     strategy:
       maxParallel: $[variables.maxParallel]
       matrix:

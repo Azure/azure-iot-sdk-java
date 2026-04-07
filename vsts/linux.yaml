@@ -23,11 +23,6 @@ jobs:
     - template: templates/DeployCloudResources.yaml
 
   - job: Linux
-    dependsOn: DeployCloudTestResources
-    variables:
-      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
-      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
-      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
     timeoutInMinutes: 180
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
