@@ -19,6 +19,7 @@
     <modules>
         <module>iot-device-client</module>
         <module>iot-device-samples</module>
+        <module>iot-device-samples/tls-1.3-sample</module>
     </modules>
     <build>
         <plugins>
