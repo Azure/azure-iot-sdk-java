@@ -25,8 +25,7 @@ public class Tls13Sample
         System.out.println("Starting...");
         System.out.println("Beginning setup.");
 
-        //TODO doesn't work with AMQP for some reason?
-        IotHubClientProtocol protocol = IotHubClientProtocol.HTTPS;
+        IotHubClientProtocol protocol = IotHubClientProtocol.AMQPS;
 
         SSLContext sslContextWithTls13Support = SSLContext.getInstance("TLSv1.3");
 
