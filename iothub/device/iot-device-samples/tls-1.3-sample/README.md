@@ -39,6 +39,8 @@ When you run this sample, the "Client Hello" message in the TLS layer will adver
 
 Note that the SDK behavior here is unchanged as it has always advertised support for TLS 1.2 and TLS 1.3. The only change to make the connection use TLS 1.3 is to connect with the connection string of the host that also supports TLS 1.3
 
+**Note that TLS 1.3 support for AMQP requires iot-device-client package version greater than 2.5.0**
+
 ## ADDITIONAL CONSIDERATIONS
 
 This feature is not generally available yet nor is it available in preview for all IoT hubs. As such, the above connection string pattern my yield a "host not found" exception.
