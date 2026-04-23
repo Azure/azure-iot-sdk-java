@@ -728,14 +728,15 @@ public class ModuleGlue
             {
                 reportedProperties.put(property.getKey(), property.getValue());
             }
-            this._deviceTwinStatusCallback.setHandler(handler);
             try
             {
-                client.updateReportedProperties(reportedProperties);
+                // EdgeHub's cloud proxy can transiently recycle and delay twin acks, so
+                // use a larger timeout than the SDK default to avoid flaky 500s.
+                client.updateReportedProperties(reportedProperties, 5 * 60 * 1000);
+                handler.handle(Future.succeededFuture());
             }
             catch (IllegalStateException | InterruptedException | IotHubClientException e)
             {
-                this._deviceTwinStatusCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));
             }
         }
