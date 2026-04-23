@@ -1,7 +1,7 @@
 variables:
   Horton.FrameworkRoot: $(Agent.BuildDirectory)/e2e-fx
   Horton.FrameworkRef: ewertons/horton-fixes
-  Horton.Language: csharp
+  Horton.Language: java
   Horton.Repo: $(Build.Repository.Uri)
   Horton.Commit: $(Build.SourceBranch)
   Horton.ForcedImage: ''

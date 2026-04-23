@@ -663,15 +663,34 @@ public class ModuleGlue
         }
         else
         {
-            this._handler = handler;
             try
             {
-                Twin twin = client.getTwin();
+                // Use a long timeout to allow EdgeHub's cloud proxy time to recover after recycling.
+                // During test setup, EdgeHub's cloud proxy can be rapidly recycled when
+                // subscribeToDesiredProperties is called, and the warm-up getTwin verifies
+                // the channel is fully live before tests proceed.
+                Twin twin = client.getTwin(5 * 60 * 1000);
+                JsonObject desired = new JsonObject();
                 TwinCollection desiredProperties = twin.getDesiredProperties();
-                for (String key : desiredProperties.keySet())
+                if (desiredProperties != null)
                 {
-                    onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
+                    for (String key : desiredProperties.keySet())
+                    {
+                        desired.put(key, desiredProperties.get(key));
+                    }
                 }
+                JsonObject reported = new JsonObject();
+                TwinCollection reportedProperties = twin.getReportedProperties();
+                if (reportedProperties != null)
+                {
+                    for (String key : reportedProperties.keySet())
+                    {
+                        reported.put(key, reportedProperties.get(key));
+                    }
+                }
+                JsonObject props = new JsonObject().put("desired", desired).put("reported", reported);
+                JsonObject result = new JsonObject().put("properties", props);
+                handler.handle(Future.succeededFuture(result));
             }
             catch (IllegalStateException | InterruptedException | IotHubClientException e)
             {
