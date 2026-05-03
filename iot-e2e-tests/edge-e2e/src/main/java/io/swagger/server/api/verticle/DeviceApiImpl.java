@@ -62,7 +62,7 @@ public class DeviceApiImpl implements DeviceApi
             String methodDataString;
             try
             {
-                methodDataString = Json.mapper.readValue(new String((byte[]) methodData, StandardCharsets.UTF_8), String.class);
+                methodDataString = Json.mapper.readValue(methodData.getPayloadAsJsonString(), String.class);
             }
             catch (IOException e)
             {

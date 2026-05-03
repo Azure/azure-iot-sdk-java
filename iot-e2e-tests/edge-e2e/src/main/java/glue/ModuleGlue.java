@@ -493,7 +493,7 @@ public class ModuleGlue
             String methodDataString;
             try
             {
-                methodDataString = Json.mapper.readValue(new String((byte[]) methodData, StandardCharsets.UTF_8), String.class);
+                methodDataString = Json.mapper.readValue(((DirectMethodPayload) methodData).getPayloadAsJsonString(), String.class);
             } catch (IOException e)
             {
                 this._handler.handle(Future.failedFuture(e));
