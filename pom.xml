@@ -118,7 +118,7 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler-proxy</artifactId>
-                <version>4.2.10.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
