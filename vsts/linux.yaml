@@ -16,18 +16,7 @@ variables:
     maxParallel: 2
 
 jobs:
-  - job: DeployCloudTestResources
-    pool:
-      vmImage: windows-latest
-    steps:     
-    - template: templates/DeployCloudResources.yaml
-
   - job: Linux
-    dependsOn: DeployCloudTestResources
-    variables:
-      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
-      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
-      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
     timeoutInMinutes: 180
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
@@ -36,11 +25,19 @@ jobs:
     strategy:
       maxParallel: $[variables.maxParallel]
       matrix:
-        JDK 11: # always run Java 11
-          JAVA_VERSION: 11
-        JDK 8: # only run Java 8 in nightly or CI builds.
-          JAVA_VERSION: 8
+        #JDK 25:
+        #  JAVA_VERSION: 25
+        JDK 21: 
+          JAVA_VERSION: 21
+        JDK 17: # always run Java 17
+          JAVA_VERSION: 17
+        #JDK 11: # always run Java 11
+          #JAVA_VERSION: 11
+        #JDK 8: # only run Java 8 in nightly or CI builds.
+          #JAVA_VERSION: 8
     steps:
+      - template: templates/DeployCloudResources.yaml
+
       - task: CmdLine@2
         displayName: 'Print Linux version'
         inputs:
@@ -74,9 +71,9 @@ jobs:
         displayName: 'Build and Test'
         env:
           JAVA_VERSION: $(JAVA_VERSION)
-          IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
-          IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
-          IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
+          IOT_DPS_CONNECTION_STRING: $(deployCloudTestResources.PROVISIONING_CONNECTION_STRING)
+          IOT_DPS_ID_SCOPE: $(deployCloudTestResources.DPS_IDSCOPE)
+          IOTHUB_CONNECTION_STRING: $(deployCloudTestResources.IOTHUB_CONNECTION_STRING)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
           RECYCLE_TEST_IDENTITIES: true
 
@@ -112,15 +109,4 @@ jobs:
           verbosity: 'Verbose'
           alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
 
-  - job: TearDownCloudTestResources
-    condition: always()
-    dependsOn:
-      - Linux
-      - DeployCloudTestResources
-    variables:
-      RESOURCE_GROUP_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.RESOURCE_GROUP_NAME'] ]
-      DEPLOYMENT_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DEPLOYMENT_NAME'] ]
-    pool:
-      vmImage: windows-2022
-    steps:
-    - template: templates/DeleteCloudResources.yaml
+      - template: templates/DeleteCloudResources.yaml
