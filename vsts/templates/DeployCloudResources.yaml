@@ -1,6 +1,5 @@
 steps:
 - task: AzureCLI@2
-  displayName: Deploy cloud test resources
   name: deployCloudTestResources
   inputs:
     azureSubscription: 'iot hub sdk service connection'

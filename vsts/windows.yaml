@@ -16,8 +16,19 @@ variables:
     maxParallel: 2
 
 jobs:
+  - job: DeployCloudTestResources
+    pool:
+      vmImage: windows-latest
+    steps:     
+    - template: templates/DeployCloudResources.yaml
+
   - job: Windows
     timeoutInMinutes: 180
+    dependsOn: DeployCloudTestResources
+    variables:
+      IOTHUB_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.IOTHUB_CONNECTION_STRING'] ]
+      DPS_IDSCOPE: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DPS_IDSCOPE'] ]
+      PROVISIONING_CONNECTION_STRING: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.PROVISIONING_CONNECTION_STRING'] ]
     strategy:
       maxParallel: $[variables.maxParallel]
       matrix:
@@ -33,8 +44,6 @@ jobs:
       vmImage: windows-latest
     displayName: Windows
     steps:
-      - template: templates/DeployCloudResources.yaml
-
       - task: JavaToolInstaller@0
         inputs:
           versionSpec: $(JAVA_VERSION)
@@ -55,9 +64,9 @@ jobs:
         displayName: 'Build and Test'
         env:
           JAVA_VERSION: $(JAVA_VERSION)
-          IOT_DPS_CONNECTION_STRING: $(deployCloudTestResources.PROVISIONING_CONNECTION_STRING)
-          IOT_DPS_ID_SCOPE: $(deployCloudTestResources.DPS_IDSCOPE)
-          IOTHUB_CONNECTION_STRING: $(deployCloudTestResources.IOTHUB_CONNECTION_STRING)
+          IOT_DPS_CONNECTION_STRING: $(PROVISIONING_CONNECTION_STRING)
+          IOT_DPS_ID_SCOPE: $(DPS_IDSCOPE)
+          IOTHUB_CONNECTION_STRING: $(IOTHUB_CONNECTION_STRING)
           TARGET_BRANCH: $(System.PullRequest.TargetBranch)
           RECYCLE_TEST_IDENTITIES: true
 
@@ -117,4 +126,15 @@ jobs:
           verbosity: 'Verbose'
           alertWarningLevel: 'Low' # The task will present a warning, but will not cause the build to fail
 
-      - template: templates/DeleteCloudResources.yaml
+  - job: TearDownCloudTestResources
+    condition: always()
+    dependsOn:
+      - Windows
+      - DeployCloudTestResources
+    variables:
+      RESOURCE_GROUP_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.RESOURCE_GROUP_NAME'] ]
+      DEPLOYMENT_NAME: $[ dependencies.DeployCloudTestResources.outputs['deployCloudTestResources.DEPLOYMENT_NAME'] ]
+    pool:
+      vmImage: windows-2022
+    steps:
+    - template: templates/DeleteCloudResources.yaml
