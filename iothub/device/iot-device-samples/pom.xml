@@ -36,6 +36,7 @@
         <module>device-reconnection-sample</module>
         <module>custom-sas-token-provider-sample</module>
         <module>unix-domain-socket-sample</module>
+        <module>tls-1.3-sample</module>
     </modules>
     <dependencies>
        <dependency>

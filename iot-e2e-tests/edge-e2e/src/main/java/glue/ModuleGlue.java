@@ -493,7 +493,7 @@ public class ModuleGlue
             String methodDataString;
             try
             {
-                methodDataString = Json.mapper.readValue(new String((byte[]) methodData, StandardCharsets.UTF_8), String.class);
+                methodDataString = Json.mapper.readValue(((DirectMethodPayload) methodData).getPayloadAsJsonString(), String.class);
             } catch (IOException e)
             {
                 this._handler.handle(Future.failedFuture(e));
@@ -663,15 +663,34 @@ public class ModuleGlue
         }
         else
         {
-            this._handler = handler;
             try
             {
-                Twin twin = client.getTwin();
+                // Use a long timeout to allow EdgeHub's cloud proxy time to recover after recycling.
+                // During test setup, EdgeHub's cloud proxy can be rapidly recycled when
+                // subscribeToDesiredProperties is called, and the warm-up getTwin verifies
+                // the channel is fully live before tests proceed.
+                Twin twin = client.getTwin(5 * 60 * 1000);
+                JsonObject desired = new JsonObject();
                 TwinCollection desiredProperties = twin.getDesiredProperties();
-                for (String key : desiredProperties.keySet())
+                if (desiredProperties != null)
                 {
-                    onPropertyChanged(new Property(key, desiredProperties.get(key)), null);
+                    for (String key : desiredProperties.keySet())
+                    {
+                        desired.put(key, desiredProperties.get(key));
+                    }
                 }
+                JsonObject reported = new JsonObject();
+                TwinCollection reportedProperties = twin.getReportedProperties();
+                if (reportedProperties != null)
+                {
+                    for (String key : reportedProperties.keySet())
+                    {
+                        reported.put(key, reportedProperties.get(key));
+                    }
+                }
+                JsonObject props = new JsonObject().put("desired", desired).put("reported", reported);
+                JsonObject result = new JsonObject().put("properties", props);
+                handler.handle(Future.succeededFuture(result));
             }
             catch (IllegalStateException | InterruptedException | IotHubClientException e)
             {
@@ -709,14 +728,15 @@ public class ModuleGlue
             {
                 reportedProperties.put(property.getKey(), property.getValue());
             }
-            this._deviceTwinStatusCallback.setHandler(handler);
             try
             {
-                client.updateReportedProperties(reportedProperties);
+                // EdgeHub's cloud proxy can transiently recycle and delay twin acks, so
+                // use a larger timeout than the SDK default to avoid flaky 500s.
+                client.updateReportedProperties(reportedProperties, 5 * 60 * 1000);
+                handler.handle(Future.succeededFuture());
             }
             catch (IllegalStateException | InterruptedException | IotHubClientException e)
             {
-                this._deviceTwinStatusCallback.setHandler(null);
                 handler.handle(Future.failedFuture(e));
             }
         }
