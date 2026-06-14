@@ -185,7 +185,7 @@ Refer to the [Azure IoT Device SDK lifecycle and support](https://learn.microsof
 
 | Release | Category | End-of-life |
 |-|-|-|
-| 2.1.5 | Active | - |
+| 2.5.0 | Active | - |
 | 1.34.3 | Deprecated | 2023-03-30 |
 
 

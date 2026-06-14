@@ -64,7 +64,7 @@ public class Tools
     private static final long WAIT_FOR_RETRY = 2000;
     private static boolean IS_ANDROID = false;
 
-    private static final String ANDROID_BUILD_CONFIG_CLASS = "com.iothub.azure.microsoft.com.androide2e.test.BuildConfig";
+    private static final String ANDROID_BUILD_CONFIG_CLASS = "com.microsoft.azure.sdk.iot.androidtest.test.BuildConfig";
     private static final Map<String, String> ANDROID_ENV_VAR = retrieveAndroidEnvVariables();
 
     public static String retrieveEnvironmentVariableValue(String environmentVariableName)

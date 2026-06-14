@@ -6,6 +6,10 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
+import com.github.monkeywie.proxyee.server.HttpProxyServer;
+import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
+import com.github.monkeywie.proxyee.server.auth.BasicHttpProxyAuthenticationProvider;
+import com.github.monkeywie.proxyee.server.auth.model.BasicHttpToken;
 import com.microsoft.azure.sdk.iot.device.auth.IotHubSSLContext;
 import com.microsoft.azure.sdk.iot.device.ClientOptions;
 import com.microsoft.azure.sdk.iot.device.DeviceClient;
@@ -50,16 +54,7 @@ import org.junit.rules.RuleChain;
 import org.junit.rules.Timeout;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.BasicProxyAuthenticator;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.ErrorInjectionHelper;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.EventCallback;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Success;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.RerunFailedTestRule;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.ThrottleResistantTestRule;
@@ -114,12 +109,6 @@ public class MultiplexingClientTests extends IntegrationTest
     protected static HttpProxyServer proxyServer;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8849;
-
-    // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
-    protected static final String testProxyUser = "proxyUsername"; // lgtm
-
-    // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
-    protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection inputs() throws Exception
@@ -216,16 +205,16 @@ public class MultiplexingClientTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = DefaultHttpProxyServer.bootstrap()
-                .withPort(testProxyPort)
-                .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
-                .start();
+        HttpProxyServerConfig config = new HttpProxyServerConfig();
+        config.setHandleSsl(false);
+        proxyServer = new HttpProxyServer().serverConfig(config);
+        proxyServer.startAsync(testProxyPort);
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        proxyServer.stop();
+        proxyServer.close();
     }
 
     @Test
@@ -475,7 +464,7 @@ public class MultiplexingClientTests extends IntegrationTest
         assumeTrue(testInstance.protocol == IotHubClientProtocol.AMQPS_WS);
 
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-        ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
+        ProxySettings proxySettings = new ProxySettings(testProxy);
 
         //re-setup test instance to use proxy instead
         testInstance.setup(DEVICE_MULTIPLEX_COUNT, MultiplexingClientOptions.builder().proxySettings(proxySettings).build(), false);

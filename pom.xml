@@ -28,17 +28,17 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.12</version>
+                <version>1.18.40</version>
             </dependency>
             <dependency>
                 <groupId>com.microsoft.azure</groupId>
                 <artifactId>qpid-proton-j-extensions</artifactId>
-                <version>1.2.4</version>
+                <version>1.2.7</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.11</version>
+                <version>3.20.0</version>
             </dependency>
             <dependency>
                 <groupId>org.eclipse.paho</groupId>
@@ -61,11 +61,6 @@
                 <version>1.7.32</version>
             </dependency>
             <dependency>
-                <groupId>com.microsoft.rest</groupId>
-                <artifactId>client-runtime</artifactId>
-                <version>1.7.14</version>
-            </dependency>
-            <dependency>
                 <groupId>com.google.code.findbugs</groupId>
                 <artifactId>annotations</artifactId>
                 <version>3.0.1</version>
@@ -73,27 +68,27 @@
             <dependency>
                 <groupId>com.azure</groupId>
                 <artifactId>azure-core</artifactId>
-                <version>1.12.0</version>
+                <version>1.57.1</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>2.14.0-rc1</version> <!-- Nested dependency from azure core. Overriding the version to use newer version-->
+                <version>2.21.0</version> <!-- Nested dependency from azure core. Overriding the version to use newer version-->
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-joda</artifactId>
-                <version>2.14.0-rc1</version> <!-- Nested dependency from azure core. Overriding the version to use newer version-->
+                <version>2.21.0</version> <!-- Nested dependency from azure core. Overriding the version to use newer version-->
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-core</artifactId>
-                <version>2.14.0-rc1</version> <!-- Nested dependency from azure core. Overriding the version to use newer version-->
+                <version>2.21.1</version> <!-- Nested dependency from azure core. Overriding the version to use newer version-->
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>2.14.0-rc1</version>
+                <version>2.21</version> <!-- Nested dependency from azure core. Overriding the version to use newer version-->
             </dependency>
             <dependency>
                 <groupId>commons-codec</groupId>
@@ -103,37 +98,52 @@
             <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.7</version> <!--samples only-->
+                <version>2.21.0</version> <!--samples only-->
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-buffer</artifactId>
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
-                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-handler-proxy</artifactId>
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec</artifactId>
-                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-dns</artifactId>
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http</artifactId>
-                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http2</artifactId>
-                <version>4.1.100.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.projectreactor.netty</groupId>
                 <artifactId>reactor-netty-http</artifactId>
-                <version>1.0.39</version> <!--e2e tests and samples only-->
+                <version>1.2.8</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>commons-cli</groupId>
@@ -153,27 +163,17 @@
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
-                <version>2.17.1</version>  <!--e2e tests and samples only-->
+                <version>2.25.4</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-core</artifactId>
-                <version>2.17.1</version>  <!--e2e tests and samples only-->
+                <version>2.25.4</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
-                <version>2.17.1</version>  <!--e2e tests and samples only-->
-            </dependency>
-            <dependency>
-                <groupId>com.google.guava</groupId>
-                <artifactId>guava</artifactId>
-                <version>32.0.0-jre</version> <!-- Nested dependency from ms client runtime. Overriding the version to use newer version-->
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.woodstox</groupId>
-                <artifactId>woodstox-core</artifactId>
-                <version>6.4.0</version>  <!-- Nested dependency from azure core. Overriding the version to use newer version-->
+                <version>2.25.4</version>  <!--e2e tests and samples only-->
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -189,7 +189,7 @@
         <dice-provider-artifact-id>dice-provider</dice-provider-artifact-id>
         <x509-provider-artifact-id>x509-provider</x509-provider-artifact-id>
 
-        <iot-device-client-version>2.5.0</iot-device-client-version>
+        <iot-device-client-version>2.5.1</iot-device-client-version>
         <iot-service-client-version>2.1.6</iot-service-client-version>  <!--e2e tests only-->
         <provisioning-device-client-version>2.1.3</provisioning-device-client-version>
         <provisioning-service-client-version>2.0.3</provisioning-service-client-version>

@@ -6,6 +6,10 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub;
 
 
+import com.github.monkeywie.proxyee.server.HttpProxyServer;
+import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
+import com.github.monkeywie.proxyee.server.auth.BasicHttpProxyAuthenticationProvider;
+import com.github.monkeywie.proxyee.server.auth.model.BasicHttpToken;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.device.exceptions.IotHubClientException;
 import com.microsoft.azure.sdk.iot.device.transport.IotHubConnectionStatus;
@@ -22,8 +26,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.Timeout;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.rules.RerunFailedTestRule;
@@ -52,12 +54,6 @@ public class TokenRenewalTests extends IntegrationTest
     private static String iotHubHostName;
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8898;
-
-    // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
-    protected static final String testProxyUser = "proxyUsername"; // lgtm
-
-    // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
-    protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
 
 
     final int SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL = 30;
@@ -91,16 +87,16 @@ public class TokenRenewalTests extends IntegrationTest
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = DefaultHttpProxyServer.bootstrap()
-                .withPort(testProxyPort)
-                .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
-                .start();
+        HttpProxyServerConfig config = new HttpProxyServerConfig();
+        config.setHandleSsl(false);
+        proxyServer = new HttpProxyServer().serverConfig(config);
+        proxyServer.startAsync(testProxyPort);
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        proxyServer.stop();
+        proxyServer.close();
     }
 
     /**
@@ -234,7 +230,7 @@ public class TokenRenewalTests extends IntegrationTest
             clients.add(createDeviceClient(protocol, null));
             if (protocol == HTTPS || protocol == MQTT_WS || protocol == AMQPS_WS)
             {
-                ProxySettings proxySettings = new ProxySettings(testProxy, testProxyUser, testProxyPass);
+                ProxySettings proxySettings = new ProxySettings(testProxy);
                 InternalClient client = createDeviceClient(protocol, proxySettings);
                 clients.add(client);
             }

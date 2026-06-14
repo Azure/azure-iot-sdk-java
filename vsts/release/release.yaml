@@ -1,0 +1,122 @@
+name: $(Date:yyyyMMdd).$(Rev:r)
+
+parameters:
+- name: publishHubDevice
+  displayName: Publish the 'com.microsoft.azure.sdk.iot:iot-device-client' package
+  type: string
+  values:
+    - true
+    - false
+  default: false
+- name: publishDpsDevice
+  displayName: Publish the 'com.microsoft.azure.sdk.iot.provisioning:provisioning-device-client' package
+  type: string
+  values:
+    - true
+    - false
+  default: false
+- name: publishDpsService
+  displayName: Publish 'com.microsoft.azure.sdk.iot.provisioning:provisioning-service-client' package
+  type: string
+  values:
+    - true
+    - false
+  default: false
+- name: publishDpsSecurity
+  displayName: Publish 'com.microsoft.azure.sdk.iot.provisioning.security:security-provider' package
+  type: string
+  values:
+    - true
+    - false
+  default: false
+- name: publishDpsSecurityX509
+  displayName: Publish 'com.microsoft.azure.sdk.iot.provisioning.security:x509-provider' package
+  type: string
+  values:
+    - true
+    - false
+  default: false
+- name: publishDpsSecurityTpm
+  displayName: Publish 'com.microsoft.azure.sdk.iot.provisioning.security:tpm-provider' package
+  type: string
+  values:
+    - true
+    - false
+  default: false
+
+jobs:
+  - job: Package
+    displayName: Package
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - bash: |
+        echo "Publish IoT hub device client package? ${{ parameters.publishHubDevice }}"
+        echo "Publish Dps device client package? ${{ parameters.publishDpsDevice }}"
+        echo "Publish Dps service client package? ${{ parameters.publishDpsService }}"
+        echo "Publish security provider package? ${{ parameters.publishDpsSecurity }}"
+        echo "Publish tpm provider package? ${{ parameters.publishDpsSecurityTpm }}"
+        echo "Publish x509 provider client package? ${{ parameters.publishDpsSecurityX509 }}"
+        if [[ ${{ parameters.publishHubDevice }} -ne "true" && ${{ parameters.publishDpsDevice }} -ne "true" && ${{ parameters.publishDpsService }} -ne "true" && ${{ parameters.publishDpsSecurity }} -ne "true" && ${{ parameters.publishDpsSecurityTpm }} -ne "true" && ${{ parameters.publishDpsSecurityX509 }} -ne "true" ]]; then
+          echo "Must select at least one package to publish"
+          exit 1
+        fi
+      displayName: Validate build params
+
+    - task: JavaToolInstaller@0
+      inputs:
+        versionSpec: 11
+        jdkArchitectureOption: 'x64'
+        jdkSourceOption: 'PreInstalled'
+
+    - task: PowerShell@2
+      displayName: Mvn install
+      inputs:
+        targetType: 'inline'
+        script: |
+          mvn clean install -DskipTests -T 2C  --batch-mode -q
+          New-Item -ItemType Directory -Path $(Build.SourcesDirectory)/output
+
+    - template: ../templates/PackPackage.yaml
+      parameters:
+        packagePath: '$(Build.SourcesDirectory)/iothub/device/iot-device-client'
+        condition: ${{ parameters.publishHubDevice }}
+
+    - template: ../templates/PackPackage.yaml
+      parameters:
+        packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-device-client'
+        condition: ${{ parameters.publishDpsDevice }}
+
+    - template: ../templates/PackPackage.yaml
+      parameters:
+        packagePath: '$(Build.SourcesDirectory)/provisioning/provisioning-service-client'
+        condition: ${{ parameters.publishDpsService }}
+
+    - template: ../templates/PackPackage.yaml
+      parameters:
+        packagePath: '$(Build.SourcesDirectory)/provisioning/security/security-provider'
+        condition: ${{ parameters.publishDpsSecurity }}
+
+    - template: ../templates/PackPackage.yaml
+      parameters:
+        packagePath: '$(Build.SourcesDirectory)/provisioning/security/tpm-provider'
+        condition: ${{ parameters.publishDpsSecurityTpm }}
+
+    - template: ../templates/PackPackage.yaml
+      parameters:
+        packagePath: '$(Build.SourcesDirectory)/provisioning/security/x509-provider'
+        condition: ${{ parameters.publishDpsSecurityX509 }}
+
+    - task: AzureCLI@2
+      displayName: "Upload packages to Azure storage"
+      inputs:
+        azureSubscription: 'azuresdkpartnerdrops'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: 'az storage blob upload-batch --source "$(Build.SourcesDirectory)/output/" --destination "drops/azure-iot-sdks/java/$(Build.BuildNumber)" --account-name azuresdkpartnerdrops --auth-mode login'
+    
+    - bash: |
+        echo "Files uploaded to partner storage directory drops/azure-iot-sdks/java/$(Build.BuildNumber)"
+        echo "Go to https://dev.azure.com/azure-sdk/internal/_build?definitionId=1809&_a=summary and run the pipeline with Relative Path in Partner Drops Blob Container set to azure-iot-sdks/java/$(Build.BuildNumber)"
+      displayName: Next Steps
+    

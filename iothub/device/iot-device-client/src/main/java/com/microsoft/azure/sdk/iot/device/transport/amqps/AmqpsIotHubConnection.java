@@ -474,10 +474,11 @@ public final class AmqpsIotHubConnection extends BaseHandler implements IotHubTr
             }
 
             SslDomain domain = Proton.sslDomain();
+            SslPeerDetails peerDetails = Proton.sslPeerDetails(this.hostName, this.isWebsocketConnection ? WEB_SOCKET_PORT : AMQP_PORT);
             domain.setSslContext(sslContext);
             domain.setPeerAuthentication(SslDomain.VerifyMode.VERIFY_PEER);
             domain.init(SslDomain.Mode.CLIENT);
-            transport.ssl(domain);
+            transport.ssl(domain, peerDetails);
         }
         catch (IOException e)
         {

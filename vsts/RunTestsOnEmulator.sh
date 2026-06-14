@@ -22,12 +22,12 @@ echo 'Listing available instrumentations:'
 adb -e shell pm list instrumentation
 echo ''
 
-annotationString="com.microsoft.azure.sdk.iot.android.helper.${TEST_GROUP_ID}"
+annotationString="com.microsoft.azure.sdk.iot.androidtest.testgroup.${TEST_GROUP_ID}"
 echo 'Running android tests with annotation'
 echo $annotationString
 
 #Return code from adb shell isn't returned as one would expect. Need to capture output logs and analyze them to determine if this test run was a success or not
-TestLogs=$(adb -e shell am instrument -w -e annotation $annotationString com.iothub.azure.microsoft.com.androide2e.test/android.support.test.runner.AndroidJUnitRunner)
+TestLogs=$(adb -e shell am instrument -w -e annotation $annotationString com.microsoft.azure.sdk.iot.androidtest.test/androidx.test.runner.AndroidJUnitRunner)
 
 echo 'Result of running tests'
 echo "$TestLogs"

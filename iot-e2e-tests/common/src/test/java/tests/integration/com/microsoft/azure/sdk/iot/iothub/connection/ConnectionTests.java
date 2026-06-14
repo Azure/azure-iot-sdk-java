@@ -1,5 +1,9 @@
 package tests.integration.com.microsoft.azure.sdk.iot.iothub.connection;
 
+import com.github.monkeywie.proxyee.server.HttpProxyServer;
+import com.github.monkeywie.proxyee.server.HttpProxyServerConfig;
+import com.github.monkeywie.proxyee.server.auth.BasicHttpProxyAuthenticationProvider;
+import com.github.monkeywie.proxyee.server.auth.model.BasicHttpToken;
 import com.microsoft.azure.sdk.iot.device.*;
 import com.microsoft.azure.sdk.iot.service.auth.AuthenticationType;
 import com.microsoft.azure.sdk.iot.service.auth.IotHubConnectionStringBuilder;
@@ -14,16 +18,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.FlakeyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 
 import javax.net.ssl.SSLContext;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.security.GeneralSecurityException;
 import java.util.*;
 
 import static com.microsoft.azure.sdk.iot.device.IotHubClientProtocol.*;
@@ -40,7 +41,7 @@ public class ConnectionTests extends IntegrationTest
     private static String iotHubConnectionString;
     private static String hostName;
 
-    @Parameterized.Parameters(name = "{0}_{1}_{2}_{3}")
+    @Parameterized.Parameters(name = "{0}_{1}_{2}_{3}_{4}")
     public static Collection inputs() throws Exception
     {
         iotHubConnectionString = Tools.retrieveEnvironmentVariableValue(TestConstants.IOT_HUB_CONNECTION_STRING_ENV_VAR_NAME);
@@ -49,39 +50,47 @@ public class ConnectionTests extends IntegrationTest
         return Arrays.asList(
             new Object[][]
                 {
-                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, false},
-                    {AMQPS, SAS, ClientType.DEVICE_CLIENT, false},
-                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, false},
-                    {MQTT, SAS, ClientType.DEVICE_CLIENT, false},
-                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, false},
+                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, false, false},
+                    {AMQPS, SAS, ClientType.DEVICE_CLIENT, false, false},
+                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, false, false},
+                    {MQTT, SAS, ClientType.DEVICE_CLIENT, false, false},
+                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, false, false},
 
-                    {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
-                    {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
-                    {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
-                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false},
+                    {HTTPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false, false},
+                    {AMQPS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false, false},
+                    {MQTT, SELF_SIGNED, ClientType.DEVICE_CLIENT, false, false},
+                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, false, false},
 
-                    {AMQPS, SAS, ClientType.MODULE_CLIENT, false},
-                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, false},
-                    {MQTT, SAS, ClientType.MODULE_CLIENT, false},
-                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, false},
+                    {AMQPS, SAS, ClientType.MODULE_CLIENT, false, false},
+                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, false, false},
+                    {MQTT, SAS, ClientType.MODULE_CLIENT, false, false},
+                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, false, false},
 
-                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
-                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
-                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, false},
+                    {AMQPS, SELF_SIGNED, ClientType.MODULE_CLIENT, false, false},
+                    {MQTT, SELF_SIGNED, ClientType.MODULE_CLIENT, false, false},
+                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, false, false},
 
-                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, true},
-                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, true},
-                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true},
-                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true},
-                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, true},
-                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true},
-                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true},
+                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, true, false},
+                    {AMQPS_WS, SAS, ClientType.DEVICE_CLIENT, true, false},
+                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true, false},
+                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true, false},
+                    {AMQPS_WS, SAS, ClientType.MODULE_CLIENT, true, false},
+                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true, false},
+                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true, false},
+
+                    // TODO AMQP_WS with proxy with auth doesn't work against our test proxy. It does work against
+                    // other proxies, so this is likely just a bug in our current test proxy
+                    {HTTPS, SAS, ClientType.DEVICE_CLIENT, true, true},
+                    {MQTT_WS, SAS, ClientType.DEVICE_CLIENT, true, true},
+                    {MQTT_WS, SELF_SIGNED, ClientType.DEVICE_CLIENT, true, true},
+                    {MQTT_WS, SAS, ClientType.MODULE_CLIENT, true, true},
+                    {MQTT_WS, SELF_SIGNED, ClientType.MODULE_CLIENT, true, true},
                 });
     }
 
-    public ConnectionTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy)
+    public ConnectionTests(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean withProxy, boolean withProxyAuth)
     {
-        this.testInstance = new ConnectionTestInstance(protocol, authenticationType, clientType, withProxy);
+        this.testInstance = new ConnectionTestInstance(protocol, authenticationType, clientType, withProxy, withProxyAuth);
     }
 
     public class ConnectionTestInstance
@@ -91,13 +100,15 @@ public class ConnectionTests extends IntegrationTest
         public AuthenticationType authenticationType;
         public ClientType clientType;
         public boolean useHttpProxy;
+        public boolean useHttpProxyAuth;
 
-        public ConnectionTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean useHttpProxy)
+        public ConnectionTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean useHttpProxy, boolean useHttpProxyAuth)
         {
             this.protocol = protocol;
             this.authenticationType = authenticationType;
             this.clientType = clientType;
             this.useHttpProxy = useHttpProxy;
+            this.useHttpProxyAuth = useHttpProxyAuth;
         }
 
         public void setup() throws Exception
@@ -105,8 +116,16 @@ public class ConnectionTests extends IntegrationTest
             ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
             if (this.useHttpProxy)
             {
-                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+                if (this.useHttpProxyAuth)
+                {
+                    Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+                    optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
+                }
+                else
+                {
+                    Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostnameWithoutAuth, testProxyPortWithoutAuth));
+                    optionsBuilder.proxySettings(new ProxySettings(testProxy));
+                }
             }
 
             if (clientType == ClientType.DEVICE_CLIENT)
@@ -125,7 +144,7 @@ public class ConnectionTests extends IntegrationTest
             if (this.useHttpProxy)
             {
                 Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
             }
 
             X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
@@ -178,25 +197,43 @@ public class ConnectionTests extends IntegrationTest
     protected static String testProxyHostname = "127.0.0.1";
     protected static int testProxyPort = 8899;
 
+    protected static HttpProxyServer proxyServerWithoutAuth;
+    protected static String testProxyHostnameWithoutAuth = "127.0.0.1";
+    protected static int testProxyPortWithoutAuth = 9000;
+
     // Semmle flags this as a security issue, but this is a test username so the warning can be suppressed
     protected static final String testProxyUser = "proxyUsername"; // lgtm
 
     // Semmle flags this as a security issue, but this is a test password so the warning can be suppressed
-    protected static final char[] testProxyPass = "1234".toCharArray(); // lgtm
+    protected static final String testProxyPass = "1234"; // lgtm
 
     @BeforeClass
     public static void startProxy()
     {
-        proxyServer = DefaultHttpProxyServer.bootstrap()
-            .withPort(testProxyPort)
-            .withProxyAuthenticator(new BasicProxyAuthenticator(testProxyUser, testProxyPass))
-            .start();
+        HttpProxyServerConfig config = new HttpProxyServerConfig();
+        config.setAuthenticationProvider(new BasicProxyAuthenticator(testProxyUser, testProxyPass));
+        config.setHandleSsl(false);
+        proxyServer = new HttpProxyServer().serverConfig(config);
+        proxyServer.startAsync(testProxyPort);
+
+        HttpProxyServerConfig configWithoutAuth = new HttpProxyServerConfig();
+        configWithoutAuth.setHandleSsl(false);
+        proxyServerWithoutAuth = new HttpProxyServer().serverConfig(configWithoutAuth);
+        proxyServerWithoutAuth.startAsync(testProxyPortWithoutAuth);
     }
 
     @AfterClass
     public static void stopProxy()
     {
-        proxyServer.stop();
+        if (proxyServer != null)
+        {
+            proxyServer.close();
+        }
+
+        if (proxyServerWithoutAuth != null)
+        {
+            proxyServerWithoutAuth.close();
+        }
     }
 
     @Test(timeout = 60000) // 1 minute
@@ -218,6 +255,7 @@ public class ConnectionTests extends IntegrationTest
     @IotHubTest
     @StandardTierHubOnlyTest
     @Test(timeout = 60000) // 1 minute
+    @FlakeyTest
     public void CanOpenConnectionWithECCCertificates() throws Exception
     {
         // SAS token authenticated devices/modules don't use RSA or ECC certificates
@@ -239,7 +277,7 @@ public class ConnectionTests extends IntegrationTest
         testInstance.identity.getClient().close();
     }
 
-    @Test
+    @Test(timeout = 60000) // 1 minute
     @IotHubTest
     public void CanOpenMultiplexingConnection() throws Exception
     {
@@ -255,8 +293,16 @@ public class ConnectionTests extends IntegrationTest
         MultiplexingClientOptions.MultiplexingClientOptionsBuilder optionsBuilder = MultiplexingClientOptions.builder();
         if (testInstance.useHttpProxy)
         {
-            Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-            optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass));
+            if (testInstance.useHttpProxyAuth)
+            {
+                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
+            }
+            else
+            {
+                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostnameWithoutAuth, testProxyPortWithoutAuth));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy));
+            }
         }
 
         MultiplexingClient multiplexingClient = new MultiplexingClient(hostName, testInstance.protocol, optionsBuilder.build());

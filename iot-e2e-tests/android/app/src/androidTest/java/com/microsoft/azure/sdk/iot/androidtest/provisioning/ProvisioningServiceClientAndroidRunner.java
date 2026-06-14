@@ -1,0 +1,17 @@
+/*
+ *  Copyright (c) Microsoft. All rights reserved.
+ *  Licensed under the MIT license. See LICENSE file in the project root for full license information.
+ */
+
+package com.microsoft.azure.sdk.iot.androidtest.provisioning;
+
+import com.microsoft.azure.sdk.iot.androidtest.testgroup.TestGroup1;
+
+import tests.integration.com.microsoft.azure.sdk.iot.provisioning.ProvisioningServiceClientTests;
+
+@TestGroup1
+public class ProvisioningServiceClientAndroidRunner extends ProvisioningServiceClientTests
+{
+    // Intentionally empty class. The important part of this file is that the class inherits tests
+    // from ProvisioningServiceClientTests and is assigned to a test group.
+}

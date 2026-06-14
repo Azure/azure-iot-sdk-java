@@ -26,8 +26,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.HttpProxyServer;
-import tests.integration.com.microsoft.azure.sdk.iot.helpers.proxy.impl.DefaultHttpProxyServer;
 
 import javax.net.ssl.SSLContext;
 import java.io.IOException;
