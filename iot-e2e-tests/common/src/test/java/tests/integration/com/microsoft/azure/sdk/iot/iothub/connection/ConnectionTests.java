@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.FlakeyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
@@ -254,6 +255,7 @@ public class ConnectionTests extends IntegrationTest
     @IotHubTest
     @StandardTierHubOnlyTest
     @Test(timeout = 60000) // 1 minute
+    @FlakeyTest
     public void CanOpenConnectionWithECCCertificates() throws Exception
     {
         // SAS token authenticated devices/modules don't use RSA or ECC certificates

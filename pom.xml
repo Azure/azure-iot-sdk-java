@@ -28,7 +28,7 @@
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.30</version>
+                <version>1.18.40</version>
             </dependency>
             <dependency>
                 <groupId>com.microsoft.azure</groupId>
@@ -103,42 +103,47 @@
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-buffer</artifactId>
-                <version>4.2.10.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-all</artifactId>
-                <version>4.2.10.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler</artifactId>
-                <version>4.2.10.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.15.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-handler-proxy</artifactId>
-                <version>4.2.10.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec</artifactId>
-                <version>4.2.10.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-dns</artifactId>
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http</artifactId>
-                <version>4.2.10.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.netty</groupId>
                 <artifactId>netty-codec-http2</artifactId>
-                <version>4.2.10.Final</version> <!--e2e tests and samples only-->
+                <version>4.2.13.Final</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>io.projectreactor.netty</groupId>
                 <artifactId>reactor-netty-http</artifactId>
-                <version>1.0.39</version> <!--e2e tests and samples only-->
+                <version>1.2.8</version> <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>commons-cli</groupId>
@@ -158,7 +163,7 @@
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-api</artifactId>
-                <version>2.17.1</version>  <!--e2e tests and samples only-->
+                <version>2.25.4</version>  <!--e2e tests and samples only-->
             </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
@@ -168,7 +173,7 @@
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-slf4j-impl</artifactId>
-                <version>2.17.1</version>  <!--e2e tests and samples only-->
+                <version>2.25.4</version>  <!--e2e tests and samples only-->
             </dependency>
         </dependencies>
     </dependencyManagement>

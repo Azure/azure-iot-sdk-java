@@ -297,12 +297,18 @@ public class ModuleApiVerticle extends AbstractVerticle {
         vertx.eventBus().<JsonObject> consumer(GET_MODULE_CONNECTIONID_TWIN_SERVICE_ID).handler(message -> {
             try {
                 String connectionId = message.body().getString("connectionId");
-                service.moduleConnectionIdTwinGet(connectionId, result -> {
-                    if (result.succeeded())
-                        message.reply(new JsonObject(Json.encode(result.result())).encodePrettily());
+                // getTwin blocks the calling thread while waiting for an IoT Hub response;
+                // use executeBlocking so the event loop stays free to process other requests.
+                vertx.executeBlocking(promise -> {
+                    service.moduleConnectionIdTwinGet(connectionId, result -> {
+                        if (result.succeeded()) promise.complete(result.result());
+                        else promise.fail(result.cause());
+                    });
+                }, false, ar -> {
+                    if (ar.succeeded())
+                        message.reply(new JsonObject(Json.encode(ar.result())).encodePrettily());
                     else {
-                        Throwable cause = result.cause();
-                        manageError(message, cause, "GET_module_connectionId_twin");
+                        manageError(message, ar.cause(), "GET_module_connectionId_twin");
                     }
                 });
             } catch (Exception e) {
@@ -316,12 +322,18 @@ public class ModuleApiVerticle extends AbstractVerticle {
             try {
                 String connectionId = message.body().getString("connectionId");
                 Object props = message.body().getJsonObject("props");
-                service.moduleConnectionIdTwinPatch(connectionId, props, result -> {
-                    if (result.succeeded())
+                // updateReportedProperties blocks the calling thread while waiting for IoT Hub to ack;
+                // use executeBlocking so the event loop stays free to process other requests.
+                vertx.executeBlocking(promise -> {
+                    service.moduleConnectionIdTwinPatch(connectionId, props, result -> {
+                        if (result.succeeded()) promise.complete();
+                        else promise.fail(result.cause());
+                    });
+                }, false, ar -> {
+                    if (ar.succeeded())
                         message.reply(null);
                     else {
-                        Throwable cause = result.cause();
-                        manageError(message, cause, "PATCH_module_connectionId_twin");
+                        manageError(message, ar.cause(), "PATCH_module_connectionId_twin");
                     }
                 });
             } catch (Exception e) {
