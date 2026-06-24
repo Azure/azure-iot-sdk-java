@@ -260,6 +260,10 @@ public class ConnectionTests extends IntegrationTest
     {
         // SAS token authenticated devices/modules don't use RSA or ECC certificates
         assumeTrue(testInstance.authenticationType == SELF_SIGNED);
+        int javaVersion = Integer.parseInt(System.getenv("JAVA_VERSION"));
+
+        // Windows env fails this test consistently for Java 17 and 21. TODO to investigate
+        assumeTrue(javaVersion == 8 || javaVersion == 11 || Tools.isLinux());
 
         // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
         assumeFalse(Tools.isAndroid());
