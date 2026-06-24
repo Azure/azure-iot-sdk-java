@@ -27,6 +27,28 @@ jobs:
     inputs:
       alertWarningLevel: High
       failOnAlert: true
+      sourceScanPath: './iothub/device/iot-device-client/'
+
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
+    inputs:
+      alertWarningLevel: High
+      failOnAlert: true
+      sourceScanPath: './provisioning/provisioning-device-client/'
+
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
+    inputs:
+      alertWarningLevel: High
+      failOnAlert: true
+      sourceScanPath: './provisioning/provisioning-service-client/'
+
+  - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    displayName: 'Component Detection'
+    inputs:
+      alertWarningLevel: High
+      failOnAlert: true
+      sourceScanPath: './provisioning/security/'
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@3
     displayName: CredScan
