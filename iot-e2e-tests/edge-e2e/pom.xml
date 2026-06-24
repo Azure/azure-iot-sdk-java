@@ -1,4 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <!--This pom.xml deliberately owns no java files. The edge e2e wrapper code lives in the iot-sdks-e2e-fx repo. That
+    wrapper code is copied into this project during horton test runs. Keeping this pom.xml allows for that copy
+    to access important variables from the root pom.xml file, so don't delete this pom.xml-->
+
     <parent>
         <groupId>com.microsoft.azure.sdk.iot</groupId>
         <artifactId>iot-e2e-tests</artifactId>
