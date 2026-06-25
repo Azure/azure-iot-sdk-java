@@ -148,6 +148,13 @@ class AmqpsCbsSessionHandler extends BaseHandler implements AmqpsLinkStateCallba
         this.connectionStateCallback.onAuthenticationFailed(deviceId, transportException);
     }
 
+    public void onAuthenticationTimedOut(String deviceId)
+    {
+        log.warn("Timed out waiting for CBS authentication response for device {}. Closing this connection...", deviceId);
+        this.connectionStateCallback.onCBSSessionClosedUnexpectedly(null);
+        this.close();
+    }
+
     public void close()
     {
         log.trace("Closing this CBS session");

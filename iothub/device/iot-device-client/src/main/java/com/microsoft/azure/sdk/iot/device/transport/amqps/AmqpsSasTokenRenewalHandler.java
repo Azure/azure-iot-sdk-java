@@ -29,6 +29,8 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
     private boolean isClosed;
     private AmqpsSasTokenRenewalHandler nextToAuthenticate;
     private Task scheduledTask;
+    private Task authenticationTimeoutTask;
+    private int currentAuthenticationRequestId;
 
     public AmqpsSasTokenRenewalHandler(AmqpsCbsSessionHandler amqpsCbsSessionHandler, AmqpsSessionHandler amqpsSessionHandler)
     {
@@ -70,6 +72,7 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
             log.debug("Sending authentication message for device {}", amqpsSessionHandler.getDeviceId());
             amqpsCbsSessionHandler.sendAuthenticationMessage(amqpsSessionHandler.getClientConfiguration(), this);
 
+            scheduleAuthenticationTimeout(reactor);
             scheduleRenewal(reactor);
         }
     }
@@ -77,6 +80,8 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
     @Override
     public DeliveryState handleAuthenticationResponseMessage(int status, String description, Reactor reactor)
     {
+        cancelAuthenticationTimeout();
+
         try
         {
             if (nextToAuthenticate != null)
@@ -104,6 +109,15 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
         return Accepted.getInstance();
     }
 
+    private void onAuthenticationTimedOut(int authenticationRequestId)
+    {
+        if (!isClosed && authenticationRequestId == currentAuthenticationRequestId)
+        {
+            log.warn("Timed out waiting for CBS authentication response for device {}", this.amqpsSessionHandler.getDeviceId());
+            this.amqpsCbsSessionHandler.onAuthenticationTimedOut(this.amqpsSessionHandler.getDeviceId());
+        }
+    }
+
     // Once closed, this handler will stop sending authentication messages for its device. This object may not be re-opened.
     public void close()
     {
@@ -128,6 +142,36 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
         this.scheduledTask = reactor.schedule(RETRY_INTERVAL_MILLISECONDS, this);
     }
 
+    private void scheduleAuthenticationTimeout(Reactor reactor)
+    {
+        cancelAuthenticationTimeout();
+
+        currentAuthenticationRequestId++;
+        final int expectedAuthenticationRequestId = currentAuthenticationRequestId;
+        long authenticationTimeout = this.amqpsSessionHandler.getClientConfiguration().getOperationTimeout();
+
+        log.trace("Scheduling CBS authentication response timeout for device {} in {} milliseconds", this.amqpsSessionHandler.getDeviceId(), authenticationTimeout);
+
+        this.authenticationTimeoutTask = reactor.schedule((int) authenticationTimeout, new BaseHandler()
+        {
+            @Override
+            public void onTimerTask(Event event)
+            {
+                onAuthenticationTimedOut(expectedAuthenticationRequestId);
+            }
+        });
+    }
+
+    private void cancelAuthenticationTimeout()
+    {
+        if (this.authenticationTimeoutTask != null)
+        {
+            this.authenticationTimeoutTask.cancel();
+            this.authenticationTimeoutTask.attachments().clear();
+            this.authenticationTimeoutTask = null;
+        }
+    }
+
     // Removes any children of this handler (such as LoggingFlowController) and disassociates this handler
     // from the proton reactor. By removing the reference of the proton reactor to this handler, this handler becomes
     // eligible for garbage collection by the JVM. This is important for multiplexed connections where SAS token renewal
@@ -139,6 +183,8 @@ class AmqpsSasTokenRenewalHandler extends BaseHandler implements AuthenticationM
             this.scheduledTask.cancel();
             this.scheduledTask.attachments().clear();
         }
+
+        cancelAuthenticationTimeout();
 
         // an instance of this class shouldn't have any children, but other handlers may be added as this SDK
         // grows and this protects against potential memory leaks
