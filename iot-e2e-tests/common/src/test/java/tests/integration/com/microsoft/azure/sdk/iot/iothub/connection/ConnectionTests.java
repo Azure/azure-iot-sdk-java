@@ -12,6 +12,7 @@ import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.Module;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.IotHubT
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.StandardTierHubOnlyTest;
 
 import javax.net.ssl.SSLContext;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.*;
@@ -102,6 +104,10 @@ public class ConnectionTests extends IntegrationTest
         public boolean useHttpProxy;
         public boolean useHttpProxyAuth;
 
+        // ECC identities are created by this test rather than taken from the shared pool of test identities, and they
+        // carry a certificate that only this test knows about, so they must never be recycled back into that pool.
+        private boolean identityIsEccIdentity;
+
         public ConnectionTestInstance(IotHubClientProtocol protocol, AuthenticationType authenticationType, ClientType clientType, boolean useHttpProxy, boolean useHttpProxyAuth)
         {
             this.protocol = protocol;
@@ -150,6 +156,7 @@ public class ConnectionTests extends IntegrationTest
             X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(certificateGenerator.getX509Certificate(), certificateGenerator.getPrivateKey());
             optionsBuilder.sslContext(sslContext);
+            this.identityIsEccIdentity = true;
 
             if (clientType == ClientType.DEVICE_CLIENT)
             {
@@ -183,12 +190,35 @@ public class ConnectionTests extends IntegrationTest
 
         public void dispose()
         {
-            if (this.identity != null && this.identity.getClient() != null)
+            if (this.identity == null)
+            {
+                return;
+            }
+
+            if (this.identity.getClient() != null)
             {
                 this.identity.getClient().close();
             }
 
-            Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
+            if (this.identityIsEccIdentity)
+            {
+                // Recycling this identity would hand a device with a certificate that no other test knows about to
+                // the next test that takes an x509 identity from the shared pool, so delete it instead.
+                try
+                {
+                    Tools.getRegistyManager(iotHubConnectionString).removeDevice(this.identity.getDeviceId());
+                }
+                catch (IOException | IotHubException e)
+                {
+                    log.error("Failed to clean up ECC test device {}", this.identity.getDeviceId(), e);
+                }
+            }
+            else
+            {
+                Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
+            }
+
+            this.identity = null;
         }
     }
 
@@ -208,18 +238,21 @@ public class ConnectionTests extends IntegrationTest
     protected static final String testProxyPass = "1234"; // lgtm
 
     @BeforeClass
-    public static void startProxy()
+    public static void startProxy() throws Exception
     {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
         config.setAuthenticationProvider(new BasicProxyAuthenticator(testProxyUser, testProxyPass));
         config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
-        proxyServer.startAsync(testProxyPort);
 
         HttpProxyServerConfig configWithoutAuth = new HttpProxyServerConfig();
         configWithoutAuth.setHandleSsl(false);
         proxyServerWithoutAuth = new HttpProxyServer().serverConfig(configWithoutAuth);
-        proxyServerWithoutAuth.startAsync(testProxyPortWithoutAuth);
+
+        // startAsync() only starts the bind, so the returned future must be waited on. Otherwise the tests in this
+        // class can start connecting before the proxy is listening, and they fail with "Connection refused".
+        ProxyServerTools.startProxyServer(proxyServer, testProxyPort);
+        ProxyServerTools.startProxyServer(proxyServerWithoutAuth, testProxyPortWithoutAuth);
     }
 
     @AfterClass
@@ -236,7 +269,16 @@ public class ConnectionTests extends IntegrationTest
         }
     }
 
-    @Test(timeout = 60000) // 1 minute
+    // Without this, every test in this class leaks its client. Those leaked clients keep reconnecting in the
+    // background for the rest of the test run, and once this class' proxy servers are closed they endlessly retry
+    // against a dead proxy, which destabilizes every test that runs afterwards.
+    @After
+    public void tearDown()
+    {
+        testInstance.dispose();
+    }
+
+    @Test
     @IotHubTest
     public void CanOpenConnection() throws Exception
     {
@@ -254,7 +296,7 @@ public class ConnectionTests extends IntegrationTest
 
     @IotHubTest
     @StandardTierHubOnlyTest
-    @Test(timeout = 60000) // 1 minute
+    @Test
     @FlakeyTest
     public void CanOpenConnectionWithECCCertificates() throws Exception
     {
@@ -281,7 +323,7 @@ public class ConnectionTests extends IntegrationTest
         testInstance.identity.getClient().close();
     }
 
-    @Test(timeout = 60000) // 1 minute
+    @Test
     @IotHubTest
     public void CanOpenMultiplexingConnection() throws Exception
     {

@@ -24,8 +24,11 @@ public class HttpProxySocketFactory extends SSLSocketFactory
     @Override
     public Socket createSocket() throws IOException
     {
-        Socket proxySocket = new Socket(proxySettings.getHostname(), proxySettings.getPort());
-        return new ProxiedSSLSocket(delegate, proxySocket, proxySettings.getUsername(), proxySettings.getPassword());
+        // The socket is deliberately left unconnected here. Connecting to the proxy is done in
+        // ProxiedSSLSocket.connect(SocketAddress, int) so that the connect timeout that the caller supplies is
+        // applied to the connection to the proxy as well. Connecting here would ignore that timeout and could
+        // block the calling thread indefinitely.
+        return new ProxiedSSLSocket(delegate, new Socket(), proxySettings);
     }
 
     @SuppressWarnings("unused") // Seems as if it's used in the Lombok delegate

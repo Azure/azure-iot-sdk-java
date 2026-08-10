@@ -5,6 +5,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
@@ -40,20 +41,21 @@ class ProxiedSSLSocket extends SSLSocket
     @Delegate(excludes = ProxiedSSLSocketNonDelegatedFunctions.class)
     private SSLSocket sslSocket;
 
-    private final String proxyUsername;
-    private final char[] proxyPassword;
+    private final ProxySettings proxySettings;
 
     private static final String HTTP = "HTTP/";
     private static final String HTTP_VERSION_1_1 = HTTP + "1.1";
 
+    // Callers may ask to connect without a timeout (a timeout of 0 means "block forever" for a plain socket).
+    // Blocking forever while connecting to a proxy, or while waiting for the proxy to answer the CONNECT request,
+    // would hang the calling thread with no way to recover, so this timeout is used instead in that case.
+    private static final int DEFAULT_PROXY_CONNECT_TIMEOUT_MILLISECONDS = 60 * 1000;
 
-    ProxiedSSLSocket(SSLSocketFactory socketFactory, Socket proxySocket, String proxyUsername, char[] proxyPassword)
+    ProxiedSSLSocket(SSLSocketFactory socketFactory, Socket proxySocket, ProxySettings proxySettings)
     {
         this.socketFactory = socketFactory;
         this.proxySocket = proxySocket;
-
-        this.proxyUsername = proxyUsername;
-        this.proxyPassword = proxyPassword;
+        this.proxySettings = proxySettings;
     }
 
     @Override
@@ -65,18 +67,61 @@ class ProxiedSSLSocket extends SSLSocket
     @Override
     public void connect(SocketAddress socketAddress, int timeout) throws IOException
     {
+        int effectiveTimeout = timeout > 0 ? timeout : DEFAULT_PROXY_CONNECT_TIMEOUT_MILLISECONDS;
+        long deadline = System.currentTimeMillis() + effectiveTimeout;
+
+        InetSocketAddress destination = (InetSocketAddress) socketAddress;
+        String destinationHost = destination.getHostName();
+        int destinationPort = destination.getPort();
+
+        log.debug("Connecting to HTTP proxy");
+        this.proxySocket.connect(new InetSocketAddress(proxySettings.getHostname(), proxySettings.getPort()), effectiveTimeout);
+
         log.debug("Sending tunnel handshake to HTTP proxy");
-        doTunnelHandshake(proxySocket, ((InetSocketAddress) socketAddress).getHostName(), ((InetSocketAddress) socketAddress).getPort());
+        int previousSoTimeout = this.proxySocket.getSoTimeout();
+
+        // Without a read timeout, a proxy that accepts the TCP connection but never answers the CONNECT request
+        // would block this thread forever.
+        this.proxySocket.setSoTimeout(getRemainingTimeout(deadline));
+
+        try
+        {
+            doTunnelHandshake(this.proxySocket, destinationHost, destinationPort);
+        }
+        finally
+        {
+            // doTunnelHandshake() closes the socket when the proxy rejects the tunnel, and setting a timeout on a
+            // closed socket would throw an exception that masks the actual failure.
+            if (!this.proxySocket.isClosed())
+            {
+                this.proxySocket.setSoTimeout(previousSoTimeout);
+            }
+        }
+
         log.debug("Handshake to HTTP proxy succeeded");
 
         //Wrap the proxy socket into the new SSLSocket so all further communication gets forwarded through the proxy
-        this.sslSocket = (SSLSocket) socketFactory.createSocket(proxySocket, ((InetSocketAddress) socketAddress).getHostName(), ((InetSocketAddress) socketAddress).getPort(), true);
+        this.sslSocket = (SSLSocket) socketFactory.createSocket(proxySocket, destinationHost, destinationPort, true);
     }
 
     @Override
     public void close() throws IOException {
         this.proxySocket.close();
-        this.sslSocket.close();
+
+        // The ssl socket is only created once the tunnel to the proxy has been established, so it may be null if this
+        // socket is closed after a failed connect attempt.
+        if (this.sslSocket != null)
+        {
+            this.sslSocket.close();
+        }
+    }
+
+    private static int getRemainingTimeout(long deadline)
+    {
+        long remainingMilliseconds = deadline - System.currentTimeMillis();
+
+        // A SO_TIMEOUT of 0 means "block forever", so the remaining time must never be allowed to reach 0.
+        return remainingMilliseconds < 1 ? 1 : (int) Math.min(remainingMilliseconds, Integer.MAX_VALUE);
     }
 
     /**
@@ -91,11 +136,13 @@ class ProxiedSSLSocket extends SSLSocket
         Charset byteEncoding = StandardCharsets.UTF_8;
         OutputStream out = tunnel.getOutputStream();
         String hostWithPort = host + ":" + port;
+        String proxyUsername = this.proxySettings.getUsername();
+        char[] proxyPassword = this.proxySettings.getPassword();
 
         String proxyConnectMessage = String.format("CONNECT %s %s\r\nHost: %s\r\nUser-Agent: %s\r\n", hostWithPort, HTTP_VERSION_1_1, hostWithPort, TransportUtils.USER_AGENT_STRING);
-        if (this.proxyUsername != null && this.proxyPassword != null)
+        if (proxyUsername != null && proxyPassword != null)
         {
-            String base64EncodedCredentials = new String(Base64.encodeBase64(String.format("%s:%s", this.proxyUsername, new String(this.proxyPassword)).getBytes(byteEncoding)), byteEncoding);
+            String base64EncodedCredentials = new String(Base64.encodeBase64(String.format("%s:%s", proxyUsername, new String(proxyPassword)).getBytes(byteEncoding)), byteEncoding);
             proxyConnectMessage += String.format("Proxy-Authorization: Basic %s\r\nUser-Agent: %s\r\n", base64EncodedCredentials, TransportUtils.USER_AGENT_STRING);
         }
 

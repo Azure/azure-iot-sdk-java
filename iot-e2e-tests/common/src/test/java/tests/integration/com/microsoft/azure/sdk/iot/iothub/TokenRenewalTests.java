@@ -85,12 +85,15 @@ public class TokenRenewalTests extends IntegrationTest
     }
 
     @BeforeClass
-    public static void startProxy()
+    public static void startProxy() throws Exception
     {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
         config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
-        proxyServer.startAsync(testProxyPort);
+
+        // startAsync() only starts the bind, so the returned future must be waited on. Otherwise the tests in this
+        // class can start connecting before the proxy is listening, and they fail with "Connection refused".
+        ProxyServerTools.startProxyServer(proxyServer, testProxyPort);
     }
 
     @AfterClass

@@ -74,16 +74,10 @@ public class ContractAPIMqttTest
     MqttMessage mockedMqttMessage;
 
     @Mocked
-    Object mockSendLock;
-
-    @Mocked
     ProvisioningDeviceClientConfig mockedProvisioningDeviceClientConfig;
 
     @Mocked
     DeviceRegistrationParser mockedDeviceRegistrationParser;
-
-    @Mocked
-    Integer mockedInteger;
 
     @Mocked
     byte[] mockedByteArray = new byte[10];
