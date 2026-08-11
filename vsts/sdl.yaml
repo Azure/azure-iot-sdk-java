@@ -30,16 +30,17 @@ jobs:
       
   - task: CodeQL3000Init@0
     displayName: 'Initialize CodeQL'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
 
   - powershell: ./vsts/package_repo_for_sdl.ps1
     displayName: 'Build packages to scan'
 
   # Must follow the maven build above: CodeQL builds the java database from the
   # traced compilation. always() so a build failure still surfaces the CodeQL
-  # status instead of silently skipping the upload.
+  # status instead of silently skipping the upload, but still only on main.
   - task: CodeQL3000Finalize@0
     displayName: 'Finalize CodeQL'
-    condition: always()
+    condition: and(always(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
 
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
