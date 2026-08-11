@@ -8,6 +8,15 @@ jobs:
 - job: SDL
   displayName: SDL Tasks
 
+  variables:
+    # Owns the 'java' CodeQL snapshot for this repo (Microsoft.Security.CodeQL.10000).
+    # CodeQL traces the maven build below, so this job -- not an incidentally
+    # instrumented e2e or provisioning job -- is what S360 records.
+    # Only on main: this pipeline also runs on PRs, which do not need a snapshot.
+    # See https://aka.ms/codeql3000 and https://aka.ms/sdlfaqcodeql.
+    Codeql.Enabled: $[eq(variables['Build.SourceBranch'], 'refs/heads/main')]
+    Codeql.Language: java
+
   condition: succeeded()
   pool:
     vmImage: windows-latest
@@ -19,8 +28,19 @@ jobs:
       jdkArchitectureOption: 'x64'
       jdkSourceOption: 'PreInstalled'
       
+  - task: CodeQL3000Init@0
+    displayName: 'Initialize CodeQL'
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+
   - powershell: ./vsts/package_repo_for_sdl.ps1
     displayName: 'Build packages to scan'
+
+  # Must follow the maven build above: CodeQL builds the java database from the
+  # traced compilation. always() so a build failure still surfaces the CodeQL
+  # status instead of silently skipping the upload, but still only on main.
+  - task: CodeQL3000Finalize@0
+    displayName: 'Finalize CodeQL'
+    condition: and(always(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
 
   - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
     displayName: 'Component Detection'
@@ -61,24 +81,6 @@ jobs:
   - powershell: ./vsts/spotbugs.ps1
     displayName: 'Run Spotbugs'
 
-    ## Semmle doesn't have a false positive list, but instead recommends marking the lines of code in question
-    ## with "// lgtm"
-    ## https://help.semmle.com/lgtm-enterprise/user/help/alert-suppression.html#suppresswarnings-annotation
-  - task: Semmle@1
-    #Only run this step if it isn't a pull request. Semmle only needs to run nightly
-    condition: ne(variables['Build.Reason'], 'PullRequest')
-    env:
-      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-    inputs:
-      toolVersion: 'Latest'
-      sourceCodeDirectory: '$(Build.SourcesDirectory)'
-      language: 'java'
-      buildCommandsString: 'mvn clean install -DskipTests -T 2C --batch-mode -q'
-      querySuite: 'Recommended'
-      timeout: '1800'
-      ram: '16384'
-      addProjectDirToScanningExclusionList: true
-
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
     displayName: PoliCheck
     inputs:
@@ -100,7 +102,6 @@ jobs:
     displayName: 'Post Analysis'
     inputs:
       CredScan: true
-      Semmle: true
 
   - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@2
     displayName: 'TSA upload'
