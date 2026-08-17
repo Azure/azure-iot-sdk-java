@@ -65,18 +65,46 @@ class ProxiedSSLSocket extends SSLSocket
     @Override
     public void connect(SocketAddress socketAddress, int timeout) throws IOException
     {
+        InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
+
         log.debug("Sending tunnel handshake to HTTP proxy");
-        doTunnelHandshake(proxySocket, ((InetSocketAddress) socketAddress).getHostName(), ((InetSocketAddress) socketAddress).getPort());
+
+        // The proxy's response to the CONNECT request is read from a blocking stream, so without a read timeout an
+        // unresponsive proxy would block this thread indefinitely rather than surfacing an error that the layers above
+        // can retry. Apply the caller's timeout while the tunnel is being established, then restore the previous value
+        // so that it does not affect traffic sent through the established tunnel. A timeout of 0 means "no timeout",
+        // which matches the behaviour of Socket.connect(SocketAddress, int).
+        int previousSoTimeout = this.proxySocket.getSoTimeout();
+        this.proxySocket.setSoTimeout(timeout);
+
+        try
+        {
+            doTunnelHandshake(this.proxySocket, inetSocketAddress.getHostName(), inetSocketAddress.getPort());
+        }
+        catch (IOException e)
+        {
+            // Don't leak the socket if the tunnel could not be established
+            this.proxySocket.close();
+            throw e;
+        }
+
+        this.proxySocket.setSoTimeout(previousSoTimeout);
+
         log.debug("Handshake to HTTP proxy succeeded");
 
         //Wrap the proxy socket into the new SSLSocket so all further communication gets forwarded through the proxy
-        this.sslSocket = (SSLSocket) socketFactory.createSocket(proxySocket, ((InetSocketAddress) socketAddress).getHostName(), ((InetSocketAddress) socketAddress).getPort(), true);
+        this.sslSocket = (SSLSocket) socketFactory.createSocket(this.proxySocket, inetSocketAddress.getHostName(), inetSocketAddress.getPort(), true);
     }
 
     @Override
     public void close() throws IOException {
         this.proxySocket.close();
-        this.sslSocket.close();
+
+        // May be null if the tunnel handshake never completed, so this socket was never fully connected
+        if (this.sslSocket != null)
+        {
+            this.sslSocket.close();
+        }
     }
 
     /**

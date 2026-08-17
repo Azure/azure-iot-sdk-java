@@ -268,14 +268,6 @@ public class ConnectionTests extends IntegrationTest
         // ECC cert generation is broken for Android. "ECDSA KeyPairGenerator is not available"
         assumeFalse(Tools.isAndroid());
 
-        // On Windows agents, opening an ECC authenticated module client through the test proxy hangs until the test
-        // times out. The equivalent device client case and the non-ECC module client case both pass through the same
-        // proxy, and every case passes on Linux, so this is likely a bug in our current test proxy rather than the SDK.
-        // TODO to investigate
-        assumeFalse(!Tools.isLinux()
-            && testInstance.useHttpProxy
-            && testInstance.clientType == ClientType.MODULE_CLIENT);
-
         testInstance.setupEccDevice();
 
         testInstance.identity.getClient().open(true);
