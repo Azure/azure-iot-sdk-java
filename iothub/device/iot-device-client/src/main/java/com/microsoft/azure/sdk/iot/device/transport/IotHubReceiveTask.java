@@ -70,12 +70,6 @@ public final class IotHubReceiveTask implements Runnable
 
         try
         {
-            if (this.transport.isClosing() || this.transport.isClosed())
-            {
-                log.trace("Receive task is exiting because the transport is closing or already closed");
-                return;
-            }
-
             // HTTP is the only protocol where the SDK must actively poll for received messages. Because of that, never
             // wait on the IoTHubTransport layer to notify this thread that a received message is ready to be handled.
             if (this.transport.getProtocol() != IotHubClientProtocol.HTTPS)

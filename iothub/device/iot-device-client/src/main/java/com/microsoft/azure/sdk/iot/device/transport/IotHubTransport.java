@@ -124,12 +124,7 @@ public class IotHubTransport implements IotHubListener
 
     // Flag set when close() starts. Acts as a signal to any running reconnection logic to not try again.
     @Setter
-    private volatile boolean isClosing;
-
-    public boolean isClosing()
-    {
-        return this.isClosing;
-    }
+    private boolean isClosing;
 
     // Used to store the CorrelationCallbackMessage, context, and start time for a correlationId
     private final Map<String, CorrelationCallbackContext> correlationCallbacks = new ConcurrentHashMap<>();
@@ -973,22 +968,19 @@ public class IotHubTransport implements IotHubListener
      */
     public void handleMessage() throws TransportException
     {
-        if (this.isClosing || this.connectionStatus != IotHubConnectionStatus.CONNECTED)
+        if (this.connectionStatus == IotHubConnectionStatus.CONNECTED)
         {
-            log.trace("Skipping message handling because the transport is closing or not connected");
-            return;
-        }
+            if (this.iotHubTransportConnection instanceof HttpsIotHubConnection)
+            {
+                log.trace("Sending http request to check for any cloud to device messages...");
+                addReceivedMessagesOverHttpToReceivedQueue();
+            }
 
-        if (this.iotHubTransportConnection instanceof HttpsIotHubConnection)
-        {
-            log.trace("Sending http request to check for any cloud to device messages...");
-            addReceivedMessagesOverHttpToReceivedQueue();
-        }
-
-        IotHubTransportMessage receivedMessage = this.receivedMessagesQueue.poll();
-        if (receivedMessage != null)
-        {
-            this.acknowledgeReceivedMessage(receivedMessage);
+            IotHubTransportMessage receivedMessage = this.receivedMessagesQueue.poll();
+            if (receivedMessage != null)
+            {
+                this.acknowledgeReceivedMessage(receivedMessage);
+            }
         }
     }
 

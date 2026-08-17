@@ -78,30 +78,6 @@ public class IotHubReceiveTaskTest
         };
     }
 
-    @Test
-    public void runDoesNotPollWhenTransportIsClosing()
-    {
-        new Expectations()
-        {
-            {
-                mockTransport.isClosing();
-                result = true;
-            }
-        };
-
-        IotHubReceiveTask receiveTask = new IotHubReceiveTask(mockTransport, true, null, null);
-
-        receiveTask.run();
-
-        new Verifications()
-        {
-            {
-                mockTransport.handleMessage();
-                times = 0;
-            }
-        };
-    }
-
     // Tests_SRS_IOTHUBRECEIVETASK_11_004: [The function shall not crash because of an IOException thrown by the transport.]
     @Test
     public void runDoesNotCrashFromIoException() throws IOException, URISyntaxException, IotHubClientException, TransportException
