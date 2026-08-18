@@ -6,7 +6,6 @@
 package com.microsoft.azure.sdk.iot.device.transport;
 
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
@@ -20,10 +19,12 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Extension of an SSLSocket that sends an HTTP CONNECT packet to the proxy socket before sending the SSL handshake upstream.
@@ -69,22 +70,24 @@ class ProxiedSSLSocket extends SSLSocket
 
         log.debug("Sending tunnel handshake to HTTP proxy");
 
-        // The proxy's response to the CONNECT request is read from a blocking stream, so without a read timeout an
+        // The proxy's response to the CONNECT request is read from a blocking stream, so without a timeout an
         // unresponsive proxy would block this thread indefinitely rather than surfacing an error that the layers above
-        // can retry. Apply the caller's timeout while the tunnel is being established, then restore the previous value
-        // so that it does not affect traffic sent through the established tunnel. A timeout of 0 means "no timeout",
-        // which matches the behaviour of Socket.connect(SocketAddress, int).
+        // can retry. The read timeout is applied as a deadline across the whole CONNECT response rather than per read,
+        // because the response is consumed a byte at a time and a proxy that trickles out one byte per interval would
+        // otherwise keep this call blocked forever. The previous value is restored once the tunnel is established so
+        // that it does not affect traffic sent through it. A timeout of 0 means "no timeout", which matches the
+        // behaviour of Socket.connect(SocketAddress, int).
         int previousSoTimeout = this.proxySocket.getSoTimeout();
-        this.proxySocket.setSoTimeout(timeout);
 
         try
         {
-            doTunnelHandshake(this.proxySocket, inetSocketAddress.getHostName(), inetSocketAddress.getPort());
+            doTunnelHandshake(this.proxySocket, inetSocketAddress.getHostName(), inetSocketAddress.getPort(), timeout);
         }
-        catch (IOException e)
+        catch (IOException | RuntimeException e)
         {
-            // Don't leak the socket if the tunnel could not be established
-            this.proxySocket.close();
+            // Don't leak the socket if the tunnel could not be established. A malformed proxy response can surface as
+            // an unchecked exception rather than an IOException, so those have to be cleaned up after as well.
+            closeProxySocketQuietly(e);
             throw e;
         }
 
@@ -94,6 +97,23 @@ class ProxiedSSLSocket extends SSLSocket
 
         //Wrap the proxy socket into the new SSLSocket so all further communication gets forwarded through the proxy
         this.sslSocket = (SSLSocket) socketFactory.createSocket(this.proxySocket, inetSocketAddress.getHostName(), inetSocketAddress.getPort(), true);
+    }
+
+    /**
+     * Close the proxy socket while propagating the failure that caused the tunnel to be abandoned. Any problem closing
+     * the socket is attached to that failure rather than replacing it.
+     * @param cause The failure that caused the tunnel handshake to be abandoned
+     */
+    private void closeProxySocketQuietly(Throwable cause)
+    {
+        try
+        {
+            this.proxySocket.close();
+        }
+        catch (IOException closeException)
+        {
+            cause.addSuppressed(closeException);
+        }
     }
 
     @Override
@@ -112,9 +132,10 @@ class ProxiedSSLSocket extends SSLSocket
      * @param tunnel The socket to communicate to the HTTP proxy through
      * @param host The destination host the proxy will forward communication to
      * @param port The destination port the proxy will forward communication to
-     * @throws IOException If unable to read or send to the HTTP proxy
+     * @param timeoutMillis How long to wait for the proxy's complete response, where 0 means wait indefinitely
+     * @throws IOException If unable to read or send to the HTTP proxy, or if the proxy did not respond in time
      */
-    private void doTunnelHandshake(Socket tunnel, String host, int port) throws IOException
+    private void doTunnelHandshake(Socket tunnel, String host, int port, int timeoutMillis) throws IOException
     {
         Charset byteEncoding = StandardCharsets.UTF_8;
         OutputStream out = tunnel.getOutputStream();
@@ -135,16 +156,24 @@ class ProxiedSSLSocket extends SSLSocket
         out.flush();
 
         //Cannot do any buffering while reading, only read what is relevant to the connect response
-        HttpConnectResponseReader in = new HttpConnectResponseReader(tunnel.getInputStream(), byteEncoding);
+        HttpConnectResponseReader in = new HttpConnectResponseReader(tunnel.getInputStream(), byteEncoding, tunnel, timeoutMillis);
 
         String connectResponse = in.readHttpConnectResponse();
 
         String[] connectResponseLines = connectResponse.split("\r\n");
 
         int connectResponseStart = 0;
-        while (connectResponseLines[connectResponseStart].isEmpty())
+        while (connectResponseStart < connectResponseLines.length && connectResponseLines[connectResponseStart].isEmpty())
         {
             connectResponseStart++;
+        }
+
+        // A response made up entirely of blank lines has no status line to inspect. Split discards trailing empty
+        // strings, so a response of just "\r\n\r\n" produces an empty array rather than a set of empty lines.
+        if (connectResponseStart == connectResponseLines.length)
+        {
+            tunnel.close();
+            throw new IOException(String.format("Unable to tunnel through %s:%d. Proxy response to CONNECT did not contain a status line", host, port));
         }
 
         //Expects the same http version in the response as the request
@@ -190,12 +219,48 @@ class ProxiedSSLSocket extends SSLSocket
         void close();
     }
 
-    @RequiredArgsConstructor
     static class HttpConnectResponseReader
     {
         private boolean alreadyRead = false;
         @NonNull private final InputStream inputStream;
         @NonNull private final Charset byteEncoding;
+
+        // Socket whose read timeout is narrowed as the deadline approaches. Null when no deadline is being enforced.
+        private final Socket socket;
+        private final int timeoutMillis;
+        private final long deadlineNanos;
+
+        HttpConnectResponseReader(@NonNull InputStream inputStream, @NonNull Charset byteEncoding, Socket socket, int timeoutMillis)
+        {
+            this.inputStream = inputStream;
+            this.byteEncoding = byteEncoding;
+            this.socket = socket;
+            this.timeoutMillis = timeoutMillis;
+            this.deadlineNanos = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(Math.max(timeoutMillis, 0));
+        }
+
+        /**
+         * Narrow the socket's read timeout to whatever is left of the caller's timeout, so that the total time spent
+         * reading the proxy's response is bounded even though it is read one byte at a time.
+         * @throws SocketTimeoutException If the deadline has already passed
+         * @throws IOException If the socket's timeout could not be updated
+         */
+        private void applyRemainingTimeout() throws IOException
+        {
+            // 0 means "no timeout", matching the behaviour of Socket.connect(SocketAddress, int)
+            if (this.socket == null || this.timeoutMillis <= 0)
+            {
+                return;
+            }
+
+            long remainingMillis = TimeUnit.NANOSECONDS.toMillis(this.deadlineNanos - System.nanoTime());
+            if (remainingMillis <= 0)
+            {
+                throw new SocketTimeoutException("Timed out waiting for the HTTP proxy to respond to the CONNECT request");
+            }
+
+            this.socket.setSoTimeout((int) Math.min(remainingMillis, Integer.MAX_VALUE));
+        }
 
         String readHttpConnectResponse() throws IOException
         {
@@ -210,6 +275,8 @@ class ProxiedSSLSocket extends SSLSocket
             //until the 4 most recently read characters were \r\n\r\n
             while (!isCRLF(mostRecentFourCharacters))
             {
+                applyRemainingTimeout();
+
                 int i = inputStream.read();
                 if (i == -1)
                 {

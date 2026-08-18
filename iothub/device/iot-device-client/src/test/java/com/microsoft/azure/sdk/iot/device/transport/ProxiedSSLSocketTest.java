@@ -16,6 +16,7 @@ import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -94,6 +95,12 @@ public class ProxiedSSLSocketTest
                 {
                     // Expected
                 }
+
+                // Asserted here rather than relying on try-with-resources, which would close the socket regardless and
+                // would let this test pass even if connect() stopped cleaning up after a failed handshake.
+                assertTrue(
+                    "Expected connect to close the proxy socket after the handshake timed out",
+                    proxySocket.isClosed());
             }
         }
     }
@@ -149,6 +156,109 @@ public class ProxiedSSLSocketTest
 
                 // The failed tunnel must not leave a connected socket behind
                 proxiedSSLSocket.close();
+            }
+        }
+    }
+
+    /**
+     * Starts a local server that answers the CONNECT request one byte at a time, pausing between each byte. Used to
+     * show that the caller's timeout bounds the whole exchange rather than each individual read.
+     */
+    private static void startTricklingProxy(final ServerSocket serverSocket, final String response, final long millisBetweenBytes)
+    {
+        Thread thread = new Thread(() ->
+        {
+            try (Socket accepted = serverSocket.accept())
+            {
+                OutputStream outputStream = accepted.getOutputStream();
+                for (byte b : response.getBytes(StandardCharsets.UTF_8))
+                {
+                    outputStream.write(b);
+                    outputStream.flush();
+                    Thread.sleep(millisBetweenBytes);
+                }
+
+                Thread.sleep(2000);
+            }
+            catch (IOException | InterruptedException e)
+            {
+                // Expected once the test closes its end of the connection
+            }
+        });
+
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    // A read timeout on its own only bounds each individual read, and the proxy's response is consumed one byte at a
+    // time. A proxy that sends a byte just before each interval expires would keep connect() blocked forever, so the
+    // timeout has to be enforced as a deadline across the whole response.
+    @Test(timeout = 30000)
+    public void connectTimesOutWhenProxyTricklesResponseSlowerThanTimeout() throws Exception
+    {
+        try (ServerSocket tricklingProxy = new ServerSocket(0))
+        {
+            // Each byte arrives well within the 500ms timeout, but the full response would take far longer than it
+            startTricklingProxy(tricklingProxy, CONNECT_ESTABLISHED_RESPONSE, 200);
+
+            try (Socket proxySocket = new Socket("127.0.0.1", tricklingProxy.getLocalPort()))
+            {
+                ProxiedSSLSocket proxiedSSLSocket = new ProxiedSSLSocket(
+                    (SSLSocketFactory) SSLSocketFactory.getDefault(), proxySocket, null, null);
+
+                long startMillis = System.currentTimeMillis();
+
+                try
+                {
+                    proxiedSSLSocket.connect(DESTINATION, 500);
+                    fail("Expected connect to time out rather than following the proxy's pace indefinitely");
+                }
+                catch (SocketTimeoutException expected)
+                {
+                    // Expected
+                }
+
+                long elapsedMillis = System.currentTimeMillis() - startMillis;
+
+                // Generous upper bound; without a deadline this would run until the whole response had trickled in
+                assertTrue(
+                    "Expected connect to give up near its 500ms timeout, but it took " + elapsedMillis + "ms",
+                    elapsedMillis < 5000);
+
+                assertTrue(
+                    "Expected connect to close the proxy socket after the handshake timed out",
+                    proxySocket.isClosed());
+            }
+        }
+    }
+
+    // "\r\n\r\n".split("\r\n") discards trailing empty strings and yields an empty array, so a response with no status
+    // line used to fail with an ArrayIndexOutOfBoundsException that escaped the IOException cleanup path.
+    @Test(timeout = 30000)
+    public void connectThrowsIOExceptionAndClosesSocketWhenProxyResponseHasNoStatusLine() throws Exception
+    {
+        try (ServerSocket proxy = new ServerSocket(0))
+        {
+            startFakeProxy(proxy, "\r\n\r\n");
+
+            try (Socket proxySocket = new Socket("127.0.0.1", proxy.getLocalPort()))
+            {
+                ProxiedSSLSocket proxiedSSLSocket = new ProxiedSSLSocket(
+                    (SSLSocketFactory) SSLSocketFactory.getDefault(), proxySocket, null, null);
+
+                try
+                {
+                    proxiedSSLSocket.connect(DESTINATION, 5000);
+                    fail("Expected connect to throw when the proxy response contains no status line");
+                }
+                catch (IOException expected)
+                {
+                    // Expected. An unchecked exception here would mean malformed responses bypass the cleanup path.
+                }
+
+                assertTrue(
+                    "Expected connect to close the proxy socket after a malformed proxy response",
+                    proxySocket.isClosed());
             }
         }
     }
