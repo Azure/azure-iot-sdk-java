@@ -3,6 +3,7 @@
 
 package com.microsoft.azure.sdk.iot.device.transport;
 
+import com.microsoft.azure.sdk.iot.device.ProxySettings;
 import org.junit.Test;
 
 import javax.net.ssl.SSLSocketFactory;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
@@ -260,6 +262,62 @@ public class ProxiedSSLSocketTest
                     "Expected connect to close the proxy socket after a malformed proxy response",
                     proxySocket.isClosed());
             }
+        }
+    }
+
+    /**
+     * Connecting to the proxy has to happen while handling connect(), not while creating the socket, because only then
+     * is a connect timeout available. If the socket returned by the factory were already connected, an unreachable
+     * proxy would block the calling thread for as long as the operating system's default TCP connect timeout allows,
+     * with no error for the transport layer to retry on.
+     */
+    @Test
+    public void createSocketDoesNotConnectToTheProxy() throws IOException
+    {
+        int closedPort;
+        try (ServerSocket temporaryServer = new ServerSocket(0))
+        {
+            closedPort = temporaryServer.getLocalPort();
+        }
+
+        //Nothing is listening on that port now, so any attempt to connect to it fails rather than hangs
+        HttpProxySocketFactory socketFactory = new HttpProxySocketFactory(
+            (SSLSocketFactory) SSLSocketFactory.getDefault(),
+            new ProxySettings(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", closedPort))));
+
+        // Creating the socket must not attempt to reach the proxy at all
+        Socket socket = socketFactory.createSocket();
+
+        try
+        {
+            socket.connect(DESTINATION, 5000);
+            fail("Expected connect to fail because nothing is listening on the proxy's port");
+        }
+        catch (IOException expected)
+        {
+            // Expected. The connection to the proxy is attempted while handling connect, where the timeout applies.
+        }
+    }
+
+    /**
+     * Guards the case above from being satisfied by a socket that never connects to the proxy at all.
+     */
+    @Test
+    public void connectEstablishesTheTunnelWhenTheFactoryReturnsAnUnconnectedSocket() throws IOException
+    {
+        try (ServerSocket proxy = new ServerSocket(0))
+        {
+            startFakeProxy(proxy, CONNECT_ESTABLISHED_RESPONSE);
+
+            HttpProxySocketFactory socketFactory = new HttpProxySocketFactory(
+                (SSLSocketFactory) SSLSocketFactory.getDefault(),
+                new ProxySettings(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("127.0.0.1", proxy.getLocalPort()))));
+
+            Socket socket = socketFactory.createSocket();
+
+            socket.connect(DESTINATION, 5000);
+
+            assertTrue("Expected the tunnel to be established through the proxy", socket.isConnected());
         }
     }
 }

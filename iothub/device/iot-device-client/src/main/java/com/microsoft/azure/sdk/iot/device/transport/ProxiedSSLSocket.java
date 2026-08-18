@@ -41,17 +41,45 @@ class ProxiedSSLSocket extends SSLSocket
     @Delegate(excludes = ProxiedSSLSocketNonDelegatedFunctions.class)
     private SSLSocket sslSocket;
 
+    //Address of the HTTP proxy. Null when the proxy socket was handed over already connected.
+    private final String proxyHostname;
+    private final int proxyPort;
+
     private final String proxyUsername;
     private final char[] proxyPassword;
 
     private static final String HTTP = "HTTP/";
     private static final String HTTP_VERSION_1_1 = HTTP + "1.1";
 
-
+    /**
+     * Create a socket that tunnels through an HTTP proxy that has already been connected to.
+     * @param socketFactory The factory used to layer SSL over the tunnel once it has been established
+     * @param proxySocket An already connected socket to the HTTP proxy
+     * @param proxyUsername The username to authenticate to the proxy with, or null if the proxy needs no authentication
+     * @param proxyPassword The password to authenticate to the proxy with, or null if the proxy needs no authentication
+     */
     ProxiedSSLSocket(SSLSocketFactory socketFactory, Socket proxySocket, String proxyUsername, char[] proxyPassword)
+    {
+        this(socketFactory, proxySocket, null, -1, proxyUsername, proxyPassword);
+    }
+
+    /**
+     * Create a socket that connects to an HTTP proxy and then tunnels through it.
+     * @param socketFactory The factory used to layer SSL over the tunnel once it has been established
+     * @param proxySocket An unconnected socket that will be connected to the proxy by
+     * {@link #connect(SocketAddress, int)} so that the caller's connect timeout applies to it
+     * @param proxyHostname The hostname of the HTTP proxy
+     * @param proxyPort The port of the HTTP proxy
+     * @param proxyUsername The username to authenticate to the proxy with, or null if the proxy needs no authentication
+     * @param proxyPassword The password to authenticate to the proxy with, or null if the proxy needs no authentication
+     */
+    ProxiedSSLSocket(SSLSocketFactory socketFactory, Socket proxySocket, String proxyHostname, int proxyPort, String proxyUsername, char[] proxyPassword)
     {
         this.socketFactory = socketFactory;
         this.proxySocket = proxySocket;
+
+        this.proxyHostname = proxyHostname;
+        this.proxyPort = proxyPort;
 
         this.proxyUsername = proxyUsername;
         this.proxyPassword = proxyPassword;
@@ -68,8 +96,6 @@ class ProxiedSSLSocket extends SSLSocket
     {
         InetSocketAddress inetSocketAddress = (InetSocketAddress) socketAddress;
 
-        log.debug("Sending tunnel handshake to HTTP proxy");
-
         // The proxy's response to the CONNECT request is read from a blocking stream, so without a timeout an
         // unresponsive proxy would block this thread indefinitely rather than surfacing an error that the layers above
         // can retry. The read timeout is applied as a deadline across the whole CONNECT response rather than per read,
@@ -81,7 +107,13 @@ class ProxiedSSLSocket extends SSLSocket
 
         try
         {
-            doTunnelHandshake(this.proxySocket, inetSocketAddress.getHostName(), inetSocketAddress.getPort(), timeout);
+            // Connecting to the proxy and tunnelling through it share the caller's timeout budget, so that this call
+            // cannot take up to twice the requested timeout.
+            int remainingTimeout = connectToProxy(timeout);
+
+            log.debug("Sending tunnel handshake to HTTP proxy");
+
+            doTunnelHandshake(this.proxySocket, inetSocketAddress.getHostName(), inetSocketAddress.getPort(), remainingTimeout);
         }
         catch (IOException | RuntimeException e)
         {
@@ -97,6 +129,55 @@ class ProxiedSSLSocket extends SSLSocket
 
         //Wrap the proxy socket into the new SSLSocket so all further communication gets forwarded through the proxy
         this.sslSocket = (SSLSocket) socketFactory.createSocket(this.proxySocket, inetSocketAddress.getHostName(), inetSocketAddress.getPort(), true);
+    }
+
+    /**
+     * Establish the TCP connection to the HTTP proxy if it has not been established already.
+     *
+     * <p>This deliberately happens here rather than when this socket is created. Creating a connected socket up front
+     * would put the connection attempt outside of any timeout the caller supplies to
+     * {@link #connect(SocketAddress, int)}, so an unreachable or overloaded proxy would block the calling thread for as
+     * long as the operating system's default TCP connect timeout allows, without any error for the layers above to
+     * retry on.</p>
+     *
+     * @param timeoutMillis The total time available for connecting to the proxy and tunnelling through it, where 0
+     * means wait indefinitely
+     * @return How much of the timeout is left for the tunnel handshake, where 0 means wait indefinitely
+     * @throws IOException If the proxy could not be connected to in time
+     */
+    private int connectToProxy(int timeoutMillis) throws IOException
+    {
+        if (this.proxySocket.isConnected())
+        {
+            //The socket was handed over already connected, so the whole timeout is available to the tunnel handshake
+            return timeoutMillis;
+        }
+
+        if (this.proxyHostname == null)
+        {
+            throw new IOException("Cannot connect to the HTTP proxy because no proxy address was provided");
+        }
+
+        log.debug("Connecting to HTTP proxy {}:{}", this.proxyHostname, this.proxyPort);
+
+        long startNanos = System.nanoTime();
+
+        this.proxySocket.connect(new InetSocketAddress(this.proxyHostname, this.proxyPort), timeoutMillis);
+
+        // 0 means "no timeout", so there is no budget to track
+        if (timeoutMillis == 0)
+        {
+            return 0;
+        }
+
+        long remainingMillis = timeoutMillis - TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
+
+        if (remainingMillis <= 0)
+        {
+            throw new SocketTimeoutException(String.format("Timed out after %d milliseconds while connecting to the HTTP proxy %s:%d", timeoutMillis, this.proxyHostname, this.proxyPort));
+        }
+
+        return (int) remainingMillis;
     }
 
     /**
