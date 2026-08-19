@@ -113,15 +113,22 @@ public class TokenRenewalTests extends IntegrationTest
     //@ContinuousIntegrationTest
     public void tokenRenewalWorks() throws Exception
     {
-        List<InternalClient> clients = createClientsToTest();
-        String hostname = clients.get(0).getConfig().getIotHubHostname();
+        // These are declared before the try so that the cleanup below can reach whatever was created before a failure.
+        // Creating the clients registers identities as it goes, so a failure part way through creation has something
+        // to clean up just as much as a failure during the test body does.
+        List<InternalClient> clients = new ArrayList<>();
         ArrayList<DeviceClient> amqpMultiplexedClients = new ArrayList<>();
-        MultiplexingClient amqpMultiplexingClient = createMultiplexedClientToTest(AMQPS, amqpMultiplexedClients, hostname);
         ArrayList<DeviceClient> amqpwsMultiplexedClients = new ArrayList<>();
-        MultiplexingClient amqpWsMultiplexingClient = createMultiplexedClientToTest(AMQPS_WS, amqpwsMultiplexedClients, hostname);
+        MultiplexingClient amqpMultiplexingClient = null;
+        MultiplexingClient amqpWsMultiplexingClient = null;
 
         try
         {
+            createClientsToTest(clients);
+            String hostname = clients.get(0).getConfig().getIotHubHostname();
+            amqpMultiplexingClient = createMultiplexedClientToTest(AMQPS, amqpMultiplexedClients, hostname);
+            amqpWsMultiplexingClient = createMultiplexedClientToTest(AMQPS_WS, amqpwsMultiplexedClients, hostname);
+
             // Allow registry operations some buffer time before attempting to open connections for them
             Thread.sleep(2000);
 
@@ -188,6 +195,13 @@ public class TokenRenewalTests extends IntegrationTest
             // the reruns of this test for the agent's resources and for that proxy, which makes the reruns fail the
             // same way the first attempt did rather than giving them a clean chance to pass.
             closeClientsQuietly(clients);
+
+            // The multiplexed clients are cleaned up separately because they are only added to the list above once
+            // both multiplexing clients have been created. A failure before that point leaves them reachable only
+            // through these lists.
+            closeClientsQuietly(amqpMultiplexedClients);
+            closeClientsQuietly(amqpwsMultiplexedClients);
+
             closeClientQuietly(amqpMultiplexingClient);
             closeClientQuietly(amqpWsMultiplexingClient);
 
@@ -203,7 +217,7 @@ public class TokenRenewalTests extends IntegrationTest
      *
      * @param clients The clients to close
      */
-    private void closeClientsQuietly(List<InternalClient> clients)
+    private void closeClientsQuietly(List<? extends InternalClient> clients)
     {
         for (InternalClient client : clients)
         {
@@ -230,6 +244,12 @@ public class TokenRenewalTests extends IntegrationTest
 
     private void closeClientQuietly(MultiplexingClient multiplexingClient)
     {
+        if (multiplexingClient == null)
+        {
+            // Creation did not get as far as this client
+            return;
+        }
+
         try
         {
             multiplexingClient.close();
@@ -296,9 +316,17 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private List<InternalClient> createClientsToTest() throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException
+    /**
+     * Create the clients that this test exercises, adding each one to the given list as it is created.
+     *
+     * <p>The clients are added to the caller's list rather than returned all at once so that a failure part way
+     * through creation still leaves the caller holding the clients that were created before it, which lets them be
+     * cleaned up rather than leaked.</p>
+     *
+     * @param clients The list to add the created clients to
+     */
+    private void createClientsToTest(List<InternalClient> clients) throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException
     {
-        List<InternalClient> clients = new ArrayList<>();
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
         for (IotHubClientProtocol protocol: IotHubClientProtocol.values())
         {
@@ -323,10 +351,14 @@ public class TokenRenewalTests extends IntegrationTest
             Device device = new Device(deviceId);
             device = registryClient.addDevice(device);
             SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(Tools.getDeviceConnectionString(iotHubConnectionString, device), SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
-            clients.add(new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol));
-        }
+            DeviceClient clientWithCustomSasTokenProvider = new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol);
 
-        return clients;
+            // This device is registered here rather than handed out by Tools, so it has to be tracked alongside the
+            // other identities. Without this it is never disposed of and is left behind in the registry on every run,
+            // whether the test passes or fails.
+            testIdentities.add(new TestDeviceIdentity(clientWithCustomSasTokenProvider, device));
+            clients.add(clientWithCustomSasTokenProvider);
+        }
     }
 
     private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> clientsToCreate, String hostname) throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException, IotHubClientException, TimeoutException
