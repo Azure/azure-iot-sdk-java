@@ -30,7 +30,7 @@ public class ContinuousIntegrationTestRule implements TestRule
             ContinuousIntegrationTest classAnnotation = description.getTestClass().getAnnotation(ContinuousIntegrationTest.class);
             if (annotation != null || classAnnotation != null)
             {
-                Assume.assumeTrue("Test is ignored", !IntegrationTest.isPullRequest);
+                Assume.assumeTrue("Test is ignored because it is annotated @ContinuousIntegrationTest and this is a pull request build", !IntegrationTest.isPullRequest);
             }
 
             base.evaluate();

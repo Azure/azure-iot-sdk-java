@@ -30,7 +30,7 @@ public class StandardTierHubOnlyTestRule implements TestRule
             StandardTierHubOnlyTest classAnnotation = description.getTestClass().getAnnotation(StandardTierHubOnlyTest.class);
             if (annotation != null || classAnnotation != null)
             {
-                Assume.assumeTrue("Test is ignored", !IntegrationTest.isBasicTierHub);
+                Assume.assumeTrue("Test is ignored because it is annotated @StandardTierHubOnlyTest and the hub under test is a basic tier hub", !IntegrationTest.isBasicTierHub);
             }
 
             base.evaluate();
