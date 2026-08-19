@@ -121,6 +121,32 @@ public class MqttIotHubConnectionTest
         assertEquals(expectedClientConfig, actualClientConfig);
     }
 
+    // The connect timeout has to be set explicitly rather than left to whatever default Paho happens to ship, and it
+    // has to stay below the timeout that Mqtt applies to the whole CONNECT round trip. If Paho were allowed as much
+    // time as the outer wait, a connection that cannot be established at all would surface as the outer wait expiring,
+    // which reports only "Timed out waiting for a response from the server" and says nothing about what went wrong.
+    @Test
+    public void constructorSetsConnectTimeoutShorterThanTheOverallConnectTimeout() throws TransportException
+    {
+        baseExpectations();
+
+        final int expectedTimeoutSeconds = (Mqtt.CONNECTION_TIMEOUT / 2) / 1000;
+
+        new MqttIotHubConnection(mockConfig);
+
+        new Verifications()
+        {
+            {
+                mockedConnectOptions.setConnectionTimeout(expectedTimeoutSeconds);
+                times = 1;
+            }
+        };
+
+        assertTrue(
+            "The timeout given to Paho must be shorter than the timeout applied to the whole CONNECT round trip",
+            expectedTimeoutSeconds * 1000 < Mqtt.CONNECTION_TIMEOUT);
+    }
+
     // Tests_SRS_MQTTIOTHUBCONNECTION_15_003: [The constructor shall throw a new IllegalArgumentException
     // if any of the parameters of the configuration is null or empty.]
     @Test(expected = IllegalArgumentException.class)

@@ -236,11 +236,44 @@ public class ConnectionTests extends IntegrationTest
         }
     }
 
+    /**
+     * Log every connection status change for a client so that a test which times out while opening leaves behind
+     * something explaining why.
+     *
+     * <p>These tests open with retry, and the default retry policy retries an unlimited number of times, so a
+     * connection that never succeeds is never abandoned by the client. That means the client never throws, and the
+     * only thing that ends the test is the JUnit timeout, which reports nothing beyond the line it was stuck on. The
+     * status callback is the one place the underlying reason is visible, so it gets written to the log as it
+     * arrives.</p>
+     *
+     * @param client The client to report status changes for
+     */
+    private static void logConnectionStatusChanges(InternalClient client)
+    {
+        client.setConnectionStatusChangeCallback(
+            (context) ->
+            {
+                Throwable cause = context.getCause();
+                log.info("Connection status changed from {} to {} because of {}{}",
+                    context.getPreviousStatus(),
+                    context.getNewStatus(),
+                    context.getNewStatusReason(),
+                    cause == null ? "" : ", cause: " + cause);
+
+                if (cause != null)
+                {
+                    log.info("Connection status change cause", cause);
+                }
+            },
+            null);
+    }
+
     @Test(timeout = 60000) // 1 minute
     @IotHubTest
     public void CanOpenConnection() throws Exception
     {
         testInstance.setup();
+        logConnectionStatusChanges(testInstance.identity.getClient());
         testInstance.identity.getClient().open(true);
 
         // deviceClient.open() is a no-op on HTTP, so a message needs to be sent to actually test opening the connection
@@ -270,6 +303,7 @@ public class ConnectionTests extends IntegrationTest
 
         testInstance.setupEccDevice();
 
+        logConnectionStatusChanges(testInstance.identity.getClient());
         testInstance.identity.getClient().open(true);
 
         // deviceClient.open() is a no-op on HTTP, so a message needs to be sent to actually test opening the connection
