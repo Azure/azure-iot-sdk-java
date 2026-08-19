@@ -113,70 +113,165 @@ public class TokenRenewalTests extends IntegrationTest
     //@ContinuousIntegrationTest
     public void tokenRenewalWorks() throws Exception
     {
-        List<InternalClient> clients = createClientsToTest();
-        String hostname = clients.get(0).getConfig().getIotHubHostname();
+        // These are declared before the try so that the cleanup below can reach whatever was created before a failure.
+        // Creating the clients registers identities as it goes, so a failure part way through creation has something
+        // to clean up just as much as a failure during the test body does.
+        List<InternalClient> clients = new ArrayList<>();
         ArrayList<DeviceClient> amqpMultiplexedClients = new ArrayList<>();
-        MultiplexingClient amqpMultiplexingClient = createMultiplexedClientToTest(AMQPS, amqpMultiplexedClients, hostname);
         ArrayList<DeviceClient> amqpwsMultiplexedClients = new ArrayList<>();
-        MultiplexingClient amqpWsMultiplexingClient = createMultiplexedClientToTest(AMQPS_WS, amqpwsMultiplexedClients, hostname);
+        MultiplexingClient amqpMultiplexingClient = null;
+        MultiplexingClient amqpWsMultiplexingClient = null;
 
-        // Allow registry operations some buffer time before attempting to open connections for them
-        Thread.sleep(2000);
-
-        //service grants a 10 minute grace period beyond when sas token expires, this test attempts to send a message after that grace period
-        // to ensure that the first sas token has expired, and that the sas token was renewed successfully.
-        final long WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE = EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS + EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS;
-
-        clients.addAll(amqpMultiplexedClients);
-        clients.addAll(amqpwsMultiplexedClients);
-
-        Success[] amqpDisconnectDidNotHappenSuccesses = new Success[clients.size()];
-        Success[] mqttDisconnectDidHappenSuccesses = new Success[clients.size()];
-        Success[] shutdownWasGracefulSuccesses = new Success[clients.size()];
-        Success[] mqttDisconnectHadTokenExpiredReasonSuccesses = new Success[clients.size()];
-        for (int clientIndex = 0; clientIndex < clients.size(); clientIndex++)
+        try
         {
-            amqpDisconnectDidNotHappenSuccesses[clientIndex] = new Success();
-            mqttDisconnectDidHappenSuccesses[clientIndex] = new Success();
-            shutdownWasGracefulSuccesses[clientIndex] = new Success();
-            mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex] = new Success();
+            createClientsToTest(clients);
+            String hostname = clients.get(0).getConfig().getIotHubHostname();
+            amqpMultiplexingClient = createMultiplexedClientToTest(AMQPS, amqpMultiplexedClients, hostname);
+            amqpWsMultiplexingClient = createMultiplexedClientToTest(AMQPS_WS, amqpwsMultiplexedClients, hostname);
+
+            // Allow registry operations some buffer time before attempting to open connections for them
+            Thread.sleep(2000);
+
+            //service grants a 10 minute grace period beyond when sas token expires, this test attempts to send a message after that grace period
+            // to ensure that the first sas token has expired, and that the sas token was renewed successfully.
+            final long WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE = EXPIRED_SAS_TOKEN_GRACE_PERIOD_SECONDS + EXTRA_BUFFER_TO_ENSURE_TOKEN_EXPIRED_SECONDS;
+
+            clients.addAll(amqpMultiplexedClients);
+            clients.addAll(amqpwsMultiplexedClients);
+
+            Success[] amqpDisconnectDidNotHappenSuccesses = new Success[clients.size()];
+            Success[] mqttDisconnectDidHappenSuccesses = new Success[clients.size()];
+            Success[] shutdownWasGracefulSuccesses = new Success[clients.size()];
+            Success[] mqttDisconnectHadTokenExpiredReasonSuccesses = new Success[clients.size()];
+            for (int clientIndex = 0; clientIndex < clients.size(); clientIndex++)
+            {
+                amqpDisconnectDidNotHappenSuccesses[clientIndex] = new Success();
+                mqttDisconnectDidHappenSuccesses[clientIndex] = new Success();
+                shutdownWasGracefulSuccesses[clientIndex] = new Success();
+                mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex] = new Success();
             
-            amqpDisconnectDidNotHappenSuccesses[clientIndex].setResult(true); //assume success until unexpected DISCONNECTED_RETRYING
-            mqttDisconnectDidHappenSuccesses[clientIndex].setResult(false); //assume failure until DISCONNECTED_RETRYING is triggered by token expiring
-            shutdownWasGracefulSuccesses[clientIndex].setResult(true); //assume success until DISCONNECTED callback without CLIENT_CLOSE
+                amqpDisconnectDidNotHappenSuccesses[clientIndex].setResult(true); //assume success until unexpected DISCONNECTED_RETRYING
+                mqttDisconnectDidHappenSuccesses[clientIndex].setResult(false); //assume failure until DISCONNECTED_RETRYING is triggered by token expiring
+                shutdownWasGracefulSuccesses[clientIndex].setResult(true); //assume success until DISCONNECTED callback without CLIENT_CLOSE
 
-            mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex].setResult(false); //assume failure until first disconnected_retrying executes with reason EXPIRED_SAS_TOKEN
+                mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex].setResult(false); //assume failure until first disconnected_retrying executes with reason EXPIRED_SAS_TOKEN
 
-            clients.get(clientIndex).setConnectionStatusChangeCallback(
-                new IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(
-                    clients.get(clientIndex).getConfig().getProtocol(),
-                    amqpDisconnectDidNotHappenSuccesses[clientIndex],
-                    mqttDisconnectDidHappenSuccesses[clientIndex],
-                    shutdownWasGracefulSuccesses[clientIndex],
-                    mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex]),
-                clients.get(clientIndex));
+                clients.get(clientIndex).setConnectionStatusChangeCallback(
+                    new IotHubConnectionStatusChangeTokenRenewalCallbackVerifier(
+                        clients.get(clientIndex).getConfig().getProtocol(),
+                        amqpDisconnectDidNotHappenSuccesses[clientIndex],
+                        mqttDisconnectDidHappenSuccesses[clientIndex],
+                        shutdownWasGracefulSuccesses[clientIndex],
+                        mqttDisconnectHadTokenExpiredReasonSuccesses[clientIndex]),
+                    clients.get(clientIndex));
+            }
+
+            openEachClient(clients);
+            amqpMultiplexingClient.open(false);
+            amqpWsMultiplexingClient.open(false);
+
+            //wait until old sas token has expired, this should force the config to generate a new one from the device key
+            System.out.println("Sleeping..." + System.currentTimeMillis());
+            Thread.sleep((SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL + WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE) * 1000);
+            System.out.println("Awake!" + System.currentTimeMillis());
+
+            sendMessageFromEachClient(clients);
+
+            closeClients(clients);
+            amqpMultiplexingClient.close();
+            amqpWsMultiplexingClient.close();
+
+            Tools.disposeTestIdentities(testIdentities, iotHubConnectionString);
+
+            testIdentities.clear();
+
+            verifyClientsConnectivityBehavedCorrectly(clients, amqpDisconnectDidNotHappenSuccesses, mqttDisconnectDidHappenSuccesses, shutdownWasGracefulSuccesses, mqttDisconnectHadTokenExpiredReasonSuccesses);
+        }
+        finally
+        {
+            // Without this, a failure part way through the test leaves behind every client that had already been
+            // opened. Those clients keep retrying their connections for the rest of the JVM's life, and the ones that
+            // were given proxy settings keep retrying through the proxy this class runs locally. That competes with
+            // the reruns of this test for the agent's resources and for that proxy, which makes the reruns fail the
+            // same way the first attempt did rather than giving them a clean chance to pass.
+            closeClientsQuietly(clients);
+
+            // The multiplexed clients are cleaned up separately because they are only added to the list above once
+            // both multiplexing clients have been created. A failure before that point leaves them reachable only
+            // through these lists.
+            closeClientsQuietly(amqpMultiplexedClients);
+            closeClientsQuietly(amqpwsMultiplexedClients);
+
+            closeClientQuietly(amqpMultiplexingClient);
+            closeClientQuietly(amqpWsMultiplexingClient);
+
+            // Identities are removed here as well so that a failed run does not leave them behind in the registry.
+            // This is a no-op when the test succeeded, because the successful path already disposed of them.
+            disposeTestIdentitiesQuietly();
+        }
+    }
+
+    /**
+     * Close each client, ignoring any failure. This is only used while cleaning up, where a client that cannot be
+     * closed must not replace the failure that the test is already reporting.
+     *
+     * @param clients The clients to close
+     */
+    private void closeClientsQuietly(List<? extends InternalClient> clients)
+    {
+        for (InternalClient client : clients)
+        {
+            closeClientQuietly(client);
+        }
+    }
+
+    private void closeClientQuietly(InternalClient client)
+    {
+        try
+        {
+            client.close();
+        }
+        catch (UnsupportedOperationException ex)
+        {
+            // Multiplexed clients throw this when closed through the individual client itself. They are closed by
+            // closing the multiplexing client that they belong to instead.
+        }
+        catch (Exception ex)
+        {
+            log.debug("Failed to close a client while cleaning up after the test", ex);
+        }
+    }
+
+    private void closeClientQuietly(MultiplexingClient multiplexingClient)
+    {
+        if (multiplexingClient == null)
+        {
+            // Creation did not get as far as this client
+            return;
         }
 
-        openEachClient(clients);
-        amqpMultiplexingClient.open(false);
-        amqpWsMultiplexingClient.open(false);
+        try
+        {
+            multiplexingClient.close();
+        }
+        catch (Exception ex)
+        {
+            log.debug("Failed to close a multiplexing client while cleaning up after the test", ex);
+        }
+    }
 
-        //wait until old sas token has expired, this should force the config to generate a new one from the device key
-        System.out.println("Sleeping..." + System.currentTimeMillis());
-        Thread.sleep((SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL + WAIT_BUFFER_FOR_TOKEN_TO_EXPIRE) * 1000);
-        System.out.println("Awake!" + System.currentTimeMillis());
-
-        sendMessageFromEachClient(clients);
-
-        closeClients(clients);
-        amqpMultiplexingClient.close();
-        amqpWsMultiplexingClient.close();
-
-        Tools.disposeTestIdentities(testIdentities, iotHubConnectionString);
+    private void disposeTestIdentitiesQuietly()
+    {
+        try
+        {
+            Tools.disposeTestIdentities(testIdentities, iotHubConnectionString);
+        }
+        catch (Exception ex)
+        {
+            log.debug("Failed to dispose of the test identities while cleaning up after the test", ex);
+        }
 
         testIdentities.clear();
-
-        verifyClientsConnectivityBehavedCorrectly(clients, amqpDisconnectDidNotHappenSuccesses, mqttDisconnectDidHappenSuccesses, shutdownWasGracefulSuccesses, mqttDisconnectHadTokenExpiredReasonSuccesses);
     }
 
     private void closeClients(List<InternalClient> clients) throws IOException
@@ -221,9 +316,17 @@ public class TokenRenewalTests extends IntegrationTest
         }
     }
 
-    private List<InternalClient> createClientsToTest() throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException
+    /**
+     * Create the clients that this test exercises, adding each one to the given list as it is created.
+     *
+     * <p>The clients are added to the caller's list rather than returned all at once so that a failure part way
+     * through creation still leaves the caller holding the clients that were created before it, which lets them be
+     * cleaned up rather than leaked.</p>
+     *
+     * @param clients The list to add the created clients to
+     */
+    private void createClientsToTest(List<InternalClient> clients) throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException
     {
-        List<InternalClient> clients = new ArrayList<>();
         Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
         for (IotHubClientProtocol protocol: IotHubClientProtocol.values())
         {
@@ -248,10 +351,14 @@ public class TokenRenewalTests extends IntegrationTest
             Device device = new Device(deviceId);
             device = registryClient.addDevice(device);
             SasTokenProvider sasTokenProvider = new SasTokenProviderImpl(Tools.getDeviceConnectionString(iotHubConnectionString, device), SECONDS_FOR_SAS_TOKEN_TO_LIVE_BEFORE_RENEWAL);
-            clients.add(new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol));
-        }
+            DeviceClient clientWithCustomSasTokenProvider = new DeviceClient(iotHubHostName, deviceId, sasTokenProvider, protocol);
 
-        return clients;
+            // This device is registered here rather than handed out by Tools, so it has to be tracked alongside the
+            // other identities. Without this it is never disposed of and is left behind in the registry on every run,
+            // whether the test passes or fails.
+            testIdentities.add(new TestDeviceIdentity(clientWithCustomSasTokenProvider, device));
+            clients.add(clientWithCustomSasTokenProvider);
+        }
     }
 
     private MultiplexingClient createMultiplexedClientToTest(IotHubClientProtocol protocol, List<DeviceClient> clientsToCreate, String hostname) throws IotHubException, IOException, URISyntaxException, InterruptedException, GeneralSecurityException, IotHubClientException, TimeoutException
