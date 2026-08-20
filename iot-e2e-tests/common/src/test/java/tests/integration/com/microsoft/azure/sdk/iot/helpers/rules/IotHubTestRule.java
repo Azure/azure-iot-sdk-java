@@ -30,7 +30,7 @@ public class IotHubTestRule implements TestRule
             IotHubTest classAnnotation = description.getTestClass().getAnnotation(IotHubTest.class);
             if (annotation != null || classAnnotation != null)
             {
-                Assume.assumeTrue("Test is ignored", IntegrationTest.runIotHubTests);
+                Assume.assumeTrue("Test is ignored because it is an IoT hub test and the RUN_IOTHUB_TESTS environment variable is set to false", IntegrationTest.runIotHubTests);
             }
 
             base.evaluate();

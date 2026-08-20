@@ -47,6 +47,17 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
     private static final int MQTT_VERSION = MQTT_VERSION_3_1_1;
     private static final boolean SET_CLEAN_SESSION = false;
 
+    // How long Paho is allowed to spend establishing the connection, which is mainly the TCP connect and the TLS
+    // handshake. This is deliberately shorter than Mqtt.CONNECTION_TIMEOUT, which bounds the whole CONNECT round trip
+    // including the CONNACK. Keeping it shorter means a connection that cannot be established at all fails with the
+    // specific reason Paho reports, rather than with the generic "Timed out waiting for a response from the server"
+    // that the outer wait produces once its own budget runs out.
+    //
+    // This is set explicitly because Paho otherwise applies its own default. That default happens to be the same value
+    // today, but relying on it means the effective timeout is chosen by the library rather than by us, and it would
+    // change silently underneath us if Paho ever changed it.
+    private static final int TCP_CONNECTION_TIMEOUT_SECONDS = (Mqtt.CONNECTION_TIMEOUT / 2) / 1000;
+
     private static final String MODEL_ID = "model-id";
 
     private String connectionId;
@@ -181,6 +192,7 @@ public class MqttIotHubConnection implements IotHubTransportConnection, MqttMess
 
         MqttConnectOptions connectOptions = new MqttConnectOptions();
         connectOptions.setKeepAliveInterval(config.getKeepAliveInterval());
+        connectOptions.setConnectionTimeout(TCP_CONNECTION_TIMEOUT_SECONDS);
         connectOptions.setCleanSession(SET_CLEAN_SESSION);
         connectOptions.setMqttVersion(MQTT_VERSION);
         connectOptions.setUserName(iotHubUserName);

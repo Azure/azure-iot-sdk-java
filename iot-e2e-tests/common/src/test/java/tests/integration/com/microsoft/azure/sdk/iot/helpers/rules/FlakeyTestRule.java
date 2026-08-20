@@ -30,7 +30,7 @@ public class FlakeyTestRule implements TestRule
             FlakeyTest classAnnotation = description.getTestClass().getAnnotation(FlakeyTest.class);
             if (annotation != null || classAnnotation != null)
             {
-                Assume.assumeTrue("Test is ignored", !IntegrationTest.isPullRequest);
+                Assume.assumeTrue("Test is ignored because it is annotated @FlakeyTest and this is a pull request build", !IntegrationTest.isPullRequest);
             }
 
             base.evaluate();

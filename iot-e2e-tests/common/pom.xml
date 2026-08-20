@@ -200,8 +200,23 @@
                     <skipTests>${shouldSkipTests}</skipTests> <!--This property is created at build time by the build-helper-maven-plugin, so it will appear as a compilation issue even though it will build just fine.-->
                     <parallel>both</parallel>
 
-                    <!--Maven will spawn up as many threads as it wants/can while running tests in parallel-->
-                    <useUnlimitedThreads>true</useUnlimitedThreads>
+                    <!--
+                    These tests run in a single JVM, and several of them stand up an embedded proxy server inside that
+                    same JVM: ConnectionTests on 8899 and 9000, TokenRenewalTests on 8898, FileUploadTests on 8897 and
+                    MultiplexingClientTests on 8849. Those proxies need to be scheduled promptly to forward traffic.
+
+                    With useUnlimitedThreads there was no cap on how many tests ran at once, so a burst of test threads
+                    could starve those proxies of CPU on a two core hosted agent. The connection would be established
+                    and then nothing would flow, which is why only the proxied variants of these tests ever failed,
+                    across three different test classes and both HTTPS and MQTT_WS.
+
+                    6 is chosen to sit above the concurrency the suite actually achieves, so throughput is not
+                    constrained. Measured on build 162050, the whole run is 49 CPU-minutes finishing in 12.8 minutes of
+                    wall clock, which is an average of 3.8 tests at a time. The wall clock is floored by
+                    tokenRenewalWorks, which takes 12.8 minutes on its own because it deliberately waits out a sas
+                    token expiry, so anything from 4 upwards leaves the total run time unchanged.
+                    -->
+                    <threadCount>6</threadCount>
                 </configuration>
             </plugin>
             <plugin>

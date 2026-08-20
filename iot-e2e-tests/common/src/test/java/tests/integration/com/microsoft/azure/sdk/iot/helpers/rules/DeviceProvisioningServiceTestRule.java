@@ -30,7 +30,7 @@ public class DeviceProvisioningServiceTestRule implements TestRule
             DeviceProvisioningServiceTest classAnnotation = description.getTestClass().getAnnotation(DeviceProvisioningServiceTest.class);
             if (annotation != null || classAnnotation != null)
             {
-                Assume.assumeTrue("Test is ignored", IntegrationTest.runProvisioningTests);
+                Assume.assumeTrue("Test is ignored because it is a provisioning test and the RUN_PROVISIONING_TESTS environment variable is set to false", IntegrationTest.runProvisioningTests);
             }
 
             base.evaluate();

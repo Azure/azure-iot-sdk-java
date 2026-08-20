@@ -24,7 +24,10 @@ import java.util.Queue;
 @Slf4j
 public abstract class Mqtt implements MqttCallback
 {
-    private static final int CONNECTION_TIMEOUT = 60 * 1000;
+    // How long to wait for the service to acknowledge a CONNECT packet. This covers the whole round trip, so it has to
+    // leave room for the TCP connect, the TLS handshake and the CONNACK. Paho is given a shorter budget for the
+    // connect itself, see MqttIotHubConnection.TCP_CONNECTION_TIMEOUT_SECONDS.
+    static final int CONNECTION_TIMEOUT = 60 * 1000;
     private static final int DISCONNECTION_TIMEOUT = 60 * 1000;
 
     //mqtt connection options
