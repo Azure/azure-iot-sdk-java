@@ -31,7 +31,7 @@ public class DigitalTwinTestRule implements TestRule {
             DigitalTwinTest methodAnnotation = description.getAnnotation(DigitalTwinTest.class);
             DigitalTwinTest classAnnotation = description.getTestClass().getAnnotation(DigitalTwinTest.class);
             if (methodAnnotation != null || classAnnotation != null) {
-                Assume.assumeTrue("Test is ignored because it is a digital twin test and the RUN_DIGITAL_TWIN_TESTS environment variable is set to false", IntegrationTest.runDigitalTwinTests);
+                Assume.assumeTrue("Test is ignored because it is a digital twin test and the RUN_DIGITAL_TESTS environment variable is set to false", IntegrationTest.runDigitalTwinTests);
             }
 
             base.evaluate();
