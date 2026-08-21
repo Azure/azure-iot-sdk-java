@@ -117,22 +117,37 @@ public class ConnectionTests extends IntegrationTest
             this.useHttpProxyAuth = useHttpProxyAuth;
         }
 
+        /**
+         * Configure this test's proxy settings on the given builder, if this variant uses a proxy at all.
+         *
+         * <p>Both setup paths go through here so that they cannot drift apart. They previously had separate copies of
+         * this logic, and the copy in setupEccDevice was missing the unauthenticated branch entirely.</p>
+         *
+         * @param optionsBuilder The builder to apply the proxy settings to
+         */
+        private void applyProxySettings(ClientOptions.ClientOptionsBuilder optionsBuilder)
+        {
+            if (!this.useHttpProxy)
+            {
+                return;
+            }
+
+            if (this.useHttpProxyAuth)
+            {
+                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
+            }
+            else
+            {
+                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostnameWithoutAuth, testProxyPortWithoutAuth));
+                optionsBuilder.proxySettings(new ProxySettings(testProxy));
+            }
+        }
+
         public void setup() throws Exception
         {
             ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
-            if (this.useHttpProxy)
-            {
-                if (this.useHttpProxyAuth)
-                {
-                    Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                    optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
-                }
-                else
-                {
-                    Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostnameWithoutAuth, testProxyPortWithoutAuth));
-                    optionsBuilder.proxySettings(new ProxySettings(testProxy));
-                }
-            }
+            applyProxySettings(optionsBuilder);
 
             if (clientType == ClientType.DEVICE_CLIENT)
             {
@@ -147,11 +162,7 @@ public class ConnectionTests extends IntegrationTest
         public void setupEccDevice() throws Exception
         {
             ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
-            if (this.useHttpProxy)
-            {
-                Proxy testProxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(testProxyHostname, testProxyPort));
-                optionsBuilder.proxySettings(new ProxySettings(testProxy, testProxyUser, testProxyPass.toCharArray()));
-            }
+            applyProxySettings(optionsBuilder);
 
             X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(certificateGenerator.getX509Certificate(), certificateGenerator.getPrivateKey());
