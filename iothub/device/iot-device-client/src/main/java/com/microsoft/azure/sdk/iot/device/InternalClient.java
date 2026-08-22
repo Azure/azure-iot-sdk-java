@@ -321,7 +321,8 @@ public class InternalClient
      * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
-     * policy was exhausted.
+     * policy was exhausted. It is also not preserved if, when using MQTT, the reconnection takes long enough that the
+     * MQTT session is lost before a successful CONNACK.
      * </p>
      * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
@@ -345,7 +346,8 @@ public class InternalClient
      * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
-     * policy was exhausted.
+     * policy was exhausted. It is also not preserved if, when using MQTT, the reconnection takes long enough that the
+     * MQTT session is lost before a successful CONNACK.
      * </p>
      * @param desiredPropertiesCallback The callback to execute each time a desired property update message is received
      * from the service. This will contain one or many properties updated at once.
@@ -542,7 +544,8 @@ public class InternalClient
      * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
-     * policy was exhausted.
+     * policy was exhausted. It is also not preserved if, when using MQTT, the reconnection takes long enough that the
+     * MQTT session is lost before a successful CONNACK.
      * </p>
      * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
@@ -565,7 +568,8 @@ public class InternalClient
      * <p>
      * This subscription is preserved between reconnect attempts. However, it is not preserved after a client has
      * been closed because the user called {@link #close()} or because this client lost its connection and its retry
-     * policy was exhausted.
+     * policy was exhausted. It is also not preserved if, when using MQTT, the reconnection takes long enough that the
+     * MQTT session is lost before a successful CONNACK.
      * </p>
      * @param methodCallback Callback on which direct methods shall be invoked. Cannot be {@code null}.
      * @param methodCallbackContext Context for device method callback. Can be {@code null}.
