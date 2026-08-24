@@ -233,7 +233,11 @@ public class ConnectionTests extends IntegrationTest
                 Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
             }
 
-            this.identity = null;
+            // identity is deliberately left set. Every test in this class is bounded by @Test(timeout = 60000), and
+            // JUnit runs that method on a separate thread which it abandons, still running, when the timeout fires.
+            // @After is outside the timeout, so dispose() executes while that abandoned thread is still working its
+            // way through the rest of the test body. Clearing the field here made those threads dereference null.
+            // The other test classes that call dispose() from an @After do not clear it either.
         }
     }
 
@@ -328,16 +332,21 @@ public class ConnectionTests extends IntegrationTest
     public void CanOpenConnection() throws Exception
     {
         testInstance.setup();
-        logConnectionStatusChanges(testInstance.identity.getClient());
-        testInstance.identity.getClient().open(true);
+
+        // Held locally rather than read back off testInstance for each call. The @After that disposes this instance
+        // runs outside this method's timeout, so it can execute while this thread is still here after a timeout.
+        InternalClient client = testInstance.identity.getClient();
+
+        logConnectionStatusChanges(client);
+        client.open(true);
 
         // deviceClient.open() is a no-op on HTTP, so a message needs to be sent to actually test opening the connection
         if (testInstance.protocol == HTTPS)
         {
-            testInstance.identity.getClient().sendEvent(new Message("some message"));
+            client.sendEvent(new Message("some message"));
         }
 
-        testInstance.identity.getClient().close();
+        client.close();
     }
 
     @IotHubTest
@@ -358,16 +367,18 @@ public class ConnectionTests extends IntegrationTest
 
         testInstance.setupEccDevice();
 
-        logConnectionStatusChanges(testInstance.identity.getClient());
-        testInstance.identity.getClient().open(true);
+        InternalClient client = testInstance.identity.getClient();
+
+        logConnectionStatusChanges(client);
+        client.open(true);
 
         // deviceClient.open() is a no-op on HTTP, so a message needs to be sent to actually test opening the connection
         if (testInstance.protocol == HTTPS)
         {
-            testInstance.identity.getClient().sendEvent(new Message("some message"));
+            client.sendEvent(new Message("some message"));
         }
 
-        testInstance.identity.getClient().close();
+        client.close();
     }
 
     @Test(timeout = 60000) // 1 minute
