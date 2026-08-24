@@ -101,8 +101,11 @@ public class ConnectionTests extends IntegrationTest
         public TestIdentity identity;
 
         // ECC identities are created by this test rather than taken from the shared pool, and they carry a
-        // certificate that only this test knows about, so they must never be recycled back into that pool.
-        private boolean identityIsEccIdentity;
+        // certificate that only this test knows about, so they must never be recycled back into that pool. This is
+        // recorded as soon as the device is registered, rather than being derived from the identity, because the
+        // rest of setupEccDevice can fail after that registration has already happened. Deleting the device also
+        // deletes any module underneath it, so the module does not need to be tracked separately.
+        private String eccDeviceIdToDelete;
         public AuthenticationType authenticationType;
         public ClientType clientType;
         public boolean useHttpProxy;
@@ -167,7 +170,6 @@ public class ConnectionTests extends IntegrationTest
             X509CertificateGenerator certificateGenerator = new X509CertificateGenerator(X509CertificateGenerator.CertificateAlgorithm.ECC);
             SSLContext sslContext = SSLContextBuilder.buildSSLContext(certificateGenerator.getX509Certificate(), certificateGenerator.getPrivateKey());
             optionsBuilder.sslContext(sslContext);
-            this.identityIsEccIdentity = true;
 
             if (clientType == ClientType.DEVICE_CLIENT)
             {
@@ -175,6 +177,7 @@ public class ConnectionTests extends IntegrationTest
                 eccDevice.setThumbprint(certificateGenerator.getX509Thumbprint(), certificateGenerator.getX509Thumbprint());
 
                 Tools.addDeviceWithRetry(new RegistryClient(iotHubConnectionString), eccDevice);
+                this.eccDeviceIdToDelete = eccDevice.getDeviceId();
 
                 String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice);
                 this.identity = new TestDeviceIdentity(
@@ -189,6 +192,8 @@ public class ConnectionTests extends IntegrationTest
                 eccModule.setThumbprint(certificateGenerator.getX509Thumbprint(), certificateGenerator.getX509Thumbprint());
 
                 Tools.addDeviceWithRetry(new RegistryClient(iotHubConnectionString), eccDevice);
+                this.eccDeviceIdToDelete = eccDevice.getDeviceId();
+
                 Tools.addModuleWithRetry(new RegistryClient(iotHubConnectionString), eccModule);
 
                 String moduleConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice) + ";ModuleId=" + eccModule.getId();
@@ -201,30 +206,29 @@ public class ConnectionTests extends IntegrationTest
 
         public void dispose()
         {
-            if (this.identity == null)
-            {
-                return;
-            }
-
-            if (this.identity.getClient() != null)
+            if (this.identity != null && this.identity.getClient() != null)
             {
                 this.identity.getClient().close();
             }
 
-            if (this.identityIsEccIdentity)
+            if (this.eccDeviceIdToDelete != null)
             {
                 // Recycling this identity would hand a device carrying a certificate that no other test knows about to
-                // the next test that takes an x509 identity from the shared pool, so delete it instead.
+                // the next test that takes an x509 identity from the shared pool, so delete it instead. This runs even
+                // when the identity was never finished being built, because the device is in the registry from the
+                // moment it is registered, whether or not the rest of the setup succeeded.
                 try
                 {
-                    Tools.getRegistyManager(iotHubConnectionString).removeDevice(this.identity.getDeviceId());
+                    Tools.getRegistyManager(iotHubConnectionString).removeDevice(this.eccDeviceIdToDelete);
                 }
                 catch (IOException | IotHubException e)
                 {
-                    log.error("Failed to clean up ECC test device {}", this.identity.getDeviceId(), e);
+                    log.error("Failed to clean up ECC test device {}", this.eccDeviceIdToDelete, e);
                 }
+
+                this.eccDeviceIdToDelete = null;
             }
-            else
+            else if (this.identity != null)
             {
                 Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
             }
