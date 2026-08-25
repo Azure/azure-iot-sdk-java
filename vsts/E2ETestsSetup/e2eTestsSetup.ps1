@@ -62,10 +62,11 @@ if ($rgExists -eq "False")
     # Tagged as part of the creation itself, not afterwards: the scheduled cleanup in
     # Azure/azure-iot-sdk-csharp vsts/resource-group-cleanup.yaml (which deletes leftover
     # 'javasdkgate*' groups as well as 'dotnetsdkgate*' ones) uses 'CreatedOn' to tell a leftover
-    # group from one whose gate run is still in flight. A group created in one step and tagged in
-    # a second can be left untagged forever if the run dies in between. A single tag is passed
-    # here on purpose -- under the AzureCLI@2 task, '--tags' with several key=value arguments
-    # collapses them into one tag value.
+    # group from one whose gate run is still in flight. Tagging in a second, separate call would
+    # leave a window where a run that dies in between produces an untagged group. That cleanup
+    # still reclaims such a group, but only via the slower 24-hour first-observed fallback rather
+    # than the 3-hour path. A single tag is passed here on purpose -- under the AzureCLI@2 task,
+    # '--tags' with several key=value arguments collapses them into one tag value.
     az group create --name $ResourceGroup --location $Region --tags "CreatedOn=$([datetime]::UtcNow.ToString('o'))" --output none
 }
 
