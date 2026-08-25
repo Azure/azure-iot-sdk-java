@@ -37,5 +37,19 @@ $ADB devices
 
 # Logged so that a DNS failure later in the run can be told apart from an emulator that never had working name
 # resolution to begin with. Does not fail the task; the tests report their own failures.
+#
+# ping's exit status is not used to judge DNS, because it also fails when ICMP is simply not allowed out, which is
+# common and harmless here. Only the resolution step is inspected: ping prints the resolved address when the lookup
+# succeeded, and reports an unknown host or bad address when it did not.
 echo "Checking name resolution from inside the emulator:"
-$ADB shell ping -c 1 -W 5 azure-devices-provisioning.net || echo "WARNING: emulator could not resolve azure-devices-provisioning.net"
+resolutionOutput=$($ADB shell ping -c 1 -W 5 azure-devices-provisioning.net 2>&1)
+echo "${resolutionOutput}"
+
+case "${resolutionOutput}" in
+    *"unknown host"*|*"bad address"*|*"Name or service not known"*|*"Temporary failure in name resolution"*)
+        echo "WARNING: emulator could not resolve azure-devices-provisioning.net. Name resolution is broken in the guest."
+        ;;
+    *)
+        echo "Name resolution succeeded. Any ping failure above is ICMP reachability, not DNS."
+        ;;
+esac
