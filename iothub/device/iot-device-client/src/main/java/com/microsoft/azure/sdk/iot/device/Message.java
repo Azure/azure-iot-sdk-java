@@ -169,7 +169,7 @@ public class Message
         initialize();
 
         this.body = body.getBytes(DEFAULT_IOTHUB_MESSAGE_CHARSET);
-        this.setContentType(DEFAULT_IOTHUB_MESSAGE_CHARSET.name());
+        this.setContentEncoding(DEFAULT_IOTHUB_MESSAGE_CHARSET.name());
     }
 
     
