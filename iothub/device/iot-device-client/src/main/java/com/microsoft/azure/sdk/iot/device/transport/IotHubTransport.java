@@ -322,6 +322,16 @@ public class IotHubTransport implements IotHubListener
     @Override
     public void onMessageReceived(IotHubTransportMessage message, TransportException e)
     {
+        CorrelationCallbackContext callbackContext = null;
+        if (message != null)
+        {
+            String correlationId = message.getCorrelationId();
+            if (!correlationId.isEmpty())
+            {
+                callbackContext = correlationCallbacks.get(correlationId);
+            }
+        }
+
         if (message != null && e != null)
         {
             log.error("Exception encountered while receiving a message from service {}", message, e);
@@ -338,36 +348,28 @@ public class IotHubTransport implements IotHubListener
 
         try
         {
-            if (message != null)
+            if (callbackContext != null && callbackContext.getCallback() != null)
             {
-                String correlationId = message.getCorrelationId();
-                if (!correlationId.isEmpty())
+                IotHubClientException clientException = null;
+                if (e != null)
                 {
-                    CorrelationCallbackContext callbackContext = correlationCallbacks.get(correlationId);
-                    if (callbackContext != null && callbackContext.getCallback() != null)
+                    // This case indicates that the transport layer failed to construct a valid message out of
+                    // a message delivered by the service
+                    clientException = e.toIotHubClientException();
+                }
+                else
+                {
+                    // This case indicates that the transport layer constructed a valid message out of a message
+                    // delivered by the service, but that message may contain an unsuccessful status code in cases
+                    // such as if an operation was rejected because it was badly formatted.
+                    IotHubStatusCode statusCode = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(message.getStatus()));
+                    if (!IotHubStatusCode.isSuccessful(statusCode))
                     {
-                        IotHubClientException clientException = null;
-                        if (e != null)
-                        {
-                            // This case indicates that the transport layer failed to construct a valid message out of
-                            // a message delivered by the service
-                            clientException = e.toIotHubClientException();
-                        }
-                        else
-                        {
-                            // This case indicates that the transport layer constructed a valid message out of a message
-                            // delivered by the service, but that message may contain an unsuccessful status code in cases
-                            // such as if an operation was rejected because it was badly formatted.
-                            IotHubStatusCode statusCode = IotHubStatusCode.getIotHubStatusCode(Integer.parseInt(message.getStatus()));
-                            if (!IotHubStatusCode.isSuccessful(statusCode))
-                            {
-                                clientException = new IotHubClientException(statusCode, "Received an unsuccessful operation error code from the service: " + statusCode);
-                            }
-                        }
-
-                        callbackContext.getCallback().onResponseReceived(message, callbackContext.getUserContext(), clientException);
+                        clientException = new IotHubClientException(statusCode, "Received an unsuccessful operation error code from the service: " + statusCode);
                     }
                 }
+
+                callbackContext.getCallback().onResponseReceived(message, callbackContext.getUserContext(), clientException);
             }
         }
         catch (Exception ex)
