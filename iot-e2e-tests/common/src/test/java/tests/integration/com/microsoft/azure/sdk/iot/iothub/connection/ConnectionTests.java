@@ -106,6 +106,17 @@ public class ConnectionTests extends IntegrationTest
         // rest of setupEccDevice can fail after that registration has already happened. Deleting the device also
         // deletes any module underneath it, so the module does not need to be tracked separately.
         private String eccDeviceIdToDelete;
+
+        // What teardown still owns, kept separate from the public identity field above. dispose() clears these but
+        // deliberately leaves identity set, because a test thread abandoned by the JUnit timeout may still read it.
+        // Clearing them is what makes dispose() safe to run more than once: without it a second run would close the
+        // same client twice and, worse, requeue the same identity into the shared pool twice.
+        private TestIdentity identityToDispose;
+
+        // Set once teardown has run. Guarded by lifecycleLock along with the two fields above.
+        private boolean disposed;
+
+        private final Object lifecycleLock = new Object();
         public AuthenticationType authenticationType;
         public ClientType clientType;
         public boolean useHttpProxy;
@@ -154,12 +165,14 @@ public class ConnectionTests extends IntegrationTest
 
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                this.identity = Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false, optionsBuilder);
+                trackForCleanup(Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false, optionsBuilder));
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
-                this.identity = Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false, optionsBuilder);
+                trackForCleanup(Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false, optionsBuilder));
             }
+
+            disposeIfTeardownAlreadyRan();
         }
 
         public void setupEccDevice() throws Exception
@@ -177,12 +190,12 @@ public class ConnectionTests extends IntegrationTest
                 eccDevice.setThumbprint(certificateGenerator.getX509Thumbprint(), certificateGenerator.getX509Thumbprint());
 
                 Tools.addDeviceWithRetry(new RegistryClient(iotHubConnectionString), eccDevice);
-                this.eccDeviceIdToDelete = eccDevice.getDeviceId();
+                trackEccDeviceForCleanup(eccDevice.getDeviceId());
 
                 String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice);
-                this.identity = new TestDeviceIdentity(
+                trackForCleanup(new TestDeviceIdentity(
                     new DeviceClient(deviceConnectionString, testInstance.protocol, optionsBuilder.build()),
-                    eccDevice);
+                    eccDevice));
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
@@ -192,26 +205,104 @@ public class ConnectionTests extends IntegrationTest
                 eccModule.setThumbprint(certificateGenerator.getX509Thumbprint(), certificateGenerator.getX509Thumbprint());
 
                 Tools.addDeviceWithRetry(new RegistryClient(iotHubConnectionString), eccDevice);
-                this.eccDeviceIdToDelete = eccDevice.getDeviceId();
+                trackEccDeviceForCleanup(eccDevice.getDeviceId());
 
                 Tools.addModuleWithRetry(new RegistryClient(iotHubConnectionString), eccModule);
 
                 String moduleConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice) + ";ModuleId=" + eccModule.getId();
-                this.identity = new TestModuleIdentity(
+                trackForCleanup(new TestModuleIdentity(
                     new ModuleClient(moduleConnectionString, testInstance.protocol, optionsBuilder.build()),
                     eccDevice,
-                    eccModule);
+                    eccModule));
+            }
+
+            disposeIfTeardownAlreadyRan();
+        }
+
+        /**
+         * Hand an identity to teardown, and publish it for the test body to use.
+         *
+         * @param newIdentity The identity this test just acquired or created
+         */
+        private void trackForCleanup(TestIdentity newIdentity)
+        {
+            // Published for the test body. Never cleared, so a thread the JUnit timeout abandoned can keep reading it.
+            this.identity = newIdentity;
+
+            synchronized (lifecycleLock)
+            {
+                this.identityToDispose = newIdentity;
             }
         }
 
-        public void dispose()
+        /**
+         * Hand a freshly registered ECC device to teardown, so it is removed from the registry even if the rest of
+         * setupEccDevice never completes.
+         *
+         * @param deviceId The device id that was just added to the registry
+         */
+        private void trackEccDeviceForCleanup(String deviceId)
         {
-            if (this.identity != null && this.identity.getClient() != null)
+            synchronized (lifecycleLock)
             {
-                this.identity.getClient().close();
+                this.eccDeviceIdToDelete = deviceId;
+            }
+        }
+
+        /**
+         * Dispose anything registered after teardown already ran.
+         *
+         * <p>Every test in this class is bounded by {@code @Test(timeout = 60000)}. JUnit runs the test body on a
+         * separate thread and, when the timeout fires, abandons that thread while it is still running. {@code @After}
+         * is outside the timeout, so teardown can execute while setup on the abandoned thread has not finished
+         * acquiring its identity. Without this, the identity that setup goes on to produce would have no owner and
+         * would leak, which is precisely the leak this class is trying to stop.</p>
+         *
+         * <p>This does not wait for setup, in either direction. Blocking teardown on a setup that is itself hung -
+         * which is how these tests have actually timed out - would stall the rest of the run.</p>
+         */
+        private void disposeIfTeardownAlreadyRan()
+        {
+            boolean teardownAlreadyRan;
+            synchronized (lifecycleLock)
+            {
+                teardownAlreadyRan = this.disposed;
             }
 
-            if (this.eccDeviceIdToDelete != null)
+            if (teardownAlreadyRan)
+            {
+                dispose();
+            }
+        }
+
+        /**
+         * Close and dispose whatever this instance currently owns.
+         *
+         * <p>Safe to call more than once, and safe to call concurrently with setup: it takes ownership of the tracked
+         * fields and clears them, so a second call finds only what was registered since the first.</p>
+         */
+        public void dispose()
+        {
+            TestIdentity identityToClean;
+            String eccDeviceIdToClean;
+
+            synchronized (lifecycleLock)
+            {
+                this.disposed = true;
+
+                identityToClean = this.identityToDispose;
+                eccDeviceIdToClean = this.eccDeviceIdToDelete;
+
+                this.identityToDispose = null;
+                this.eccDeviceIdToDelete = null;
+            }
+
+            if (identityToClean != null && identityToClean.getClient() != null)
+            {
+                identityToClean.getClient().close();
+            }
+
+            if (eccDeviceIdToClean != null)
             {
                 // Recycling this identity would hand a device carrying a certificate that no other test knows about to
                 // the next test that takes an x509 identity from the shared pool, so delete it instead. This runs even
@@ -219,25 +310,17 @@ public class ConnectionTests extends IntegrationTest
                 // moment it is registered, whether or not the rest of the setup succeeded.
                 try
                 {
-                    Tools.getRegistyManager(iotHubConnectionString).removeDevice(this.eccDeviceIdToDelete);
+                    Tools.getRegistyManager(iotHubConnectionString).removeDevice(eccDeviceIdToClean);
                 }
                 catch (IOException | IotHubException e)
                 {
-                    log.error("Failed to clean up ECC test device {}", this.eccDeviceIdToDelete, e);
+                    log.error("Failed to clean up ECC test device {}", eccDeviceIdToClean, e);
                 }
-
-                this.eccDeviceIdToDelete = null;
             }
-            else if (this.identity != null)
+            else if (identityToClean != null)
             {
-                Tools.disposeTestIdentity(this.identity, iotHubConnectionString);
+                Tools.disposeTestIdentity(identityToClean, iotHubConnectionString);
             }
-
-            // identity is deliberately left set. Every test in this class is bounded by @Test(timeout = 60000), and
-            // JUnit runs that method on a separate thread which it abandons, still running, when the timeout fires.
-            // @After is outside the timeout, so dispose() executes while that abandoned thread is still working its
-            // way through the rest of the test body. Clearing the field here made those threads dereference null.
-            // The other test classes that call dispose() from an @After do not clear it either.
         }
     }
 
@@ -426,10 +509,22 @@ public class ConnectionTests extends IntegrationTest
             multiplexingClient.registerDeviceClients(testClients);
 
             multiplexingClient.open(true);
-            multiplexingClient.close();
         }
         finally
         {
+            // Closing here rather than after open() so that a failed or timed out open still gives the client and the
+            // three device clients registered to it back. Otherwise they keep retrying for the life of the JVM, and
+            // the proxied variants keep retrying through the proxies this class runs locally.
+            try
+            {
+                multiplexingClient.close();
+            }
+            catch (Exception e)
+            {
+                // Swallowed so it cannot mask whatever the test itself threw.
+                log.error("Failed to close the multiplexing client", e);
+            }
+
             Tools.disposeTestIdentities(testIdentities, iotHubConnectionString);
         }
     }
