@@ -154,7 +154,7 @@
             "maxDeliveryCount": 100
           }
         },
-        "StorageEndpoints": {
+        "storageEndpoints": {
           "$default": {
             "sasTtlAsIso8601": "PT1H",
             "connectionString": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}', parameters('StorageAccountName'), listkeys(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName')), '2019-06-01').keys[0].value)]",
