@@ -70,7 +70,7 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
   }
 }
 
-resource iotHub 'Microsoft.Devices/IotHubs@2021-03-03-preview' = {
+resource iotHub 'Microsoft.Devices/IotHubs@2023-06-30' = {
   name: HubName
   location: resourceGroup().location
   identity: {
