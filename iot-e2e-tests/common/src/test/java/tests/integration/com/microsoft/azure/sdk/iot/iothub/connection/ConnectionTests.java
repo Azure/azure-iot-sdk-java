@@ -252,7 +252,8 @@ public class ConnectionTests extends IntegrationTest
         /**
          * Dispose anything registered after teardown already ran.
          *
-         * <p>Every test in this class is bounded by {@code @Test(timeout = 60000)}. JUnit runs the test body on a
+         * <p>Every test in this class is bounded by a timeout, the two minute one that {@link IntegrationTest}
+         * applies. JUnit runs the test body on a
          * separate thread and, when the timeout fires, abandons that thread while it is still running. {@code @After}
          * is outside the timeout, so teardown can execute while setup on the abandoned thread has not finished
          * acquiring its identity. Without this, the identity that setup goes on to produce would have no owner and
@@ -410,7 +411,18 @@ public class ConnectionTests extends IntegrationTest
             null);
     }
 
-    @Test(timeout = 60000) // 1 minute
+    // These tests deliberately do not set their own timeout, and take the two minute one from IntegrationTest instead.
+    //
+    // They used to declare @Test(timeout = 60000). That is exactly Mqtt.CONNECTION_TIMEOUT, the budget the client gives
+    // a single MQTT CONNECT round trip, so the two expired at the same instant. When a connect attempt stalled, the
+    // client sat in connectToken.waitForCompletion for the full minute, and JUnit killed the test on the same tick that
+    // the client would have thrown and let its retry policy try again. The failure that came out was a bare
+    // TestTimedOutException with no connection status transition logged at all, because nothing had been allowed to
+    // happen yet.
+    //
+    // A test bounded by the same number as the component it exercises cannot observe that component retrying. Two
+    // minutes leaves room for one stalled attempt to expire and a retry to follow it.
+    @Test
     @IotHubTest
     public void CanOpenConnection() throws Exception
     {
@@ -434,7 +446,7 @@ public class ConnectionTests extends IntegrationTest
 
     @IotHubTest
     @StandardTierHubOnlyTest
-    @Test(timeout = 60000) // 1 minute
+    @Test
     @FlakeyTest
     public void CanOpenConnectionWithECCCertificates() throws Exception
     {
@@ -464,7 +476,7 @@ public class ConnectionTests extends IntegrationTest
         client.close();
     }
 
-    @Test(timeout = 60000) // 1 minute
+    @Test
     @IotHubTest
     public void CanOpenMultiplexingConnection() throws Exception
     {
