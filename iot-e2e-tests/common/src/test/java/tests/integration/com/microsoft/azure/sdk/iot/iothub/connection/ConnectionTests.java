@@ -113,6 +113,12 @@ public class ConnectionTests extends IntegrationTest
         // same client twice and, worse, requeue the same identity into the shared pool twice.
         private TestIdentity identityToDispose;
 
+        // Set once setupEccDevice starts creating an identity, and never cleared. Identity classification has to
+        // outlive eccDeviceIdToDelete: teardown claims and clears that id, so if teardown runs between the device
+        // being registered and the identity being published, the late disposeIfTeardownAlreadyRan would see an
+        // identity with no ecc id and hand a self signed identity to the shared x509 pool.
+        private volatile boolean identityIsEcc;
+
         // Set once teardown has run. Guarded by lifecycleLock along with the two fields above.
         private boolean disposed;
 
@@ -177,6 +183,10 @@ public class ConnectionTests extends IntegrationTest
 
         public void setupEccDevice() throws Exception
         {
+            // Marked before anything is created, so that every identity this method goes on to publish is classified
+            // as ECC even if teardown runs partway through.
+            this.identityIsEcc = true;
+
             ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
             applyProxySettings(optionsBuilder);
 
@@ -317,6 +327,13 @@ public class ConnectionTests extends IntegrationTest
                 {
                     log.error("Failed to clean up ECC test device {}", eccDeviceIdToClean, e);
                 }
+            }
+            else if (identityToClean != null && this.identityIsEcc)
+            {
+                // An earlier dispose already claimed and deleted the device id, and this identity was published after
+                // that. The device is gone from the registry, so there is nothing left to delete, but it must still
+                // not be recycled: it is self signed with a certificate no other test knows about.
+                log.debug("Discarding late ECC identity {} rather than recycling it", identityToClean.getDeviceId());
             }
             else if (identityToClean != null)
             {
@@ -509,15 +526,19 @@ public class ConnectionTests extends IntegrationTest
         int multiplexCount = 3;
         List<TestIdentity> testIdentities = new ArrayList<>(multiplexCount);
         List<DeviceClient> testClients = new ArrayList<>(multiplexCount);
-        for (int i = 0; i < multiplexCount; i++)
-        {
-            TestIdentity testIdentity = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, false);
-            testIdentities.add(testIdentity);
-            testClients.add((DeviceClient) testIdentity.getClient());
-        }
 
+        // The acquisition loop is inside the protected scope because it can throw partway through. Acquiring the
+        // second or third identity can fail after the first is already in the list, and this method never assigns
+        // testInstance.identity, so the @After cannot reclaim them. Everything acquired so far is disposed instead.
         try
         {
+            for (int i = 0; i < multiplexCount; i++)
+            {
+                TestIdentity testIdentity = Tools.getTestDevice(iotHubConnectionString, testInstance.protocol, testInstance.authenticationType, false);
+                testIdentities.add(testIdentity);
+                testClients.add((DeviceClient) testIdentity.getClient());
+            }
+
             multiplexingClient.registerDeviceClients(testClients);
 
             multiplexingClient.open(true);
