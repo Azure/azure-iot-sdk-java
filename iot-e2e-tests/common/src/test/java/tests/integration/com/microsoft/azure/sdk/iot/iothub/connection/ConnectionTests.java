@@ -113,14 +113,26 @@ public class ConnectionTests extends IntegrationTest
         // same client twice and, worse, requeue the same identity into the shared pool twice.
         private TestIdentity identityToDispose;
 
-        // Set once setupEccDevice starts creating an identity, and never cleared. Identity classification has to
-        // outlive eccDeviceIdToDelete: teardown claims and clears that id, so if teardown runs between the device
-        // being registered and the identity being published, the late disposeIfTeardownAlreadyRan would see an
-        // identity with no ecc id and hand a self signed identity to the shared x509 pool.
-        private volatile boolean identityIsEcc;
+        // Set once setupEccDevice starts creating an identity, and cleared only when a new attempt begins.
+        // Identity classification has to outlive eccDeviceIdToDelete: teardown claims and clears that id, so if
+        // teardown runs between the device being registered and the identity being published, the late
+        // disposeIfTeardownAlreadyRan would see an identity with no ecc id and hand a self signed identity to the
+        // shared x509 pool.
+        private boolean identityIsEcc;
 
-        // Set once teardown has run. Guarded by lifecycleLock along with the two fields above.
-        private boolean disposed;
+        // Which setup attempt this instance is currently serving, and how far teardown has run.
+        //
+        // RerunFailedTestRule reuses this instance for every attempt at a test, so lifecycle state cannot be a plain
+        // "teardown has happened" flag. It was, and the result was that once the first attempt's @After had run,
+        // every later attempt disposed its own freshly acquired client the moment setup published it, and open()
+        // then failed with "Client was closed while attempting to open the connection". One flaky timeout became a
+        // guaranteed failure of every remaining attempt.
+        //
+        // Each setup takes a generation number, and teardown records the generation it covered. A setup only cleans
+        // up after itself if teardown has already run for its own generation, so an earlier attempt's teardown can
+        // no longer reach into a later attempt's.
+        private long setupGeneration;
+        private long disposedThrough;
 
         private final Object lifecycleLock = new Object();
         public AuthenticationType authenticationType;
@@ -166,26 +178,37 @@ public class ConnectionTests extends IntegrationTest
 
         public void setup() throws Exception
         {
+            long generation = beginSetup();
+
             ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
             applyProxySettings(optionsBuilder);
 
+            log.info("Acquiring test identity");
+
             if (clientType == ClientType.DEVICE_CLIENT)
             {
-                trackForCleanup(Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false, optionsBuilder));
+                trackForCleanup(generation, Tools.getTestDevice(iotHubConnectionString, this.protocol, this.authenticationType, false, optionsBuilder), false);
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
-                trackForCleanup(Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false, optionsBuilder));
+                trackForCleanup(generation, Tools.getTestModule(iotHubConnectionString, this.protocol, this.authenticationType , false, optionsBuilder), false);
             }
 
-            disposeIfTeardownAlreadyRan();
+            log.info("Test identity acquired");
+
+            disposeIfTeardownAlreadyRan(generation);
         }
 
         public void setupEccDevice() throws Exception
         {
+            long generation = beginSetup();
+
             // Marked before anything is created, so that every identity this method goes on to publish is classified
             // as ECC even if teardown runs partway through.
-            this.identityIsEcc = true;
+            synchronized (lifecycleLock)
+            {
+                this.identityIsEcc = true;
+            }
 
             ClientOptions.ClientOptionsBuilder optionsBuilder = ClientOptions.builder();
             applyProxySettings(optionsBuilder);
@@ -200,12 +223,12 @@ public class ConnectionTests extends IntegrationTest
                 eccDevice.setThumbprint(certificateGenerator.getX509Thumbprint(), certificateGenerator.getX509Thumbprint());
 
                 Tools.addDeviceWithRetry(new RegistryClient(iotHubConnectionString), eccDevice);
-                trackEccDeviceForCleanup(eccDevice.getDeviceId());
+                trackEccDeviceForCleanup(generation, eccDevice.getDeviceId());
 
                 String deviceConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice);
-                trackForCleanup(new TestDeviceIdentity(
+                trackForCleanup(generation, new TestDeviceIdentity(
                     new DeviceClient(deviceConnectionString, testInstance.protocol, optionsBuilder.build()),
-                    eccDevice));
+                    eccDevice), true);
             }
             else if (clientType == ClientType.MODULE_CLIENT)
             {
@@ -215,52 +238,147 @@ public class ConnectionTests extends IntegrationTest
                 eccModule.setThumbprint(certificateGenerator.getX509Thumbprint(), certificateGenerator.getX509Thumbprint());
 
                 Tools.addDeviceWithRetry(new RegistryClient(iotHubConnectionString), eccDevice);
-                trackEccDeviceForCleanup(eccDevice.getDeviceId());
+                trackEccDeviceForCleanup(generation, eccDevice.getDeviceId());
 
                 Tools.addModuleWithRetry(new RegistryClient(iotHubConnectionString), eccModule);
 
                 String moduleConnectionString = Tools.getDeviceConnectionString(iotHubConnectionString, eccDevice) + ";ModuleId=" + eccModule.getId();
-                trackForCleanup(new TestModuleIdentity(
+                trackForCleanup(generation, new TestModuleIdentity(
                     new ModuleClient(moduleConnectionString, testInstance.protocol, optionsBuilder.build()),
                     eccDevice,
-                    eccModule));
+                    eccModule), true);
             }
 
-            disposeIfTeardownAlreadyRan();
+            disposeIfTeardownAlreadyRan(generation);
+        }
+
+        /**
+         * Begin a new setup attempt and take its generation number.
+         *
+         * <p>Reclaims anything a previous attempt left behind first. Normally there is nothing: that attempt's
+         * {@code @After} already claimed and cleared what it owned. Anything still present is residue from a setup
+         * abandoned by the timeout, and disposing it here is the last chance to reclaim it.</p>
+         *
+         * @return The generation number this setup attempt owns
+         */
+        private long beginSetup()
+        {
+            dispose();
+
+            synchronized (lifecycleLock)
+            {
+                return ++this.setupGeneration;
+            }
         }
 
         /**
          * Hand an identity to teardown, and publish it for the test body to use.
          *
+         * @param generation The generation of the setup attempt that produced this identity
          * @param newIdentity The identity this test just acquired or created
+         * @param isEcc Whether this identity was created by setupEccDevice
          */
-        private void trackForCleanup(TestIdentity newIdentity)
+        private void trackForCleanup(long generation, TestIdentity newIdentity, boolean isEcc)
         {
-            // Published for the test body. Never cleared, so a thread the JUnit timeout abandoned can keep reading it.
-            this.identity = newIdentity;
-
+            boolean superseded;
             synchronized (lifecycleLock)
             {
-                this.identityToDispose = newIdentity;
+                superseded = generation != this.setupGeneration;
+
+                if (!superseded)
+                {
+                    this.identityToDispose = newIdentity;
+
+                    if (isEcc)
+                    {
+                        this.identityIsEcc = true;
+                    }
+                }
             }
+
+            if (superseded)
+            {
+                // A setup the timeout abandoned finished after a later attempt had already started. Publishing now
+                // would give this instance an identity the running attempt is not using, and lose the one it is.
+                disposeSupersededIdentity(newIdentity, isEcc);
+                return;
+            }
+
+            // Published for the test body. Never cleared, so a thread the JUnit timeout abandoned can keep reading it.
+            this.identity = newIdentity;
         }
 
         /**
          * Hand a freshly registered ECC device to teardown, so it is removed from the registry even if the rest of
          * setupEccDevice never completes.
          *
+         * @param generation The generation of the setup attempt that registered this device
          * @param deviceId The device id that was just added to the registry
          */
-        private void trackEccDeviceForCleanup(String deviceId)
+        private void trackEccDeviceForCleanup(long generation, String deviceId)
         {
+            boolean superseded;
             synchronized (lifecycleLock)
             {
-                this.eccDeviceIdToDelete = deviceId;
+                superseded = generation != this.setupGeneration;
+
+                if (!superseded)
+                {
+                    this.eccDeviceIdToDelete = deviceId;
+                }
+            }
+
+            if (superseded)
+            {
+                removeEccDevice(deviceId);
             }
         }
 
         /**
-         * Dispose anything registered after teardown already ran.
+         * Close and discard an identity produced by a setup attempt that has already been superseded.
+         *
+         * @param supersededIdentity The identity to reclaim
+         * @param isEcc Whether it was created by setupEccDevice, and so must never be recycled
+         */
+        private void disposeSupersededIdentity(TestIdentity supersededIdentity, boolean isEcc)
+        {
+            log.debug("Reclaiming identity {} from a superseded setup attempt", supersededIdentity.getDeviceId());
+
+            if (supersededIdentity.getClient() != null)
+            {
+                supersededIdentity.getClient().close();
+            }
+
+            if (isEcc)
+            {
+                removeEccDevice(supersededIdentity.getDeviceId());
+            }
+            else
+            {
+                Tools.disposeTestIdentity(supersededIdentity, iotHubConnectionString);
+            }
+        }
+
+        /**
+         * Remove an ECC device from the registry. These are never recycled: they are self signed with a certificate
+         * no other test knows about, so returning one to the shared x509 pool would fail a later test.
+         *
+         * @param deviceId The device to remove
+         */
+        private void removeEccDevice(String deviceId)
+        {
+            try
+            {
+                Tools.getRegistyManager(iotHubConnectionString).removeDevice(deviceId);
+            }
+            catch (IOException | IotHubException e)
+            {
+                log.error("Failed to clean up ECC test device {}", deviceId, e);
+            }
+        }
+
+        /**
+         * Dispose anything registered after teardown already ran for this setup's generation.
          *
          * <p>Every test in this class is bounded by a timeout, the two minute one that {@link IntegrationTest}
          * applies. JUnit runs the test body on a
@@ -269,15 +387,21 @@ public class ConnectionTests extends IntegrationTest
          * acquiring its identity. Without this, the identity that setup goes on to produce would have no owner and
          * would leak, which is precisely the leak this class is trying to stop.</p>
          *
+         * <p>The generation matters. A rerun reuses this instance, so an unqualified "teardown has run" would still
+         * be set when the next attempt started, and that attempt would dispose its own client the moment it
+         * published it.</p>
+         *
          * <p>This does not wait for setup, in either direction. Blocking teardown on a setup that is itself hung -
          * which is how these tests have actually timed out - would stall the rest of the run.</p>
+         *
+         * @param generation The generation of the setup attempt that is finishing
          */
-        private void disposeIfTeardownAlreadyRan()
+        private void disposeIfTeardownAlreadyRan(long generation)
         {
             boolean teardownAlreadyRan;
             synchronized (lifecycleLock)
             {
-                teardownAlreadyRan = this.disposed;
+                teardownAlreadyRan = this.disposedThrough >= generation;
             }
 
             if (teardownAlreadyRan)
@@ -296,16 +420,21 @@ public class ConnectionTests extends IntegrationTest
         {
             TestIdentity identityToClean;
             String eccDeviceIdToClean;
+            boolean wasEcc;
 
             synchronized (lifecycleLock)
             {
-                this.disposed = true;
+                // Teardown covers every setup that has begun so far, and nothing later. A setup that starts after
+                // this takes a higher generation and is unaffected.
+                this.disposedThrough = this.setupGeneration;
 
                 identityToClean = this.identityToDispose;
                 eccDeviceIdToClean = this.eccDeviceIdToDelete;
+                wasEcc = this.identityIsEcc;
 
                 this.identityToDispose = null;
                 this.eccDeviceIdToDelete = null;
+                this.identityIsEcc = false;
             }
 
             if (identityToClean != null && identityToClean.getClient() != null)
@@ -319,16 +448,9 @@ public class ConnectionTests extends IntegrationTest
                 // the next test that takes an x509 identity from the shared pool, so delete it instead. This runs even
                 // when the identity was never finished being built, because the device is in the registry from the
                 // moment it is registered, whether or not the rest of the setup succeeded.
-                try
-                {
-                    Tools.getRegistyManager(iotHubConnectionString).removeDevice(eccDeviceIdToClean);
-                }
-                catch (IOException | IotHubException e)
-                {
-                    log.error("Failed to clean up ECC test device {}", eccDeviceIdToClean, e);
-                }
+                removeEccDevice(eccDeviceIdToClean);
             }
-            else if (identityToClean != null && this.identityIsEcc)
+            else if (identityToClean != null && wasEcc)
             {
                 // An earlier dispose already claimed and deleted the device id, and this identity was published after
                 // that. The device is gone from the registry, so there is nothing left to delete, but it must still
@@ -450,7 +572,12 @@ public class ConnectionTests extends IntegrationTest
         InternalClient client = testInstance.identity.getClient();
 
         logConnectionStatusChanges(client);
+
+        // Bracketing the open so a timeout can be attributed. Silence after "Acquiring test identity" and before this
+        // line means setup was stuck getting an identity; silence after this line means the connect itself stalled.
+        log.info("Opening client");
         client.open(true);
+        log.info("Client opened");
 
         // deviceClient.open() is a no-op on HTTP, so a message needs to be sent to actually test opening the connection
         if (testInstance.protocol == HTTPS)
@@ -482,7 +609,12 @@ public class ConnectionTests extends IntegrationTest
         InternalClient client = testInstance.identity.getClient();
 
         logConnectionStatusChanges(client);
+
+        // Bracketing the open so a timeout can be attributed. Silence after "Acquiring test identity" and before this
+        // line means setup was stuck getting an identity; silence after this line means the connect itself stalled.
+        log.info("Opening client");
         client.open(true);
+        log.info("Client opened");
 
         // deviceClient.open() is a no-op on HTTP, so a message needs to be sent to actually test opening the connection
         if (testInstance.protocol == HTTPS)
