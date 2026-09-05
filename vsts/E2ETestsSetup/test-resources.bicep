@@ -21,9 +21,6 @@ param BlobServiceName string = 'default'
 @description('The name of the Container inside the BlobService.')
 param ContainerName string = 'fileupload'
 
-@description('Flag to indicate if IoT hub should have security solution enabled.')
-param EnableIotHubSecuritySolution bool = false
-
 var hubKeysId = resourceId('Microsoft.Devices/IotHubs/Iothubkeys', HubName, 'iothubowner')
 var dpsKeysId = resourceId('Microsoft.Devices/ProvisioningServices/keys', DpsName, 'provisioningserviceowner')
 

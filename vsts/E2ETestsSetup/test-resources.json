@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.46.1.21595",
-      "templateHash": "7187049160758863132"
+      "templateHash": "3528572825137063880"
     }
   },
   "parameters": {
@@ -57,13 +57,6 @@
       "defaultValue": "fileupload",
       "metadata": {
         "description": "The name of the Container inside the BlobService."
-      }
-    },
-    "EnableIotHubSecuritySolution": {
-      "type": "bool",
-      "defaultValue": false,
-      "metadata": {
-        "description": "Flag to indicate if IoT hub should have security solution enabled."
       }
     }
   },
