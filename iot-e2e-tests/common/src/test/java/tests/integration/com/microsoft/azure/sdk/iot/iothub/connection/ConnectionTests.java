@@ -293,6 +293,11 @@ public class ConnectionTests extends IntegrationTest
                     {
                         this.identityIsEcc = true;
                     }
+
+                    // Published for the test body under the same lock, so that what teardown owns and what the test
+                    // body can see change together. Never cleared, so a thread the JUnit timeout abandoned can keep
+                    // reading it.
+                    this.identity = newIdentity;
                 }
             }
 
@@ -301,11 +306,7 @@ public class ConnectionTests extends IntegrationTest
                 // A setup the timeout abandoned finished after a later attempt had already started. Publishing now
                 // would give this instance an identity the running attempt is not using, and lose the one it is.
                 disposeSupersededIdentity(newIdentity, isEcc);
-                return;
             }
-
-            // Published for the test body. Never cleared, so a thread the JUnit timeout abandoned can keep reading it.
-            this.identity = newIdentity;
         }
 
         /**
@@ -351,12 +352,15 @@ public class ConnectionTests extends IntegrationTest
 
             if (isEcc)
             {
-                removeEccDevice(supersededIdentity.getDeviceId());
+                // Only the client is reclaimed here. setupEccDevice always registers the device and calls
+                // trackEccDeviceForCleanup before it builds the identity, so the device is already owned by whichever
+                // path saw it first: trackEccDeviceForCleanup removed it directly if it was superseded at
+                // registration, and otherwise the dispose that superseded this attempt removed it. Deleting it again
+                // would just log a not found error over a cleanup that had already worked.
+                return;
             }
-            else
-            {
-                Tools.disposeTestIdentity(supersededIdentity, iotHubConnectionString);
-            }
+
+            Tools.disposeTestIdentity(supersededIdentity, iotHubConnectionString);
         }
 
         /**
