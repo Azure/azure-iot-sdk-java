@@ -4,18 +4,18 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.15.31.15270",
-      "templateHash": "3831266858947033411"
+      "version": "0.46.1.21595",
+      "templateHash": "3528572825137063880"
     }
   },
   "parameters": {
     "StorageAccountName": {
       "type": "string",
+      "minLength": 3,
+      "maxLength": 24,
       "metadata": {
         "description": "The name of the storage account used by the IoT hub."
-      },
-      "maxLength": 24,
-      "minLength": 3
+      }
     },
     "HubName": {
       "type": "string",
@@ -118,7 +118,7 @@
     },
     {
       "type": "Microsoft.Devices/IotHubs",
-      "apiVersion": "2021-03-03-preview",
+      "apiVersion": "2023-06-30",
       "name": "[parameters('HubName')]",
       "location": "[resourceGroup().location]",
       "identity": {
@@ -147,7 +147,7 @@
             "maxDeliveryCount": 100
           }
         },
-        "StorageEndpoints": {
+        "storageEndpoints": {
           "$default": {
             "sasTtlAsIso8601": "PT1H",
             "connectionString": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1}', parameters('StorageAccountName'), listkeys(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageAccountName')), '2019-06-01').keys[0].value)]",

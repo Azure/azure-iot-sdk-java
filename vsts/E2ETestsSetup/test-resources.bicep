@@ -21,9 +21,6 @@ param BlobServiceName string = 'default'
 @description('The name of the Container inside the BlobService.')
 param ContainerName string = 'fileupload'
 
-@description('Flag to indicate if IoT hub should have security solution enabled.')
-param EnableIotHubSecuritySolution bool = false
-
 var hubKeysId = resourceId('Microsoft.Devices/IotHubs/Iothubkeys', HubName, 'iothubowner')
 var dpsKeysId = resourceId('Microsoft.Devices/ProvisioningServices/keys', DpsName, 'provisioningserviceowner')
 
@@ -70,7 +67,7 @@ resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@20
   }
 }
 
-resource iotHub 'Microsoft.Devices/IotHubs@2021-03-03-preview' = {
+resource iotHub 'Microsoft.Devices/IotHubs@2023-06-30' = {
   name: HubName
   location: resourceGroup().location
   identity: {
@@ -99,7 +96,7 @@ resource iotHub 'Microsoft.Devices/IotHubs@2021-03-03-preview' = {
         maxDeliveryCount: 100
       }
     }
-    StorageEndpoints: {
+    storageEndpoints: {
       '$default': {
         sasTtlAsIso8601: 'PT1H'
         connectionString: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${listkeys(storageAccount.id, '2019-06-01').keys[0].value}'
