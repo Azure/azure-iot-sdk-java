@@ -8,6 +8,8 @@ import com.microsoft.azure.sdk.iot.provisioning.service.Query;
 import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 
+import java.util.Collections;
+
 /**
  * Create, get, query, and delete an individual enrollment on the Microsoft Azure IoT Hub Device Provisioning Service
  */
@@ -47,6 +49,14 @@ public class ServiceEnrollmentSample
         individualEnrollment.setIotHubHostName(IOTHUB_HOST_NAME);
         individualEnrollment.setProvisioningStatus(PROVISIONING_STATUS);
 
+        // ***** Optional 2026-11-02-preview fields *****
+        // These fields are supported by the 2026-11-02-preview DPS service API version, which this SDK targets.
+        // Remove them if you don't need them.
+        individualEnrollment.setNamespaceName("[Namespace Name]");
+        individualEnrollment.setCertificateAuthorityName("[Certificate Authority Name]");
+        individualEnrollment.setCertificatePolicyName("[Certificate Policy Name]");
+        individualEnrollment.setDeviceTypeRefs(Collections.singletonList("[Device Type Ref]"));
+
         // ************************************ Create the individualEnrollment *************************************
         System.out.println("\nAdd new individualEnrollment...");
         IndividualEnrollment individualEnrollmentResult =  provisioningServiceClient.createOrUpdateIndividualEnrollment(individualEnrollment);
@@ -57,6 +67,20 @@ public class ServiceEnrollmentSample
         System.out.println("\nGet the individualEnrollment information...");
         IndividualEnrollment getResult = provisioningServiceClient.getIndividualEnrollment(REGISTRATION_ID);
         System.out.println(getResult);
+
+        // ***** Inspect 2026-11-02-preview response fields *****
+        System.out.println("\nNamespace name: " + getResult.getNamespaceName());
+        System.out.println("Certificate authority name: " + getResult.getCertificateAuthorityName());
+        System.out.println("Certificate policy name: " + getResult.getCertificatePolicyName());
+        System.out.println("Device type refs: " + getResult.getDeviceTypeRefs());
+
+        // The device registration state carries a response-only connectionProfile (2026-11-02-preview).
+        // It is an extensible enum (for example "classic" or "mqttV5"); unknown values are preserved as-is.
+        DeviceRegistrationState registrationState = getResult.getDeviceRegistrationState();
+        if (registrationState != null)
+        {
+            System.out.println("Connection profile: " + registrationState.getConnectionProfile());
+        }
 
         // ************************************ Query info of individualEnrollment ************************************
         System.out.println("\nCreate a query for enrollments...");
