@@ -23,4 +23,4 @@ steps:
       Write-Host "##vso[task.setvariable variable=RESOURCE_GROUP_NAME;isOutput=true]$resourceGroupName"
       Write-Host "##vso[task.setvariable variable=DEPLOYMENT_NAME;isOutput=true]$deploymentName"
 
-      $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region westcentralus -ResourceGroup $resourceGroupName -DeploymentName $deploymentName
+      $(Build.SourcesDirectory)/vsts/E2ETestsSetup/e2eTestsSetup.ps1 -SubscriptionId $subscriptionId -Region eastus -ResourceGroup $resourceGroupName -DeploymentName $deploymentName
