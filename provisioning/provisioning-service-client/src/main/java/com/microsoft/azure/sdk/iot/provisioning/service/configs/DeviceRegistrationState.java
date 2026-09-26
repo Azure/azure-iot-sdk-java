@@ -105,6 +105,13 @@ public class DeviceRegistrationState implements Serializable
     @Getter
     private String etag;
 
+    // the connection profile (2026-11-02-preview); response-only, extensible enum (e.g. "classic", "mqttV5")
+    private static final String CONNECTION_PROFILE_TAG = "connectionProfile";
+    @Expose
+    @SerializedName(CONNECTION_PROFILE_TAG)
+    @Getter
+    private String connectionProfile;
+
     /**
      * CONSTRUCTOR
      *
@@ -172,6 +179,11 @@ public class DeviceRegistrationState implements Serializable
         {
             ParserUtility.validateStringUTF8(result.etag);
             this.etag = result.etag;
+        }
+
+        if (result.connectionProfile != null)
+        {
+            this.connectionProfile = result.connectionProfile;
         }
     }
 

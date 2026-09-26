@@ -211,6 +211,38 @@ public class EnrollmentGroup extends Serializable
     @Setter
     private Collection<String> iotHubs;
 
+    // the namespace name (2026-11-02-preview)
+    private static final String NAMESPACE_NAME_TAG = "namespaceName";
+    @Expose
+    @SerializedName(NAMESPACE_NAME_TAG)
+    @Getter
+    @Setter
+    private String namespaceName;
+
+    // the certificate authority name (2026-11-02-preview)
+    private static final String CERTIFICATE_AUTHORITY_NAME_TAG = "certificateAuthorityName";
+    @Expose
+    @SerializedName(CERTIFICATE_AUTHORITY_NAME_TAG)
+    @Getter
+    @Setter
+    private String certificateAuthorityName;
+
+    // the certificate policy name (2026-11-02-preview)
+    private static final String CERTIFICATE_POLICY_NAME_TAG = "certificatePolicyName";
+    @Expose
+    @SerializedName(CERTIFICATE_POLICY_NAME_TAG)
+    @Getter
+    @Setter
+    private String certificatePolicyName;
+
+    // the device type references (2026-11-02-preview)
+    private static final String DEVICE_TYPE_REFS_TAG = "deviceTypeRefs";
+    @Expose
+    @SerializedName(DEVICE_TYPE_REFS_TAG)
+    @Getter
+    @Setter
+    private Collection<String> deviceTypeRefs;
+
     private static final String DEVICE_CAPABILITIES_TAG = "capabilities";
     @Expose
     @SerializedName(DEVICE_CAPABILITIES_TAG)
@@ -336,6 +368,10 @@ public class EnrollmentGroup extends Serializable
         }
 
         this.setIotHubs(result.getIotHubs());
+        this.setNamespaceName(result.getNamespaceName());
+        this.setCertificateAuthorityName(result.getCertificateAuthorityName());
+        this.setCertificatePolicyName(result.getCertificatePolicyName());
+        this.setDeviceTypeRefs(result.getDeviceTypeRefs());
         this.setAllocationPolicy(result.getAllocationPolicy());
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
         this.setReprovisionPolicy(result.getReprovisionPolicy());
