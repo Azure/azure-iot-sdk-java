@@ -130,7 +130,7 @@ public final class ProvisioningServiceClient
         this.enrollmentGroupManager = EnrollmentGroupManager.createFromContractApiHttp(contractApiHttp);
         this.registrationStatusManager = RegistrationStatusManager.createFromContractApiHttp(contractApiHttp);
 
-        log.debug("Initialized a ProvisioningServiceClient instance using SDK version {}", SDKUtils.getServiceApiVersion());
+        log.debug("Initialized a ProvisioningServiceClient instance using service API version {}", SDKUtils.getServiceApiVersion());
     }
 
     /**
