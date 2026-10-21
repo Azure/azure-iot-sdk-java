@@ -100,7 +100,7 @@ public class ProvisioningServiceClientTests
         EnrollmentGroup enrollment = new EnrollmentGroup(groupId, attestation);
         enrollment.setAllocationPolicy(AllocationPolicy.CUSTOM);
         CustomAllocationDefinition customAllocationDefinition = new CustomAllocationDefinition();
-        customAllocationDefinition.setApiVersion("2018-09-01-preview");
+        customAllocationDefinition.setApiVersion("2026-11-01");
         customAllocationDefinition.setWebhookUrl(customAllocationWebhookUrl);
         enrollment.setCustomAllocationDefinition(customAllocationDefinition);
         ReprovisionPolicy reprovisionPolicy = new ReprovisionPolicy();

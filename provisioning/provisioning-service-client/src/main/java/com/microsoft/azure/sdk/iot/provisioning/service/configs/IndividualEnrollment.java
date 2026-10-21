@@ -226,6 +226,30 @@ public class IndividualEnrollment extends Serializable
     @Setter
     private Collection<String> iotHubs;
 
+    // the namespace containing the referenced certificate authority and policy
+    private static final String NAMESPACE_NAME_TAG = "namespaceName";
+    @Expose
+    @SerializedName(NAMESPACE_NAME_TAG)
+    @Getter
+    @Setter
+    private String namespaceName;
+
+    // the certificate authority resource that owns the referenced certificate policy
+    private static final String CERTIFICATE_AUTHORITY_NAME_TAG = "certificateAuthorityName";
+    @Expose
+    @SerializedName(CERTIFICATE_AUTHORITY_NAME_TAG)
+    @Getter
+    @Setter
+    private String certificateAuthorityName;
+
+    // the certificate policy resource name
+    private static final String CERTIFICATE_POLICY_NAME_TAG = "certificatePolicyName";
+    @Expose
+    @SerializedName(CERTIFICATE_POLICY_NAME_TAG)
+    @Getter
+    @Setter
+    private String certificatePolicyName;
+
     /**
      * CONSTRUCTOR
      *
@@ -354,6 +378,9 @@ public class IndividualEnrollment extends Serializable
         }
 
         this.setIotHubs(result.getIotHubs());
+        this.setNamespaceName(result.getNamespaceName());
+        this.setCertificateAuthorityName(result.getCertificateAuthorityName());
+        this.setCertificatePolicyName(result.getCertificatePolicyName());
         this.setAllocationPolicy(result.getAllocationPolicy());
         this.setCustomAllocationDefinition(result.getCustomAllocationDefinition());
         this.setReprovisionPolicy(result.getReprovisionPolicy());
