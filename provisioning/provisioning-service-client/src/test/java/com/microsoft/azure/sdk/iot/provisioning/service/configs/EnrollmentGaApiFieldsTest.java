@@ -7,6 +7,8 @@ import com.google.gson.JsonObject;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 
 public class EnrollmentGaApiFieldsTest
 {
@@ -14,7 +16,7 @@ public class EnrollmentGaApiFieldsTest
     private static final String SECONDARY_KEY = "dmFsaWRTZWNvbmRhcnlLZXk=";
 
     @Test
-    public void individualEnrollment_WithGaFields_RoundTrips()
+    public void individualEnrollment_GaFields_RoundTrip()
     {
         IndividualEnrollment enrollment = new IndividualEnrollment(
             "registration-id",
@@ -35,7 +37,7 @@ public class EnrollmentGaApiFieldsTest
     }
 
     @Test
-    public void enrollmentGroup_WithGaFields_RoundTrips()
+    public void enrollmentGroup_GaFields_RoundTrip()
     {
         EnrollmentGroup enrollmentGroup = new EnrollmentGroup(
             "enrollment-group-id",
@@ -53,5 +55,39 @@ public class EnrollmentGaApiFieldsTest
         assertEquals("namespace", deserializedEnrollmentGroup.getNamespaceName());
         assertEquals("authority", deserializedEnrollmentGroup.getCertificateAuthorityName());
         assertEquals("policy", deserializedEnrollmentGroup.getCertificatePolicyName());
+    }
+
+    @Test
+    public void individualEnrollment_GaFieldsAbsent_LeavesNullAndOmitsFromJson()
+    {
+        IndividualEnrollment enrollment = new IndividualEnrollment(
+            "registration-id",
+            new SymmetricKeyAttestation(PRIMARY_KEY, SECONDARY_KEY));
+
+        assertNull(enrollment.getNamespaceName());
+        assertNull(enrollment.getCertificateAuthorityName());
+        assertNull(enrollment.getCertificatePolicyName());
+
+        JsonObject enrollmentJson = enrollment.toJsonElement().getAsJsonObject();
+        assertFalse(enrollmentJson.has("namespaceName"));
+        assertFalse(enrollmentJson.has("certificateAuthorityName"));
+        assertFalse(enrollmentJson.has("certificatePolicyName"));
+    }
+
+    @Test
+    public void enrollmentGroup_GaFieldsAbsent_LeavesNullAndOmitsFromJson()
+    {
+        EnrollmentGroup enrollmentGroup = new EnrollmentGroup(
+            "enrollment-group-id",
+            new SymmetricKeyAttestation(PRIMARY_KEY, SECONDARY_KEY));
+
+        assertNull(enrollmentGroup.getNamespaceName());
+        assertNull(enrollmentGroup.getCertificateAuthorityName());
+        assertNull(enrollmentGroup.getCertificatePolicyName());
+
+        JsonObject enrollmentGroupJson = enrollmentGroup.toJsonElement().getAsJsonObject();
+        assertFalse(enrollmentGroupJson.has("namespaceName"));
+        assertFalse(enrollmentGroupJson.has("certificateAuthorityName"));
+        assertFalse(enrollmentGroupJson.has("certificatePolicyName"));
     }
 }

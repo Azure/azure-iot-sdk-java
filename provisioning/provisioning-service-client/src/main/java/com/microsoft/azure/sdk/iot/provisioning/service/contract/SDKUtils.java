@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SDKUtils
 {
+    // The service client sends this GA version with every DPS service request.
     private static final String SERVICE_API_VERSION = "2026-11-01";
     private static final String PROVISIONING_SERVICE_CLIENT = "com.microsoft.azure.sdk.iot.provisioning.service.provisioning-service-client/";
     private static final String PROVISIONING_SERVICE_CLIENT_VERSION = getPackageVersion();
