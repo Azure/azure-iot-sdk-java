@@ -123,8 +123,10 @@ public class IotHubTransport implements IotHubListener
     private final boolean useIdentifiableThreadNames;
 
     // Flag set when close() starts. Acts as a signal to any running reconnection logic to not try again.
+    // Volatile because it is written by the thread calling close() and read by a different thread that is looping
+    // in open() or reconnect(), without any lock shared between the two.
     @Setter
-    private boolean isClosing;
+    private volatile boolean isClosing;
 
     // Used to store the CorrelationCallbackMessage, context, and start time for a correlationId
     private final Map<String, CorrelationCallbackContext> correlationCallbacks = new ConcurrentHashMap<>();

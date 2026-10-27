@@ -107,9 +107,9 @@ public class ConnectionTests extends IntegrationTest
         // deletes any module underneath it, so the module does not need to be tracked separately.
         private String eccDeviceIdToDelete;
 
-        // What teardown still owns, kept separate from the public identity field above. dispose() clears these but
+        // What teardown still owns, kept separate from the public identity field above. claimLocked() clears these but
         // deliberately leaves identity set, because a test thread abandoned by the JUnit timeout may still read it.
-        // Clearing them is what makes dispose() safe to run more than once: without it a second run would close the
+        // Clearing them is what makes cleanup safe to run more than once: without it a second run would close the
         // same client twice and, worse, requeue the same identity into the shared pool twice.
         private TestIdentity identityToDispose;
 
@@ -133,6 +133,17 @@ public class ConnectionTests extends IntegrationTest
         // no longer reach into a later attempt's.
         private long setupGeneration;
         private long disposedThrough;
+
+        // The generation of the setup attempt that ran on the current thread, so that @After knows which attempt it
+        // belongs to.
+        //
+        // The two minute timeout is a JUnit rule (see IntegrationTest), and rules wrap @Before and @After as well as
+        // the test body. So each attempt's body and its @After run together on one "Time-limited test" thread, and
+        // when that attempt times out, JUnit abandons the whole thread - @After included - and RerunFailedTestRule
+        // starts the next attempt straight away on a new thread. The abandoned @After still runs eventually, once
+        // the stale open() gives up, and by then a later attempt owns this instance. Without knowing its own
+        // generation, that late @After would close the later attempt's client out from under it.
+        private final ThreadLocal<Long> setupGenerationOnThisThread = new ThreadLocal<>();
 
         private final Object lifecycleLock = new Object();
         public AuthenticationType authenticationType;
@@ -256,19 +267,38 @@ public class ConnectionTests extends IntegrationTest
          * Begin a new setup attempt and take its generation number.
          *
          * <p>Reclaims anything a previous attempt left behind first. Normally there is nothing: that attempt's
-         * {@code @After} already claimed and cleared what it owned. Anything still present is residue from a setup
-         * abandoned by the timeout, and disposing it here is the last chance to reclaim it.</p>
+         * {@code @After} already claimed and cleared what it owned. Anything still present belongs to an attempt the
+         * timeout abandoned, whose {@code @After} has not run and, once this generation is taken, never will act.</p>
+         *
+         * <p>That residue is released on a background thread rather than here. Its client is typically still inside
+         * an open() that is stuck on a connect attempt, and close() waits for open() to let go of the client's state
+         * lock, which can take as long as a whole MQTT connect timeout. Waiting for it here would spend this
+         * attempt's own time budget on the previous attempt's hang.</p>
          *
          * @return The generation number this setup attempt owns
          */
         private long beginSetup()
         {
-            dispose();
-
+            Claim residue;
+            long generation;
             synchronized (lifecycleLock)
             {
-                return ++this.setupGeneration;
+                // Claimed and superseded in one step, so that nothing can be published in between that would belong
+                // to neither generation.
+                residue = claimLocked();
+                generation = ++this.setupGeneration;
             }
+
+            setupGenerationOnThisThread.set(generation);
+
+            if (!residue.isEmpty())
+            {
+                Thread residueCleanupThread = new Thread(() -> release(residue), "ConnectionTests-residue-cleanup");
+                residueCleanupThread.setDaemon(true);
+                residueCleanupThread.start();
+            }
+
+            return generation;
         }
 
         /**
@@ -355,7 +385,7 @@ public class ConnectionTests extends IntegrationTest
                 // Only the client is reclaimed here. setupEccDevice always registers the device and calls
                 // trackEccDeviceForCleanup before it builds the identity, so the device is already owned by whichever
                 // path saw it first: trackEccDeviceForCleanup removed it directly if it was superseded at
-                // registration, and otherwise the dispose that superseded this attempt removed it. Deleting it again
+                // registration, and otherwise the claim in beginSetup that superseded this attempt removed it. Deleting it again
                 // would just log a not found error over a cleanup that had already worked.
                 return;
             }
@@ -385,15 +415,16 @@ public class ConnectionTests extends IntegrationTest
          * Dispose anything registered after teardown already ran for this setup's generation.
          *
          * <p>Every test in this class is bounded by a timeout, the two minute one that {@link IntegrationTest}
-         * applies. JUnit runs the test body on a
-         * separate thread and, when the timeout fires, abandons that thread while it is still running. {@code @After}
-         * is outside the timeout, so teardown can execute while setup on the abandoned thread has not finished
-         * acquiring its identity. Without this, the identity that setup goes on to produce would have no owner and
-         * would leak, which is precisely the leak this class is trying to stop.</p>
+         * applies as a JUnit rule. JUnit runs the test body and its {@code @After} together on a separate thread and,
+         * when the timeout fires, abandons that thread while it is still running. A later attempt's setup then claims
+         * whatever the abandoned attempt had published, which can happen while setup on the abandoned thread has not
+         * finished acquiring its identity. Without this, the identity that setup goes on to produce would have no
+         * owner and would leak, which is precisely the leak this class is trying to stop.</p>
          *
          * <p>The generation matters. A rerun reuses this instance, so an unqualified "teardown has run" would still
          * be set when the next attempt started, and that attempt would dispose its own client the moment it
-         * published it.</p>
+         * published it. The disposal is bounded by the generation for the same reason: once this attempt has been
+         * superseded, whatever the instance now owns belongs to the later attempt.</p>
          *
          * <p>This does not wait for setup, in either direction. Blocking teardown on a setup that is itself hung -
          * which is how these tests have actually timed out - would stall the rest of the run.</p>
@@ -410,53 +441,99 @@ public class ConnectionTests extends IntegrationTest
 
             if (teardownAlreadyRan)
             {
-                dispose();
+                dispose(generation);
             }
         }
 
         /**
-         * Close and dispose whatever this instance currently owns.
+         * Teardown for the attempt that ran on the calling thread. Called from {@code @After}.
+         *
+         * <p>If a later attempt has started since this thread's setup, this is the late {@code @After} of an
+         * attempt the timeout abandoned, and it does nothing. The later attempt's setup already claimed what this
+         * attempt owned, and everything the instance owns now belongs to that later attempt.</p>
+         */
+        public void teardown()
+        {
+            Long generation = setupGenerationOnThisThread.get();
+            setupGenerationOnThisThread.remove();
+
+            // Null when this thread never ran a setup, for instance a test that does not use one or that was skipped
+            // by an assumption first. Such a test never publishes anything, so nothing newer can be at risk.
+            dispose(generation);
+        }
+
+        /**
+         * Close and dispose whatever this instance currently owns, provided it still belongs to the given generation.
          *
          * <p>Safe to call more than once, and safe to call concurrently with setup: it takes ownership of the tracked
          * fields and clears them, so a second call finds only what was registered since the first.</p>
+         *
+         * @param ownerGeneration The setup generation the caller acts for, or null to dispose unconditionally
          */
-        public void dispose()
+        private void dispose(Long ownerGeneration)
         {
-            TestIdentity identityToClean;
-            String eccDeviceIdToClean;
-            boolean wasEcc;
-
+            Claim claim;
             synchronized (lifecycleLock)
             {
-                // Teardown covers every setup that has begun so far, and nothing later. A setup that starts after
-                // this takes a higher generation and is unaffected.
-                this.disposedThrough = this.setupGeneration;
+                if (ownerGeneration != null && ownerGeneration != this.setupGeneration)
+                {
+                    log.debug("Skipping cleanup for superseded setup attempt {}; attempt {} owns this instance now",
+                        ownerGeneration, this.setupGeneration);
+                    return;
+                }
 
-                identityToClean = this.identityToDispose;
-                eccDeviceIdToClean = this.eccDeviceIdToDelete;
-                wasEcc = this.identityIsEcc;
-
-                this.identityToDispose = null;
-                this.eccDeviceIdToDelete = null;
-                this.identityIsEcc = false;
+                claim = claimLocked();
             }
+
+            release(claim);
+        }
+
+        /**
+         * Take ownership of everything this instance currently tracks for cleanup. Must hold lifecycleLock.
+         *
+         * @return What was claimed, to be passed to {@link #release(Claim)} once the lock is released
+         */
+        private Claim claimLocked()
+        {
+            // Teardown covers every setup that has begun so far, and nothing later. A setup that starts after
+            // this takes a higher generation and is unaffected.
+            this.disposedThrough = this.setupGeneration;
+
+            Claim claim = new Claim(this.identityToDispose, this.eccDeviceIdToDelete, this.identityIsEcc);
+
+            this.identityToDispose = null;
+            this.eccDeviceIdToDelete = null;
+            this.identityIsEcc = false;
+
+            return claim;
+        }
+
+        /**
+         * Close and clean up what a {@link #claimLocked()} call took ownership of. Must not hold lifecycleLock,
+         * since closing a client can block for as long as an in-progress open of that client.
+         *
+         * @param claim What to clean up
+         */
+        private void release(Claim claim)
+        {
+            TestIdentity identityToClean = claim.identity;
 
             if (identityToClean != null && identityToClean.getClient() != null)
             {
                 identityToClean.getClient().close();
             }
 
-            if (eccDeviceIdToClean != null)
+            if (claim.eccDeviceId != null)
             {
                 // Recycling this identity would hand a device carrying a certificate that no other test knows about to
                 // the next test that takes an x509 identity from the shared pool, so delete it instead. This runs even
                 // when the identity was never finished being built, because the device is in the registry from the
                 // moment it is registered, whether or not the rest of the setup succeeded.
-                removeEccDevice(eccDeviceIdToClean);
+                removeEccDevice(claim.eccDeviceId);
             }
-            else if (identityToClean != null && wasEcc)
+            else if (identityToClean != null && claim.wasEcc)
             {
-                // An earlier dispose already claimed and deleted the device id, and this identity was published after
+                // An earlier claim already took and deleted the device id, and this identity was published after
                 // that. The device is gone from the registry, so there is nothing left to delete, but it must still
                 // not be recycled: it is self signed with a certificate no other test knows about.
                 log.debug("Discarding late ECC identity {} rather than recycling it", identityToClean.getDeviceId());
@@ -465,6 +542,25 @@ public class ConnectionTests extends IntegrationTest
             {
                 Tools.disposeTestIdentity(identityToClean, iotHubConnectionString);
             }
+        }
+    }
+
+    private static final class Claim
+    {
+        final TestIdentity identity;
+        final String eccDeviceId;
+        final boolean wasEcc;
+
+        Claim(TestIdentity identity, String eccDeviceId, boolean wasEcc)
+        {
+            this.identity = identity;
+            this.eccDeviceId = eccDeviceId;
+            this.wasEcc = wasEcc;
+        }
+
+        boolean isEmpty()
+        {
+            return identity == null && eccDeviceId == null;
         }
     }
 
@@ -505,7 +601,7 @@ public class ConnectionTests extends IntegrationTest
     @After
     public void disposeTestInstance()
     {
-        testInstance.dispose();
+        testInstance.teardown();
     }
 
     @AfterClass
@@ -571,8 +667,8 @@ public class ConnectionTests extends IntegrationTest
     {
         testInstance.setup();
 
-        // Held locally rather than read back off testInstance for each call. The @After that disposes this instance
-        // runs outside this method's timeout, so it can execute while this thread is still here after a timeout.
+        // Held locally rather than read back off testInstance for each call. If this attempt times out, the rerun's
+        // setup replaces testInstance.identity while this abandoned thread may still be running.
         InternalClient client = testInstance.identity.getClient();
 
         logConnectionStatusChanges(client);
