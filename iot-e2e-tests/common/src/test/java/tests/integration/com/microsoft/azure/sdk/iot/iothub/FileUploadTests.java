@@ -36,6 +36,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.FlakeyTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.ProxyServerTools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestConstants;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.TestDeviceIdentity;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
@@ -147,12 +148,12 @@ public class FileUploadTests extends IntegrationTest
     }
 
     @BeforeClass
-    public static void startProxy()
+    public static void startProxy() throws Exception
     {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
         config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
-        proxyServer.startAsync(testProxyPort);
+        ProxyServerTools.startProxyServer(proxyServer, testProxyPort);
     }
 
     @AfterClass

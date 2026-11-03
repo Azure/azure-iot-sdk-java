@@ -38,6 +38,9 @@
                             <addClasspath>true</addClasspath>
                             <mainClass>tools.com.microsoft.azure.sdk.iot.ProvisioningX509CertGen</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Automatic-Module-Name>com.microsoft.provisioning.x509.cert.generator</Automatic-Module-Name>
+                        </manifestEntries>
                     </archive>
                 </configuration>
             </plugin>
@@ -48,18 +51,6 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.4</version>
-                <configuration>
-                    <archive>
-                        <manifestEntries>
-                            <Automatic-Module-Name>com.microsoft.provisioning.x509.cert.generator</Automatic-Module-Name>
-                        </manifestEntries>
-                    </archive>
                 </configuration>
             </plugin>
             <plugin>

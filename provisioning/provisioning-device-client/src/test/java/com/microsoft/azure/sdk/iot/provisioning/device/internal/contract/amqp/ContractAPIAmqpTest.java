@@ -68,9 +68,6 @@ public class ContractAPIAmqpTest
     Map<String, Object> mockedHashMap;
 
     @Mocked
-    Object mockSendLock;
-
-    @Mocked
     ProvisioningDeviceClientConfig mockedProvisioningDeviceClientConfig;
 
     @Mocked

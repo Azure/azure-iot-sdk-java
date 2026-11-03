@@ -203,12 +203,12 @@ public class MultiplexingClientTests extends IntegrationTest
     }
 
     @BeforeClass
-    public static void startProxy()
+    public static void startProxy() throws Exception
     {
         HttpProxyServerConfig config = new HttpProxyServerConfig();
         config.setHandleSsl(false);
         proxyServer = new HttpProxyServer().serverConfig(config);
-        proxyServer.startAsync(testProxyPort);
+        ProxyServerTools.startProxyServer(proxyServer, testProxyPort);
     }
 
     @AfterClass
