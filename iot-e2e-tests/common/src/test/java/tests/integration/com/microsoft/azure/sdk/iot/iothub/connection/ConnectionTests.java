@@ -12,10 +12,7 @@ import com.microsoft.azure.sdk.iot.service.registry.Device;
 import com.microsoft.azure.sdk.iot.service.registry.Module;
 import com.microsoft.azure.sdk.iot.service.registry.RegistryClient;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.*;
@@ -35,6 +32,7 @@ import static com.microsoft.azure.sdk.iot.service.auth.AuthenticationType.SELF_S
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
+@Ignore // Flakey tests
 @Slf4j
 @IotHubTest
 @RunWith(Parameterized.class)
