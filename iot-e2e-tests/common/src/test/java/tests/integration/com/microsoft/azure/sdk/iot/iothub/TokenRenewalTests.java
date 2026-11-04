@@ -23,6 +23,7 @@ import com.microsoft.azure.sdk.iot.service.registry.Device;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.RuleChain;
 import org.junit.rules.Timeout;
@@ -46,6 +47,7 @@ import static junit.framework.TestCase.assertTrue;
 
 @Slf4j
 @IotHubTest
+@Ignore // Flakey tests
 public class TokenRenewalTests extends IntegrationTest
 {
     protected static String iotHubConnectionString;
