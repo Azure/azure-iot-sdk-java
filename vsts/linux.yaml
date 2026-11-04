@@ -31,7 +31,7 @@ jobs:
     timeoutInMinutes: 180
     pool:
       # If this is changed, don't forget to update supported_platforms.md in the root directory. That document outlines what OS we test on and should stay up to date.
-      vmImage: ubuntu-latest
+      vmImage: ubuntu-22.04 # ubuntu-latest no longer carries Java 8 installations, so pin to this version
     displayName: Linux
     strategy:
       maxParallel: $[variables.maxParallel]
