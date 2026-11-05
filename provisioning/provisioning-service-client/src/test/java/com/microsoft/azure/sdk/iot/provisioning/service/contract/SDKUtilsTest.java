@@ -23,8 +23,7 @@ public class SDKUtilsTest
         String serviceApiVersion = Deencapsulation.invoke("com.microsoft.azure.sdk.iot.provisioning.service.contract.SDKUtils", "getServiceApiVersion");
 
         // assert
-        assertNotNull(serviceApiVersion);
-        assertFalse(serviceApiVersion.isEmpty());
+        assertEquals("2026-11-01", serviceApiVersion);
     }
 
     /* SRS_SDK_UTILS_21_002: [The getUserAgentString shall return a string with the SDK name and version separated by `/`.] */

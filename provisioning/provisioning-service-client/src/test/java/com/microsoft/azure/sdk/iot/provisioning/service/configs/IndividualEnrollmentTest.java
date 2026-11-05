@@ -1101,7 +1101,7 @@ public class IndividualEnrollmentTest
     {
         // arrange
         String expectedWebhookUrl = "https://www.microsoft.com";
-        String expectedApiVersion = "2019-03-31";
+        String expectedApiVersion = "2026-11-01";
         final String json = "{\n" +
                 "  \"registrationId\": \"" + VALID_REGISTRATION_ID + "\",\n" +
                 "  \"customAllocationDefinition\": {\n" +
