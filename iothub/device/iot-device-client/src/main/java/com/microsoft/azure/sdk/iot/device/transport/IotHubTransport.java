@@ -236,11 +236,14 @@ public class IotHubTransport implements IotHubListener
             return true;
         }
 
-        for (MultiplexedDeviceState multiplexedDeviceState : this.multiplexedDeviceConnectionStates.values())
+        if (this.isMultiplexing)
         {
-            if (multiplexedDeviceState.getConnectionStatus() == IotHubConnectionStatus.DISCONNECTED_RETRYING)
+            for (MultiplexedDeviceState multiplexedDeviceState : this.multiplexedDeviceConnectionStates.values())
             {
-                return true;
+                if (multiplexedDeviceState.getConnectionStatus() == IotHubConnectionStatus.DISCONNECTED_RETRYING)
+                {
+                    return true;
+                }
             }
         }
 

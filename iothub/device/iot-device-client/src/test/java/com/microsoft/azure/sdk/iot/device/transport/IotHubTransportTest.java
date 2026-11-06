@@ -118,6 +118,50 @@ public class IotHubTransportTest
         IotHubTransport transport = new IotHubTransport(null, mockedIotHubConnectionStatusChangeCallback, false);
     }
 
+    @Test
+    public void needsReconnectIgnoresDeviceSessionStateWhenNotMultiplexing()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockedConfig.getDeviceId();
+                result = "someDeviceId";
+            }
+        };
+        IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
+        Map<String, MultiplexedDeviceState> deviceConnectionStates = Deencapsulation.getField(transport, "multiplexedDeviceConnectionStates");
+        deviceConnectionStates.values().iterator().next().setConnectionStatus(DISCONNECTED_RETRYING);
+
+        //act
+        boolean needsReconnect = transport.needsReconnect();
+
+        //assert
+        assertFalse(needsReconnect);
+    }
+
+    @Test
+    public void needsReconnectChecksDeviceSessionStateWhenMultiplexing()
+    {
+        //arrange
+        new Expectations()
+        {
+            {
+                mockedConfig.getDeviceId();
+                result = "someDeviceId";
+            }
+        };
+        IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, true);
+        Map<String, MultiplexedDeviceState> deviceConnectionStates = Deencapsulation.getField(transport, "multiplexedDeviceConnectionStates");
+        deviceConnectionStates.values().iterator().next().setConnectionStatus(DISCONNECTED_RETRYING);
+
+        //act
+        boolean needsReconnect = transport.needsReconnect();
+
+        //assert
+        assertTrue(needsReconnect);
+    }
+
     //Tests_SRS_IOTHUBTRANSPORT_34_004: [This function shall retrieve a packet from the inProgressPackets queue with the message id from the provided message if there is one.]
     //Tests_SRS_IOTHUBTRANSPORT_34_006: [If there was a packet in the inProgressPackets queue tied to the provided message, and the provided throwable is a TransportException, this function shall call "handleMessageException" with the provided packet and transport exception.]
     @Test
