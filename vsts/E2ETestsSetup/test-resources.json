@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.46.1.21595",
-      "templateHash": "3528572825137063880"
+      "templateHash": "7235129954165692613"
     }
   },
   "parameters": {
@@ -76,6 +76,7 @@
       },
       "kind": "StorageV2",
       "properties": {
+        "allowBlobPublicAccess": false,
         "supportsHttpsTrafficOnly": true,
         "encryption": {
           "services": {
