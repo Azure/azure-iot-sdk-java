@@ -5,6 +5,7 @@ import com.microsoft.azure.sdk.iot.provisioning.service.configs.*;
 import com.microsoft.azure.sdk.iot.provisioning.service.exceptions.ProvisioningServiceClientException;
 import org.junit.Before;
 import org.junit.Test;
+import tests.integration.com.microsoft.azure.sdk.iot.helpers.IntegrationTest;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.Tools;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.X509CertificateGenerator;
 import tests.integration.com.microsoft.azure.sdk.iot.helpers.annotations.DeviceProvisioningServiceTest;
@@ -17,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 import static tests.integration.com.microsoft.azure.sdk.iot.provisioning.setup.ProvisioningCommon.DPS_CONNECTION_STRING_ENV_VAR_NAME;
 
 @DeviceProvisioningServiceTest
-public class ProvisioningServiceClientTests
+public class ProvisioningServiceClientTests extends IntegrationTest
 {
     public static final String provisioningServiceConnectionString = Tools.retrieveEnvironmentVariableValue(DPS_CONNECTION_STRING_ENV_VAR_NAME);
 
