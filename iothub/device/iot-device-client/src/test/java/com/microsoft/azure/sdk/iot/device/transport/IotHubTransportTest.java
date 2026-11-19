@@ -225,6 +225,54 @@ public class IotHubTransportTest
         assertEquals(mockedTransportMessage, receivedMessagesQueue.poll());
     }
 
+    //Tests_SRS_IOTHUBTRANSPORT_34_010: [If a correlation callback exists for a received message, this function shall call onResponseReceived even if the saved correlation callback is removed while queueing the received message.]
+    @Test
+    public void onMessageReceivedCallsResponseCallbackEvenIfCallbackIsRemovedWhileAddingMessageToQueue(@Mocked final CorrelatingMessageCallback mockedCorrelationCallback)
+    {
+        //arrange
+        final String correlationId = "1234";
+        final Object callbackContext = new Object();
+        final Map<String, CorrelationCallbackContext> correlationCallbacks = new ConcurrentHashMap<>();
+        correlationCallbacks.put(correlationId, new CorrelationCallbackContext(mockedCorrelationCallback, callbackContext, System.currentTimeMillis()));
+
+        new Expectations()
+        {
+            {
+                mockedConfig.getDeviceId();
+                result = "someDeviceId";
+
+                mockedTransportMessage.getCorrelationId();
+                result = correlationId;
+
+                mockedTransportMessage.getStatus();
+                result = "200";
+            }
+        };
+
+        new MockUp<IotHubTransport>()
+        {
+            @Mock void addToReceivedMessagesQueue(IotHubTransportMessage message)
+            {
+                correlationCallbacks.remove(correlationId);
+            }
+        };
+
+        IotHubTransport transport = new IotHubTransport(mockedConfig, mockedIotHubConnectionStatusChangeCallback, false);
+        Deencapsulation.setField(transport, "correlationCallbacks", correlationCallbacks);
+
+        //act
+        transport.onMessageReceived(mockedTransportMessage, null);
+
+        //assert
+        new Verifications()
+        {
+            {
+                mockedCorrelationCallback.onResponseReceived(mockedTransportMessage, callbackContext, null);
+                times = 1;
+            }
+        };
+    }
+
     //Tests_SRS_IOTHUBTRANSPORT_34_014: [If the provided connectionId is associated with the current connection, This function shall invoke updateStatus with status CONNECTED, change reason CONNECTION_OK and a null throwable.]
     @Test
     public void onConnectionEstablishedCallsUpdateStatus()
